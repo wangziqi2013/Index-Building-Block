@@ -24,3 +24,6 @@
 
 // The following are C++ STL inclusions
 #include <vector>
+
+// Common headers
+#include "common.h"

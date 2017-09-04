@@ -7,8 +7,6 @@
  * included by adding the path to compiler
  */
 
-#include "common.h"
-
 // Whether to use "wangziqi2013" name space to avoid name collision
 // with other libraries
 #define USE_WANGZIQI2013_NAMESPACE

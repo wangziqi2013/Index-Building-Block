@@ -8,7 +8,7 @@
 #ifndef _KVNODE_H
 #define _KVNODE_H
 
-#include "common-macro.h"
+#include "common.h"
 
 OPTIONAL_NAMESPACE_WANGZIQI2013
 namespace index_building_block {

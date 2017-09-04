@@ -2,9 +2,12 @@
 #
 # This file defines common flags for the make system and GNU tool chain
 #
+# In order for SRC_DIR to work, it should be defined before this file
+# is included
+#
 
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -Werror -I../common/ -std=c++11
+CXXFLAGS = -O0 -g -Wall -Werror -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)
 LDFLAGS = -pthread
 MAKE = make
 LD = ld

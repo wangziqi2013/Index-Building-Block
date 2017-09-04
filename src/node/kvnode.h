@@ -11,11 +11,11 @@
 #include "common.h"
 
 OPTIONAL_NAMESPACE_WANGZIQI2013
-namespace index_building_block {
+namespace PROJECT_NAMESPACE {
 
 
 
-} // namespace index_building_block
+} // namespace PROJECT_NAMESPACE
 NAMESPACE_WANGZIQI2013_END
 
 #endif

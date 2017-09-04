@@ -44,10 +44,3 @@
       dummy(fmt, ##__VA_ARGS__); \
     } while (0);
 #endif
-
-// This defines test printing. Note that this is not affected by the flag
-#define test_printf(fmt, ...)                               \
-    do {                                                    \
-      fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
-      fflush(stderr);                                       \
-    } while (0);

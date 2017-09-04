@@ -14,16 +14,17 @@
  *     or suffixs for global names
  *   - If you are not sure, please be reasonable and conservative
  *   - All system library file inclusion should be put into this file.
+ *   - All testing utility should go to test-util.h or cpp
  */
 
 // The following are C library inclusions
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctype>
+#include <cctype>
 
 // The following are C++ STL inclusions
 #include <vector>
 
-// Common headers
-#include "common.h"
+// Common macro definition
+#include "common-macro.h"

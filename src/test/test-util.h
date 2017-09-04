@@ -17,7 +17,7 @@ NAMESPACE_USE_ALL
     do {                                                    \
       fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
       fflush(stderr);                                       \
-    } while (0);
+    } while(0);
 
 // If called this function prints the current function name
 // as the name of the test case
@@ -26,6 +26,6 @@ NAMESPACE_USE_ALL
                           dbg_printf("========== %s ==========\n", \
                                      __FUNCTION__); \
                           dbg_printf("=\n"); \
-                        }
+                        } while(0);
 
 #endif

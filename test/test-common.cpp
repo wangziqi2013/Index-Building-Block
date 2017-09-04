@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "test-util.h"
 
 /*
  * TestDebugPrint() - This function tests whether debug printing works

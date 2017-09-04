@@ -1,6 +1,9 @@
 
 /*
  * test-util.h - This file contains declarations for test-util.cpp
+ *
+ * For those definitions that will not be used outside the testing framework
+ * please do not include them into common.h. Put them here instead.
  */
 
 #ifndef _TEST_UTIL_H

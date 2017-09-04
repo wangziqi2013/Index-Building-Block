@@ -13,4 +13,14 @@
  *     To avoid possible name collisions, it is advised to add special prefixs
  *     or suffixs for global names
  *   - If you are not sure, please be reasonable and conservative
+ *   - All system library file inclusion should be put into this file.
  */
+
+// The following are C library inclusions
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctype>
+
+// The following are C++ STL inclusions
+#include <vector>

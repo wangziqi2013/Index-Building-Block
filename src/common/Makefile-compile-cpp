@@ -1,0 +1,15 @@
+
+#
+# This file is included as a simple way of compiling
+# all CPP files into BUILD_DIR, which is defined by the includer
+#
+
+SRC = $(wildcard *.cpp)
+HEADER = $(wildcard *.h)
+OBJ = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(wildcard *.cpp))
+
+all: $(OBJ)
+
+$(BUILD_DIR)/%.o: %.cpp Makefile
+	@printf "%b" ">>> Building $< to $@\n";
+	@$(CXX) -c -o $@ $< $(CXXFLAGS)

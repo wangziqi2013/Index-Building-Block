@@ -10,5 +10,4 @@ BUILD_DIR = ../../build
 
 $(info = Compiling testing utility...)
 
-$(BUILD_DIR)/test-util.o: ./test-util.cpp ./test-util.h
-	$(CXX) -c ./test-util.cpp -o $(BUILD_DIR)/test-util.o $(CXXFLAGS) $(LDFLAGS)
+-include ../common/Makefile-compile-cpp

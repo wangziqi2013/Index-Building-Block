@@ -27,3 +27,27 @@
   #define NAMESPACE_USE_ALL using PROJECT_NAMESPACE;
 #endif
 
+// This flag defines debug printing inside the source code
+// Note: This should not be used for test printing
+#define DEBUG_PRINT
+
+#ifdef DEBUG_PRINT
+  #define dbg_printf(fmt, ...)                              \
+    do {                                                    \
+      fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
+      fflush(stderr);                                       \
+    } while (0);
+#else
+  static void dummy(const char*, ...) {}
+  #define dbg_printf(fmt, ...)   \
+    do {                         \
+      dummy(fmt, ##__VA_ARGS__); \
+    } while (0);
+#endif
+
+// This defines test printing. Note that this is not affected by the flag
+#define test_printf(fmt, ...)                               \
+    do {                                                    \
+      fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
+      fflush(stderr);                                       \
+    } while (0);

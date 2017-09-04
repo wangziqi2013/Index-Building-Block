@@ -6,3 +6,6 @@
 CXX = g++
 CXXFLAGS = -O0 -g -Wall -Werror -I../common/ -std=c++11
 LDFLAGS = -pthread
+MAKE = make
+LD = ld
+RM = rm

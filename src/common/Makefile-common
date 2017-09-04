@@ -7,7 +7,7 @@
 #
 
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -Werror -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)
+CXXFLAGS = -O0 -g -Wall -Werror -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)/test -I$(SRC_DIR)
 LDFLAGS = -pthread
 MAKE = make
 LD = ld

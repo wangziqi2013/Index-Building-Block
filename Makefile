@@ -9,7 +9,7 @@ BUILD_DIR = ./build
 BIN_DIR = ./bin
 
 # This include the common make file
--include ../common/Makefile-common
+-include ./src/common/Makefile-common
 
 $(info Compiling modules...)
 
@@ -19,15 +19,17 @@ all: test-all
 
 test-all: common test
 
+COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
 common: 
 	$(MAKE) -C ./src/common
 
+TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))
 test: 
 	$(MAKE) -C ./src/test
 
 test-common: common test
-	@$(CXX) -o $(BIN_DIR)/$@ $(BUILD_DIR)/*.o ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f ./build/*
-	rm -f ./bin/*
+	$(RM) -f ./build/*
+	$(RM) -f ./bin/*

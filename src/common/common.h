@@ -3,9 +3,14 @@
  * common.h - This file defines the most common environmental variables
  *            and declarations.
  *
- * Since this file is included in every source files, please be cautious when
- * changing this file. Your change may have unintended affect if not treated 
- * seriously. Please obey the following rules when you add things into this
- * file:
- *
+ * Since this file is included by almost every source files, please be cautious 
+ * when changing this file. Your change may have unintended affect if not 
+ * treated seriously. Please obey the following rules when you add things into 
+ * this file:
+ *   - No variable definitions. Put them into a CPP file and link them properly
+ *   - No macro definition. Put them into common-macro.h
+ *   - This file does not have a name space, which means all names are global
+ *     To avoid possible name collisions, it is advised to add special prefixs
+ *     or suffixs for global names
+ *   - If you are not sure, please be reasonable and conservative
  */

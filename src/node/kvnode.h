@@ -4,12 +4,18 @@
  *            key-value container
  */
 
+#pragma once
+#ifndef _KVNODE_H
+#define _KVNODE_H
+
 #include "common-macro.h"
 
-namespace wangziqi2013 {
+OPTIONAL_NAMESPACE_WANGZIQI2013
 namespace index_building_block {
 
 
 
 } // namespace index_building_block
-} // namespace wangziqi2013
+NAMESPACE_WANGZIQI2013_END
+
+#endif

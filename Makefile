@@ -13,7 +13,7 @@ BIN_DIR = ./bin
 
 $(info Compiling modules...)
 
-.PHONY: all test-all test common clean
+.PHONY: all test-all test common clean prepare
 
 all: test-all
 
@@ -33,3 +33,7 @@ test-common: common test
 clean:
 	$(RM) -f ./build/*
 	$(RM) -f ./bin/*
+
+prepare:
+	mkdir -p build
+	mkdir -p bin

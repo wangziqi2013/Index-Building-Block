@@ -21,12 +21,12 @@ namespace wangziqi2013 {}
 // This should be used with the ending macro as a pair
 // If the name space is not used then we just define an empty pair
 #ifdef USE_WANGZIQI2013_NAMESPACE
-  #define OPTIONAL_NAMESPACE_WANGZIQI2013 namespace wangziqi2013 {
+  #define NAMESPACE_WANGZIQI2013 namespace wangziqi2013 {
   #define NAMESPACE_WANGZIQI2013_END }
   #define NAMESPACE_USE_ALL using namespace wangziqi2013; \
                             using namespace PROJECT_NAMESPACE;
 #else
-  #define OPTIONAL_NAMESPACE_WANGZIQI2013
+  #define NAMESPACE_WANGZIQI2013
   #define NAMESPACE_WANGZIQI2013_END
   #define NAMESPACE_USE_ALL using namespace PROJECT_NAMESPACE;
 #endif

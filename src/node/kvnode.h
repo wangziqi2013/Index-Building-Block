@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-OPTIONAL_NAMESPACE_WANGZIQI2013
+NAMESPACE_WANGZIQI2013
 namespace PROJECT_NAMESPACE {
 
 /*
@@ -23,7 +23,9 @@ template <typename KeyType,
           typename ValueType, 
           typename KeyLess, 
           typename KeyEq,
-          typename Extra>
+          typename Extra,
+          int node_size
+          >
 class KVNode {
 
 };

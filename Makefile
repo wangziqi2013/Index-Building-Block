@@ -29,11 +29,13 @@ test:
 
 test-common: common test
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
+	# Make a shortcut of the binary
+	$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
 clean:
 	$(RM) -f ./build/*
 	$(RM) -f ./bin/*
 
 prepare:
-	mkdir -p build
-	mkdir -p bin
+	$(MKDIR) -p build
+	$(MKDIR) -p bin

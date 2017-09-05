@@ -31,6 +31,7 @@
 *.out
 *.app
 
+# Project directory to store outputs
 build
 bin
 lib

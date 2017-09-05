@@ -12,3 +12,5 @@ LDFLAGS = -pthread
 MAKE = make
 LD = ld
 RM = rm
+MKDIR = mkdir
+LN = ln

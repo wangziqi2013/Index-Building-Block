@@ -35,3 +35,6 @@
 build
 bin
 lib
+
+# Shortcuts of test case executables
+*-bin

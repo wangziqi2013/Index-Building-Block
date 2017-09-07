@@ -22,6 +22,9 @@ all: test-all
 
 test-all: common test
 
+# Note that calling make with -C will also pass the environmental variable set inside and by
+# the shell to the subprocess of make
+
 COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
 common: 
 	@$(MAKE) -C ./src/common

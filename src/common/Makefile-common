@@ -7,10 +7,28 @@
 #
 
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -Werror -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)/test -I$(SRC_DIR)
+CXXFLAGS = -Wall -Werror -Wunreachable-code -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)/test -I$(SRC_DIR)
 LDFLAGS = -pthread
 MAKE = make
 LD = ld
 RM = rm
 MKDIR = mkdir
 LN = ln
+
+ifdef MODE
+  ifeq ($(MODE), DEBUG)
+    $(info = DEBUG MODE)
+    CXXFLAGS += -O0 -g
+  else
+    ifeq ($(MODE), RELEASE)
+      $(info = RELEASE MODE)
+      CXXFLAGS += -O3 -DNDEBUG
+    else
+      $(error ERROR: UNKNOWN BUILD MODE "$(MODE)")
+    endif
+  endif
+else
+  $(info = DEFAULT MODE)
+  CXXFLAGS += -O2 -g
+endif
+

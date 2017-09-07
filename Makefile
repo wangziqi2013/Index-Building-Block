@@ -11,9 +11,10 @@ BIN_DIR = ./bin
 # This include the common make file
 -include ./src/common/Makefile-common
 
-$(info = Compiling modules...)
-$(info = CXXFLAGS = $(CXXFLAGS))
-$(info = LDFLAGS = $(LDFLAGS))
+$(info = Invoking the main compilation dispatcher...)
+
+$(info = CXXFLAGS: $(CXXFLAGS))
+$(info = LDFLAGS: $(LDFLAGS))
 
 .PHONY: all test-all test common clean prepare
 

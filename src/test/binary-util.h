@@ -39,9 +39,10 @@ class BitSequence {
   /*
    * BitSequence() - Raw type construction
    */
-  BitSequence(size_t p_length, void *p_data_p) : length{p_length},
-                                                 capacity{ALLOC_SIZE(p_length)},
-                                                 data_p{new uint8_t[ALLOC_SIZE(p_length)]} {
+  BitSequence(size_t p_length, 
+              const void *p_data_p) : length{p_length},
+                                      capacity{ALLOC_SIZE(p_length)},
+                                      data_p{new uint8_t[ALLOC_SIZE(p_length)]} {
     memcpy(data_p, p_data_p, capacity);
     return;
   }
@@ -121,7 +122,7 @@ class BitSequence {
   bool GetBit(size_t pos) const;
   // Set a range within 64 bits
   void SetRange(size_t range_start, size_t range_end, uint64_t value);
-  void SetRange(size_t range_start, size_t range_end, uint8_t *range_data_p);
+  void SetRange(size_t range_start, size_t range_end, const void *range_data_p);
 
   bool operator==(const BitSequence &other) const;
 };

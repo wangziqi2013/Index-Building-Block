@@ -89,3 +89,26 @@ bool BitSequence::GetBit(size_t pos) const {
             (static_cast<uint8_t>(0x01) << BIT_OFFSET(pos))
            );
 }
+
+/*
+ * SetRange() - Sets the a range in the bit sequence given the data
+ * 
+ * Note that we implicit start from the beginning point of the data. If
+ * you wish to start from the middle, then you should shift the data first
+ */
+void BitSequence::SetRange(size_t range_start, 
+                           size_t range_end, 
+                           const void *range_data_p) {
+  always_assert(range_start < length && range_end < length);
+  size_t range_length = range_end - range_start;
+
+  // Construct a const temp object - note that this will copy the data
+  const BitSequence bs{range_length, range_data_p};
+  for(size_t i = 0;i < range_length;i++) {
+    SetBit(range_start + i, bs.GetBit(i));
+  }
+
+  return;
+}
+
+//void Bit

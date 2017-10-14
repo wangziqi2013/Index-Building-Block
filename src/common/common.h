@@ -27,6 +27,8 @@
 
 // The following are C++ STL inclusions
 #include <vector>
+#include <string>
+#include <set>
 
 // Empty namesapce definition to allow the compiler know them
 // in advance

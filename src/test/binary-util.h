@@ -14,6 +14,56 @@ namespace wangziqi2013 {
 namespace index_building_block {
 
 /*
+ * class BitField - Represents a subfield in bit sequence object
+ */
+class BitField {
+ private:
+  // The symbolic name of the bit field
+  std::string name;
+  size_t start;
+  size_t end;
+
+ public:
+  /*
+   * BitField() - Constructor
+   */
+  BitField(const std::string p_name, 
+           size_t p_start, 
+           size_t p_end) : name{p_name},
+                           start{p_start},
+                           end{p_end} {
+    return;
+  }
+
+  /*
+   * BitField() - Copy constructor
+   */
+  BitField(const BitField &other) : name{other.name},
+                                    start{other.start},
+                                    end{other.end} {
+    return;  
+  }
+
+  /*
+   * BitField() - Assignment
+   */
+  BitField &operator=(const BitField &other) {
+    name = other.name;
+    start = other.start;
+    end = other.end;
+
+    return *this;
+  }
+
+  /*
+   * CompareLess() - Needed by ordered structure
+   */
+  static bool CompareLess(const BitField &bf1, const BitField &bf2) {
+    return bf1.start < bf2.start;
+  }
+};
+
+/*
  * class BitSequence - This class defines an abstraction of a bit sequence
  *                     that allows the user to view, modify and print any
  *                     sub-sequence within this bit sequence

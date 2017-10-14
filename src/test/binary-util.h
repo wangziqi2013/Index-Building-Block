@@ -1,7 +1,14 @@
 
+/*
+ * binary-util.h - This file contains binary utilities that manipulates, 
+ *                 modifies and prints binary data in a flaxible way
+ */
+
 #pragma once
 #ifndef _BINARY_UTIL_H
 #define _BINARY_UTIL_H
+
+#include "common.h"
 
 /*
  * class BitSequence - This class defines an abstraction of a bit sequence

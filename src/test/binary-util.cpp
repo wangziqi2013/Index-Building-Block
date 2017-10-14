@@ -146,11 +146,13 @@ void BitSequence::SetRange(size_t range_start,
  * also check whether all bits in the 64 bit value has effect; if not
  * we return false, otherwise return true
  */
-bool BitSequence::SetRange(size_t range_start, 
+void BitSequence::SetRange(size_t range_start, 
                            size_t range_end, 
                            uint64_t value) {
   always_assert(range_start < length && range_end <= length);
+  
   size_t range_length = range_end - range_start;
+  always_assert(range_length <= (sizeof(value) * 8));
 
   for(size_t i = 0;i < range_length;i++) {
     SetBit(range_start + i, !!(value & 0x1));
@@ -159,7 +161,27 @@ bool BitSequence::SetRange(size_t range_start,
 
   // If there is no active 1 bit in value then this is true; false otherwise
   // This can only detect part of the problem
-  return !value;
+  return;
+}
+
+/*
+ * GetRange() - Returns a range specified by the parameter
+ */
+uint64_t BitSequence::GetRange(size_t range_start, size_t range_end) const {
+  always_assert(range_start < length && range_end <= length);
+  
+  size_t range_length = range_end - range_start;
+  always_assert(range_length <= (sizeof(uint64_t) * 8));
+
+  uint64_t ret = 0x0UL;
+  for(size_t i = 0;i < range_length;i++) {
+    // Must do this before each iteration, o.w. the last bit is always 0
+    ret <<= 1;
+    bool bit = GetBit(i);
+    ret |= bit ? 0x1UL : 0x0UL;
+  }
+
+  return ret;
 }
 
 

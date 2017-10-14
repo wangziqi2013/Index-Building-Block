@@ -9,6 +9,8 @@
 #define _BINARY_UTIL_H
 
 #include "common.h"
+#include <string>
+#include <set>
 
 namespace wangziqi2013 {
 namespace index_building_block {
@@ -184,9 +186,15 @@ class BitSequence {
   bool SetBit(size_t pos, bool value);
   bool GetBit(size_t pos) const;
   // Set a range within 64 bits
-  bool SetRange(size_t range_start, size_t range_end, uint64_t value);
+  void SetRange(size_t range_start, size_t range_end, uint64_t value);
   // Set a range using arbitraty binary data
   void SetRange(size_t range_start, size_t range_end, const void *range_data_p);
+
+  // If the range is smaller than or equal to 64 bits
+  // then we can call this
+  uint64_t GetRange(size_t range_start, size_t range_end) const;
+  void GetRange(size_t range_start, size_t range_end, void *output_p) const;
+
   // Print the sequence from MSB to LSB. We print a white space after every
   // "group" digits, and prints a new line after every "line" digits
   void Print(int group=8, int line=32) const;

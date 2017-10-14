@@ -22,6 +22,7 @@ class BitSequence {
  private:
   // 0 if not initialized
   size_t length;
+  size_t capacity;
   // nullptr if not initialized
   uint8_t *data_p;
 
@@ -30,6 +31,7 @@ class BitSequence {
    * BitSequence() - Empty construction
    */
   BitSequence() : length{0UL},
+                  capacity{0UL},
                   data_p{nullptr} {
     return;
   }
@@ -38,9 +40,10 @@ class BitSequence {
    * BitSequence() - Raw type construction
    */
   BitSequence(size_t p_length, void *p_data_p) : length{p_length},
-                                                 data_p{new uint8_t[p_length]} {
-    memcpy(data_p, p_data_p, length);
-    return;  
+                                                 capacity{ALLOC_SIZE(p_length)},
+                                                 data_p{new uint8_t[ALLOC_SIZE(p_length)]} {
+    memcpy(data_p, p_data_p, capacity);
+    return;
   }
 
   /*
@@ -61,8 +64,9 @@ class BitSequence {
    * BitSequence() - Copy constructor
    */
   BitSequence(const BitSequence &other) : length{other.length},
-                                          data_p{new uint8_t[other.length]} {
-    memcpy(data_p, other.data_p, length);
+                                          capacity{other.capacity},
+                                          data_p{new uint8_t[other.capacity]} {
+    memcpy(data_p, other.data_p, capacity);
     return;
   }
 
@@ -70,9 +74,11 @@ class BitSequence {
    * BitSequence() - Move constructor; clears the source
    */
   BitSequence(BitSequence &&other) : length{other.length},
+                                     capacity{other.capacity},
                                      data_p{other.data_p} {
     other.data_p = nullptr;
     other.length = 0UL;
+    other.capacity = 0UL;
     return;
   }
 
@@ -101,6 +107,13 @@ class BitSequence {
     return bit_offset % 8;
   }
 
+  /*
+   * ALLOC_SIZE() - Number of bytes to allocate given the bit length
+   */
+  static inline size_t ALLOC_SIZE(size_t length) {
+    return (length + 7) / 8;
+  }
+
   // Get a zeroed-out sequence with certain size
   void Make(size_t new_size);
   // Set/Get a single bit
@@ -109,6 +122,8 @@ class BitSequence {
   // Set a range within 64 bits
   void SetRange(size_t range_start, size_t range_end, uint64_t value);
   void SetRange(size_t range_start, size_t range_end, uint8_t *range_data_p);
+
+  bool operator==(const BitSequence &other) const;
 };
 
 #endif

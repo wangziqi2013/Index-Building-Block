@@ -14,13 +14,15 @@ void BitSequence::Make(size_t new_size) {
     delete[] data_p;
   }
 
-  size_t new_byte_size = (new_size + 7) / 8;
+  size_t new_byte_size = ALLOC_SIZE(new_size);
 
   data_p = new uint8_t[new_byte_size];
   memset(data_p, 0x00, new_byte_size);
 
   // It is the bit length
   length = new_size;
+  // It is the byte we allocate
+  capacity = new_byte_size;
 
   return;
 }

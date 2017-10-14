@@ -56,9 +56,15 @@ namespace wangziqi2013 {}
 // also, it exits with return number 1 if called
 #define err_printf(fmt, ...)                              \
   do {                                                    \
-    fprintf(stderr, "%-24s: ERROR @ %d " fmt,             \
-            __FUNCTION__, __LINE__, ##__VA_ARGS__);       \
+    fprintf(stderr, "%-24s: ERROR @ File %s Line %d: " fmt, \
+            __FUNCTION__, __FILE__,                       \
+            __LINE__, ##__VA_ARGS__);                     \
     fflush(stderr);                                       \
     exit(ERROR_EXIT_STATUS);                              \
   } while (0);
-  
+
+// This assert will work even under debug mode
+#define always_assert(cond)                                \
+  do {                                                     \
+    if(!(cond)) err_printf("Assertion \"" #cond "\" fails\n"); \
+  } while (0); 

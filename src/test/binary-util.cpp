@@ -24,3 +24,28 @@ void BitSequence::Make(size_t new_size) {
 
   return;
 }
+
+/*
+ * SetBit() - This function sets a given bit in the bit sequence
+ * 
+ * If the index is not valid, the assertion would fail. The return
+ * value indicates the previous state of the bit
+ */
+bool BitSequence::SetBit(size_t pos, bool value) {
+  always_assert(pos < length);
+
+  size_t byte_offset = BYTE_OFFSET(pos);
+  size_t bit_offset = BIT_OFFSET(pos);
+
+  uint8_t mask = static_cast<uint8_t>(0x01) << bit_offset;
+  // If the bit is 1 this will be true
+  bool ret = !!(data_p[byte_offset] & mask);
+
+  if(value == false) {
+    data_p[byte_offset] &= (~mask);
+  } else {
+    data_p[byte_offset] |= mask;
+  }
+
+  return ret;
+}

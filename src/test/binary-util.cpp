@@ -172,6 +172,8 @@ bool BitSequence::SetRange(size_t range_start,
  */
 void BitSequence::Print(int group, int line) const {
   always_assert(group >= 1 && group <= line);
+  always_assert(length > 0UL);
+
   if(line % group != 0) {
     dbg_printf("Line (%d) is not a multiple of group (%d)!",
                line, group);
@@ -182,7 +184,7 @@ void BitSequence::Print(int group, int line) const {
 
   size_t current = length - 1;
   size_t count = 0;
-  while(current >= 0) {
+  while(count < length) {
     bool value = GetBit(current);
     putchar(value ? '1' : '0');
     current--;
@@ -207,18 +209,19 @@ void BitSequence::Print(int group, int line) const {
 /*
  * PrintTitle() - Prints the title of the bit array.
  */
-void BitSequence::PrintTitle(int group, int line) const {
+void BitSequence::PrintTitle(int group, int line) {
   for(int i = 0;i < line;i++) {
-    if(i % group == 0 || i % group == (group - 1)) {
+    if(i % group == 0) {
       putchar('+');
+    } else if(i % group == (group - 1)) {
+      putchar('+');
+      putchar(' ');
     } else {
       putchar('-');
     }
-
-    if(i % group == 0 && i != 0) {
-      putchar('-');
-    }
   }
+
+  putchar('\n');
 
   return;
 }

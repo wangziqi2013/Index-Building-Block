@@ -60,7 +60,7 @@ class BitSequence {
    * Pointers in T are safe, because we do not dereference any pointers in it.
    */
   template <typename T>
-  BitSequence(const T &data) : BitSequence(sizeof(T), &data) {
+  BitSequence(const T &data) : BitSequence(sizeof(T) * 8, &data) {
     return;
   }
 
@@ -134,7 +134,7 @@ class BitSequence {
   // "group" digits, and prints a new line after every "line" digits
   void Print(int group=8, int line=32) const;
   // Print the title of the bit sequence
-  void PrintTitle(int group=8, int line=32) const;
+  static void PrintTitle(int group=8, int line=32);
 
   bool operator==(const BitSequence &other) const;
 };

@@ -35,6 +35,20 @@ void TestSetGet() {
   always_assert(bs2 == bs3);
   always_assert(bs3 == bs4);
 
+  BitSequence bs5{}, bs6{length - 10, &value};
+  // length 54
+  bs5.Make(length - 10);
+  bs5.SetRange(15, 53, value >> 15);
+  bs5.SetRange(53, 54, value >> 53);
+  bs5.SetRange(0, 7, value);
+  bs5.SetRange(7, 15, value >> 7);
+
+  BitSequence::PrintTitle();
+  bs5.Print();
+  BitSequence::PrintTitle();
+  bs6.Print();
+  always_assert(bs5 == bs6);
+
   return;
 }
 

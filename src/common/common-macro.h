@@ -5,6 +5,10 @@
  *
  * Domain-specific macros should be defined in their own domain, and then
  * included by adding the path to compiler
+ * 
+ * Note that this file should not include any other file in the source tree.
+ * Also, do not directly include this file in the source code; include 
+ * common.h instead
  */
 
 // Whether to use "wangziqi2013" name space to avoid name collision

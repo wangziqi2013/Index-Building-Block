@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+#include <cstdint>
 
 // The following are C++ STL inclusions
 #include <vector>

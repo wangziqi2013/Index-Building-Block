@@ -29,6 +29,6 @@ ifdef MODE
   endif
 else
   $(info = DEFAULT MODE)
-  CXXFLAGS += -O2 -g
+  CXXFLAGS += -O2 -g -DNDEBUG
 endif
 

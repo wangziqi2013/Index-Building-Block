@@ -14,6 +14,9 @@
  * class BitSequence - This class defines an abstraction of a bit sequence
  *                     that allows the user to view, modify and print any
  *                     sub-sequence within this bit sequence
+ * 
+ * This data structure stores any raw bit array as an array of opaque types,
+ * and interpret it using small-endian
  */
 class BitSequence {
  private:
@@ -55,6 +58,25 @@ class BitSequence {
   }
 
   /*
+   * BitSequence() - Copy constructor
+   */
+  BitSequence(const BitSequence &other) : length{other.length},
+                                          data_p{new uint8_t[other.length]} {
+    memcpy(data_p, other.data_p, length);
+    return;
+  }
+
+  /*
+   * BitSequence() - Move constructor; clears the source
+   */
+  BitSequence(BitSequence &&other) : length{other.length},
+                                     data_p{other.data_p} {
+    other.data_p = nullptr;
+    other.length = 0UL;
+    return;
+  }
+
+  /*
    * ~BitSequence() - Deletes the data array if it is not nullptr
    */
   ~BitSequence() {
@@ -64,6 +86,14 @@ class BitSequence {
 
     return;
   }
+
+  // Get a zeroed-out sequence with certain size
+  void Make(size_t new_size);
+  // Set a single bit
+  void SetBit(size_t pos, bool value);
+  // Set a range within 64 bits
+  void SetRange(size_t range_start, size_t range_end, uint64_t value);
+  void SetRange(size_t range_start, size_t range_end, uint8_t *range_data_p);
 };
 
 #endif

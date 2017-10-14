@@ -35,11 +35,10 @@ namespace wangziqi2013 {}
   #define NAMESPACE_USE_ALL using namespace PROJECT_NAMESPACE;
 #endif
 
-// This flag defines debug printing inside the source code
-// Note: This should not be used for test printing
-#define DEBUG_PRINT
-
-#ifdef DEBUG_PRINT
+// The debug print facility will be disabled if NDEBUG is enabled
+// NDEBUG is enabled only under DEBUG mode; Under release node and 
+// default mode there is no debug printing
+#ifndef NDEBUG
   #define dbg_printf(fmt, ...)                              \
     do {                                                    \
       fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
@@ -52,3 +51,13 @@ namespace wangziqi2013 {}
       dummy(fmt, ##__VA_ARGS__); \
     } while (0);
 #endif
+
+// Error printing: Always print no matter whether the NDEBUG flag is set
+// also, it exits with return number 1 if called
+#define err_printf(fmt, ...)                              \
+  do {                                                    \
+    fprintf(stderr, "%-24s: ERROR @ %d " fmt,             \
+            __FUNCTION__, __LINE__, ##__VA_ARGS__);       \
+    fflush(stderr);                                       \
+    exit(1);                                              \
+  } while (0);

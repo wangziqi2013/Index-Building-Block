@@ -28,6 +28,34 @@ void BitSequence::Make(size_t new_size) {
 }
 
 /*
+ * operator==() - Compares two bit sequence
+ */
+bool BitSequence::operator==(const BitSequence &other) const {
+  if(length != other.length) {
+    return false;
+  }
+
+  // Number of full bytes (i.e. No partial bit)
+  size_t full_byte = BYTE_OFFSET(length);
+  // Note that multiple of 8 this will be 0
+  size_t unused_bit = (8 - (length % 8)) % 8;
+
+  // Compare full bytes using memcmp()
+  if(memcmp(data_p, other.data_p, full_byte) != 0) {
+    return false;
+  }
+
+  // Then compare partial bytes
+  for(size_t i = 0;i < unused_bit;i++) {
+    if(GetBit(length - i - 1) != other.GetBit(length - i - 1)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/*
  * SetBit() - This function sets a given bit in the bit sequence
  * 
  * If the index is not valid, the assertion would fail. The return

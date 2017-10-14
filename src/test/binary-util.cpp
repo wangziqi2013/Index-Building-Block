@@ -49,3 +49,13 @@ bool BitSequence::SetBit(size_t pos, bool value) {
 
   return ret;
 }
+
+/*
+ * GetBit() - Returns a bit on given position
+ */
+bool BitSequence::GetBit(size_t pos) const {
+  always_assert(pos < length);
+  return !!(data_p[BYTE_OFFSET(pos)] & 
+            (static_cast<uint8_t>(0x01) << BIT_OFFSET(pos))
+           );
+}

@@ -103,8 +103,9 @@ class BitSequence {
 
   // Get a zeroed-out sequence with certain size
   void Make(size_t new_size);
-  // Set a single bit
+  // Set/Get a single bit
   bool SetBit(size_t pos, bool value);
+  bool GetBit(size_t pos) const;
   // Set a range within 64 bits
   void SetRange(size_t range_start, size_t range_end, uint64_t value);
   void SetRange(size_t range_start, size_t range_end, uint8_t *range_data_p);

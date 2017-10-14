@@ -32,7 +32,9 @@ void TestErrorPrint() {
     err_printf("Fork() returned -1; exit\n");
   } else if(fork_ret == 0) {
     // This is child process; it will exit after printing
-    err_printf("Child process executing err_printf()\n");
+    test_printf("Child process executing err_printf() with always_assert\n");
+    // It will print and exit
+    always_assert(0 == 1);
   } else {
     int child_status = 0;
     int exit_pid = waitpid(fork_ret, &child_status, 0);
@@ -49,9 +51,28 @@ void TestErrorPrint() {
   return;
 }
 
+/*
+ * TestAlwaysAssert() - This function tests whether always_assert() works as 
+ *                      expected even under non-debug mode
+ */
+void TestAlwaysAssert() {
+  #ifdef NDEBUG
+  test_printf("Under non-debug mode\n");
+  assert(false);
+  #else
+  test_printf("Under debug mode\n");
+  #endif
+
+  test_printf("always_assert true\n");
+  always_assert(true);
+
+  return;
+}
+
 int main() {
   TestDebugPrint();
   TestErrorPrint();
+  TestAlwaysAssert();
 
   return 0;
 }

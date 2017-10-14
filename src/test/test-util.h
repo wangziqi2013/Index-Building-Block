@@ -21,12 +21,12 @@ NAMESPACE_USE_ALL
     } while(0);
 
 // If called this function prints the current function name
-// as the name of the test case
+// as the name of the test case - this always prints in any mode
 #define PrintTestName() do { \
-                          dbg_printf("=\n"); \
-                          dbg_printf("========== %s ==========\n", \
-                                     __FUNCTION__); \
-                          dbg_printf("=\n"); \
+                          test_printf("=\n"); \
+                          test_printf("========== %s ==========\n", \
+                                      __FUNCTION__); \
+                          test_printf("=\n"); \
                         } while(0);
 
 #endif

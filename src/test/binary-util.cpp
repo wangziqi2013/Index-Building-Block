@@ -175,3 +175,22 @@ void BitSequence::Print(int group, int line) const {
 
   return; 
 }
+
+/*
+ * PrintTitle() - Prints the title of the bit array.
+ */
+void BitSequence::PrintTitle(int group, int line) const {
+  for(int i = 0;i < line;i++) {
+    if(i % group == 0 || i % group == (group - 1)) {
+      putchar('+');
+    } else {
+      putchar('-');
+    }
+
+    if(i % group == 0 && i != 0) {
+      putchar('-');
+    }
+  }
+
+  return;
+}

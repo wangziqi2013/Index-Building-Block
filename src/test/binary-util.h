@@ -124,6 +124,11 @@ class BitSequence {
   bool SetRange(size_t range_start, size_t range_end, uint64_t value);
   // Set a range using arbitraty binary data
   void SetRange(size_t range_start, size_t range_end, const void *range_data_p);
+  // Print the sequence from MSB to LSB. We print a white space after every
+  // "group" digits, and prints a new line after every "line" digits
+  void Print(int group=8, int line=32) const;
+  // Print the title of the bit sequence
+  void PrintTitle(int group=8, int line=32) const;
 
   bool operator==(const BitSequence &other) const;
 };

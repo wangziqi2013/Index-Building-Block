@@ -133,3 +133,45 @@ bool BitSequence::SetRange(size_t range_start,
   // This can only detect part of the problem
   return !value;
 }
+
+
+/*
+ * Print() - Prints the sequence using digit 0 and 1.
+ * 
+ * We print a space after every group digits, and print a line after
+ * every line digits. If line is not a multiple of group we also print
+ * a warning
+ */
+void BitSequence::Print(int group, int line) const {
+  always_assert(group >= 1 && group <= line);
+  if(line % group != 0) {
+    dbg_printf("Line (%d) is not a multiple of group (%d)!",
+               line, group);
+  } else if(length % line != 0) {
+    dbg_printf("Length (%d) is not a multiple of line (%d)!",
+               length, line);
+  }
+
+  size_t current = length - 1;
+  size_t count = 0;
+  while(current >= 0) {
+    bool value = GetBit(current);
+    putchar(value ? '1' : '0');
+    current--;
+    count++;
+
+    // First check line, then check whitespace
+    if(count % line == 0) {
+      putchar('\n');
+    } else if(count % group == 0) {
+      putchar(' ');
+    }
+  }
+
+  // If the last line is not finished we must add an extra new line
+  if(count % line != 0) {
+    putchar('\n');
+  }
+
+  return; 
+}

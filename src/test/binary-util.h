@@ -121,7 +121,8 @@ class BitSequence {
   bool SetBit(size_t pos, bool value);
   bool GetBit(size_t pos) const;
   // Set a range within 64 bits
-  void SetRange(size_t range_start, size_t range_end, uint64_t value);
+  bool SetRange(size_t range_start, size_t range_end, uint64_t value);
+  // Set a range using arbitraty binary data
   void SetRange(size_t range_start, size_t range_end, const void *range_data_p);
 
   bool operator==(const BitSequence &other) const;

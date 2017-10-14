@@ -111,4 +111,25 @@ void BitSequence::SetRange(size_t range_start,
   return;
 }
 
-//void Bit
+/*
+ * SetRange() - Sets a range in the bit sequence given a 64 bit integer
+ * 
+ * Since this specialized version uses 64 bit value as the source, we 
+ * also check whether all bits in the 64 bit value has effect; if not
+ * we return false, otherwise return true
+ */
+bool BitSequence::SetRange(size_t range_start, 
+                           size_t range_end, 
+                           uint64_t value) {
+  always_assert(range_start < length && range_end < length);
+  size_t range_length = range_end - range_start;
+
+  for(size_t i = 0;i < range_length;i++) {
+    SetBit(range_start + i, !!(value & 0x1));
+    value >>= 1;
+  }
+
+  // If there is no active 1 bit in value then this is true; false otherwise
+  // This can only detect part of the problem
+  return !value;
+}

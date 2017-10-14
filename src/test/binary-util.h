@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+NAMESPACE_WANGZIQI2013
+namespace PROJECT_NAMESPACE {
+
 /*
  * class BitSequence - This class defines an abstraction of a bit sequence
  *                     that allows the user to view, modify and print any
@@ -132,5 +135,8 @@ class BitSequence {
 
   bool operator==(const BitSequence &other) const;
 };
+
+} // namespace PROJECT_NAMESPACE
+NAMESPACE_WANGZIQI2013_END
 
 #endif

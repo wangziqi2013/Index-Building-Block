@@ -1,6 +1,9 @@
 
 #include "binary-util.h"
 
+NAMESPACE_WANGZIQI2013
+namespace PROJECT_NAMESPACE {
+
 /*
  * Make() - Get a sequence of certain size. If there is any prior data, they
  *          will be freed
@@ -194,3 +197,6 @@ void BitSequence::PrintTitle(int group, int line) const {
 
   return;
 }
+
+} // namespace PROJECT_NAMESPACE
+NAMESPACE_WANGZIQI2013_END

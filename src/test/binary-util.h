@@ -121,6 +121,13 @@ class BitSequence {
     return (length + 7) / 8;
   }
 
+  /*
+   * UNUSED_BITS() - Returns the number of unused bits in the last byte
+   */
+  static inline size_t UNUSED_BITS(size_t length, size_t alignment_unit) {
+    return (alignment_unit - (length % alignment_unit)) % alignment_unit;
+  }
+
   // Get a zeroed-out sequence with certain size
   void Make(size_t new_size);
   // Set/Get a single bit

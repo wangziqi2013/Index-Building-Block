@@ -66,7 +66,7 @@ bool BitSequence::operator==(const BitSequence &other) const {
   // Number of full bytes (i.e. No partial bit)
   size_t full_byte = BYTE_OFFSET(length);
   // Note that multiple of 8 this will be 0
-  size_t unused_bit = (8 - (length % 8)) % 8;
+  size_t unused_bit = UNUSED_BITS(length, sizeof(uint8_t));
 
   // Compare full bytes using memcmp()
   if(memcmp(data_p, other.data_p, full_byte) != 0) {
@@ -174,17 +174,20 @@ void BitSequence::Print(int group, int line) const {
   always_assert(group >= 1 && group <= line);
   always_assert(length > 0UL);
 
-  if(line % group != 0) {
-    dbg_printf("Line (%d) is not a multiple of group (%d)!",
-               line, group);
-  } else if(length % line != 0) {
-    dbg_printf("Length (%lu) is not a multiple of line (%d)!",
-               length, line);
-  }
-
   size_t current = length - 1;
   size_t count = 0;
-  while(count < length) {
+  size_t unused_bit = UNUSED_BITS(length, line);
+
+  // Print padding space first
+  while(count < unused_bit) {
+    putchar(' ');
+    count++;
+    if(count % group == 0) {
+      putchar(' ');
+    }
+  }
+
+  while(count < length + unused_bit) {
     bool value = GetBit(current);
     putchar(value ? '1' : '0');
     current--;
@@ -210,6 +213,11 @@ void BitSequence::Print(int group, int line) const {
  * PrintTitle() - Prints the title of the bit array.
  */
 void BitSequence::PrintTitle(int group, int line) {
+  if(line % group != 0) {
+    dbg_printf("Line (%d) is not a multiple of group (%d)!\n",
+               line, group);
+  }
+  
   for(int i = 0;i < line;i++) {
     if(i % group == 0) {
       putchar('+');

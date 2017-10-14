@@ -13,6 +13,7 @@
 NAMESPACE_USE_ALL
 
 // This defines test printing. Note that this is not affected by the flag
+// i.e. It always prints even under debug mode
 #define test_printf(fmt, ...)                               \
     do {                                                    \
       fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \

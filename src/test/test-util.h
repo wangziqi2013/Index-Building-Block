@@ -10,7 +10,6 @@
 #define _TEST_UTIL_H
 
 #include "common.h"
-NAMESPACE_USE_ALL
 
 // This defines test printing. Note that this is not affected by the flag
 // i.e. It always prints even under debug mode

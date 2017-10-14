@@ -10,8 +10,8 @@
 
 #include "common.h"
 
-NAMESPACE_WANGZIQI2013
-namespace PROJECT_NAMESPACE {
+namespace wangziqi2013 {
+namespace index_building_block {
 
 template <typename KeyType,
           typename ValueType>
@@ -53,7 +53,7 @@ class KVNodeBase {
    
 };
 
-} // namespace PROJECT_NAMESPACE
-NAMESPACE_WANGZIQI2013_END
+} // namespace index_building_block
+} // namespace wangziqi2013
 
 #endif

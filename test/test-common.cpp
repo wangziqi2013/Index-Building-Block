@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+using namespace wangziqi2013;
+using namespace index_building_block;
+
 /*
  * TestDebugPrint() - This function tests whether debug printing works
  * 

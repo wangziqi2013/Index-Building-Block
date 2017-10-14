@@ -1,8 +1,8 @@
 
 #include "binary-util.h"
 
-NAMESPACE_WANGZIQI2013
-namespace PROJECT_NAMESPACE {
+namespace wangziqi2013 {
+namespace index_building_block {
 
 /*
  * Make() - Get a sequence of certain size. If there is any prior data, they
@@ -198,5 +198,5 @@ void BitSequence::PrintTitle(int group, int line) const {
   return;
 }
 
-} // namespace PROJECT_NAMESPACE
-NAMESPACE_WANGZIQI2013_END
+} // namespace index_building_block
+} // namespace wangziqi2013

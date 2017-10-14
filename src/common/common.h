@@ -28,5 +28,12 @@
 // The following are C++ STL inclusions
 #include <vector>
 
+// Empty namesapce definition to allow the compiler know them
+// in advance
+namespace wangziqi2013 {
+namespace index_building_block {
+}
+}
+
 // Common macro definition
 #include "common-macro.h"

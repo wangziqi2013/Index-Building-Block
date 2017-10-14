@@ -11,30 +11,6 @@
  * common.h instead
  */
 
-// Whether to use "wangziqi2013" name space to avoid name collision
-// with other libraries
-#define USE_WANGZIQI2013_NAMESPACE
-
-// This macro defines the project's name space
-#define PROJECT_NAMESPACE index_building_block
-
-// Empty name space
-namespace PROJECT_NAMESPACE {}
-namespace wangziqi2013 {}
-
-// This should be used with the ending macro as a pair
-// If the name space is not used then we just define an empty pair
-#ifdef USE_WANGZIQI2013_NAMESPACE
-  #define NAMESPACE_WANGZIQI2013 namespace wangziqi2013 {
-  #define NAMESPACE_WANGZIQI2013_END }
-  #define NAMESPACE_USE_ALL using namespace wangziqi2013; \
-                            using namespace PROJECT_NAMESPACE;
-#else
-  #define NAMESPACE_WANGZIQI2013
-  #define NAMESPACE_WANGZIQI2013_END
-  #define NAMESPACE_USE_ALL using namespace PROJECT_NAMESPACE;
-#endif
-
 // The debug print facility will be disabled if NDEBUG is enabled
 // NDEBUG is enabled only under DEBUG mode; Under release node and 
 // default mode there is no debug printing

@@ -10,8 +10,8 @@
 
 #include "common.h"
 
-NAMESPACE_WANGZIQI2013
-namespace PROJECT_NAMESPACE {
+namespace wangziqi2013 {
+namespace index_building_block {
 
 /*
  * class BitSequence - This class defines an abstraction of a bit sequence
@@ -87,6 +87,31 @@ class BitSequence {
   }
 
   /*
+   * operator=() - Normal assignment
+   */
+  BitSequence &operator=(const BitSequence &other) {
+    // First destroy then copy construct a new one
+    this->~BitSequence();
+    new (this) BitSequence{other};
+
+    return *this;
+  }
+
+  /*
+   * operator=() - Move assignment
+   */
+  BitSequence &operator=(BitSequence &&other) {
+    this->~BitSequence();
+    data_p = other.data_p; 
+    capacity = other.capacity;
+    length = other.length;
+    other.data_p = nullptr;
+    other.capacity = other.length = 0UL;
+
+    return *this;
+  }
+
+  /*
    * ~BitSequence() - Deletes the data array if it is not nullptr
    */
   ~BitSequence() {
@@ -136,7 +161,7 @@ class BitSequence {
   bool operator==(const BitSequence &other) const;
 };
 
-} // namespace PROJECT_NAMESPACE
-NAMESPACE_WANGZIQI2013_END
+} // namespace index_building_block
+} // namespace wangziqi2013
 
 #endif

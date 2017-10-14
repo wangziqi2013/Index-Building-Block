@@ -37,6 +37,11 @@ test-common: common test
 	@$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
+test-binary-util: common test
+	@$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-binary-util.cpp $(CXXFLAGS) $(LDFLAGS)
+	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
+
+
 clean:
 	$(RM) -f ./build/*
 	$(RM) -f ./bin/*

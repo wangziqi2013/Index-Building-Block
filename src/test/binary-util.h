@@ -50,7 +50,7 @@ class BitSequence {
    * Pointers in T are safe, because we do not dereference any pointers in it.
    */
   template <typename T>
-  BitSequence(const T &data) : BitSequence(sizeof(T), &data)
+  BitSequence(const T &data) : BitSequence(sizeof(T), &data) {
     return;
   }
 

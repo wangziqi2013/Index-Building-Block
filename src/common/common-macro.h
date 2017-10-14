@@ -45,13 +45,13 @@ namespace wangziqi2013 {}
       fflush(stderr);                                       \
     } while (0);
 #else
-  static void dummy(const char*, ...) {}
   #define dbg_printf(fmt, ...)   \
     do {                         \
-      dummy(fmt, ##__VA_ARGS__); \
     } while (0);
 #endif
 
+// This defines the exit status if there is an error
+#define ERROR_EXIT_STATUS 1
 // Error printing: Always print no matter whether the NDEBUG flag is set
 // also, it exits with return number 1 if called
 #define err_printf(fmt, ...)                              \
@@ -59,5 +59,6 @@ namespace wangziqi2013 {}
     fprintf(stderr, "%-24s: ERROR @ %d " fmt,             \
             __FUNCTION__, __LINE__, ##__VA_ARGS__);       \
     fflush(stderr);                                       \
-    exit(1);                                              \
+    exit(ERROR_EXIT_STATUS);                              \
   } while (0);
+  

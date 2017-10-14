@@ -23,7 +23,7 @@
 #include <cstring>
 #include <cctype>
 #include <cstdint>
-#include <assert>
+#include <cassert>
 
 // The following are C++ STL inclusions
 #include <vector>

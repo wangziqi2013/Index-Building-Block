@@ -5,6 +5,31 @@ namespace wangziqi2013 {
 namespace index_building_block {
 
 /*
+ * operator=() - Normal assignment
+ */
+BitSequence &BitSequence::operator=(const BitSequence &other) {
+  // First destroy then copy construct a new one
+  this->~BitSequence();
+  new (this) BitSequence{other};
+
+  return *this;
+}
+
+/*
+ * operator=() - Move assignment
+ */
+BitSequence &BitSequence::operator=(BitSequence &&other) {
+  this->~BitSequence();
+  data_p = other.data_p; 
+  capacity = other.capacity;
+  length = other.length;
+  other.data_p = nullptr;
+  other.capacity = other.length = 0UL;
+
+  return *this;
+}
+
+/*
  * Make() - Get a sequence of certain size. If there is any prior data, they
  *          will be freed
  * 
@@ -102,7 +127,7 @@ bool BitSequence::GetBit(size_t pos) const {
 void BitSequence::SetRange(size_t range_start, 
                            size_t range_end, 
                            const void *range_data_p) {
-  always_assert(range_start < length && range_end < length);
+  always_assert(range_start < length && range_end <= length);
   size_t range_length = range_end - range_start;
 
   // Construct a const temp object - note that this will copy the data
@@ -124,7 +149,7 @@ void BitSequence::SetRange(size_t range_start,
 bool BitSequence::SetRange(size_t range_start, 
                            size_t range_end, 
                            uint64_t value) {
-  always_assert(range_start < length && range_end < length);
+  always_assert(range_start < length && range_end <= length);
   size_t range_length = range_end - range_start;
 
   for(size_t i = 0;i < range_length;i++) {
@@ -151,7 +176,7 @@ void BitSequence::Print(int group, int line) const {
     dbg_printf("Line (%d) is not a multiple of group (%d)!",
                line, group);
   } else if(length % line != 0) {
-    dbg_printf("Length (%d) is not a multiple of line (%d)!",
+    dbg_printf("Length (%lu) is not a multiple of line (%d)!",
                length, line);
   }
 

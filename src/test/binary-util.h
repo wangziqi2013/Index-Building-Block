@@ -86,30 +86,8 @@ class BitSequence {
     return;
   }
 
-  /*
-   * operator=() - Normal assignment
-   */
-  BitSequence &operator=(const BitSequence &other) {
-    // First destroy then copy construct a new one
-    this->~BitSequence();
-    new (this) BitSequence{other};
-
-    return *this;
-  }
-
-  /*
-   * operator=() - Move assignment
-   */
-  BitSequence &operator=(BitSequence &&other) {
-    this->~BitSequence();
-    data_p = other.data_p; 
-    capacity = other.capacity;
-    length = other.length;
-    other.data_p = nullptr;
-    other.capacity = other.length = 0UL;
-
-    return *this;
-  }
+  BitSequence &operator=(const BitSequence &other);
+  BitSequence &operator=(BitSequence &&other);
 
   /*
    * ~BitSequence() - Deletes the data array if it is not nullptr

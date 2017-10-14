@@ -39,8 +39,14 @@
     exit(ERROR_EXIT_STATUS);                              \
   } while (0);
 
+// Under debug mode, always assert is a normal assert
+// Otherwise it is err_printf()
+#ifndef NDEBUG
+#define always_assert(cond) assert(cond)
+#else
 // This assert will work even under debug mode
 #define always_assert(cond)                                \
   do {                                                     \
     if(!(cond)) err_printf("Assertion \"" #cond "\" fails\n"); \
   } while (0); 
+#endif

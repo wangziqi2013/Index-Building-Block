@@ -49,6 +49,12 @@ void TestSetGet() {
   bs6.Print();
   always_assert(bs5 == bs6);
 
+  uint32_t value2 = 0xFFFFFFFF;
+  BitSequence bs7{27, &value2};
+  const uint8_t *data_p = bs7.GetData();
+  test_printf("*data_p = 0x%X\n", *reinterpret_cast<const uint32_t *>(data_p));
+  always_assert(*reinterpret_cast<const uint32_t *>(data_p) == (value2 >> 5));
+
   return;
 }
 

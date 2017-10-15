@@ -8,6 +8,10 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 BIN_DIR = ./bin
 
+# We print the mode fir the first invocation, but 
+# not the following
+MODE_PRINT = 1
+
 # This include the common make file
 -include ./src/common/Makefile-common
 
@@ -27,17 +31,19 @@ test-all: common test
 
 COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
 common: 
-	@$(MAKE) -C ./src/common
+	@$(MAKE) -s -C ./src/common
 
 TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))
 test: 
-	@$(MAKE) -C ./src/test
+	@$(MAKE) -s -C ./src/test
 
 test-common: common test ./test/test-common.cpp
+	$(info >>> Building binary for test-common)
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
 test-binary-util: common test ./test/test-binary-util.cpp
+	$(info >>> Building binary for test-binary-util)
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-binary-util.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 

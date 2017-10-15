@@ -15,20 +15,34 @@ RM = rm
 MKDIR = mkdir
 LN = ln
 
+# We can also use DEBUG=1 to specify mode
+ifdef DEBUG
+  ifeq (&(DEBUG), 1)
+    MODE=DEBUG
+  endif
+endif
+
 ifdef MODE
   ifeq ($(MODE), DEBUG)
-    $(info = DEBUG MODE)
+    ifeq ($(MODE_PRINT), 1)
+      $(info = DEBUG MODE)
+    endif
     CXXFLAGS += -O0 -g
   else
     ifeq ($(MODE), RELEASE)
-      $(info = RELEASE MODE)
+      ifeq ($(MODE_PRINT), 1)
+        $(info = RELEASE MODE)
+      endif
       CXXFLAGS += -O3 -DNDEBUG
     else
       $(error ERROR: UNKNOWN BUILD MODE "$(MODE)")
     endif
   endif
 else
-  $(info = DEFAULT MODE)
+  ifeq ($(MODE_PRINT), 1)
+    $(info = DEFAULT MODE)
+  endif
   CXXFLAGS += -O2 -g -DNDEBUG
 endif
 
+MODE_PRINT=0

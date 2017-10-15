@@ -33,11 +33,11 @@ TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/
 test: 
 	@$(MAKE) -C ./src/test
 
-test-common: common test
+test-common: common test ./test/test-common.cpp
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
-test-binary-util: common test
+test-binary-util: common test ./test/test-binary-util.cpp
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-binary-util.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 

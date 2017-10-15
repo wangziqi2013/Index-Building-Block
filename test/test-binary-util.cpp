@@ -57,6 +57,7 @@ void TestSetGet() {
 
   uint64_t get_range_ret = bs1.GetRange(13, 37);
   uint64_t get_range_ret_2 = 0x0UL;
+  // Note that the range is half-open
   bs1.GetRange(13, 37, &get_range_ret_2);
   uint64_t expected = value << (64 - 37) >> (64 - 37 + 13);
   test_printf("GetRange() ret1 = 0x%lX, ret2 = 0x%lX; expected = 0x%lX\n", 

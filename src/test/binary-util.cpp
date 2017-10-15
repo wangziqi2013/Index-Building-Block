@@ -175,10 +175,8 @@ uint64_t BitSequence::GetRange(size_t range_start, size_t range_end) const {
 
   uint64_t ret = 0x0UL;
   for(size_t i = 0;i < range_length;i++) {
-    // Must do this before each iteration, o.w. the last bit is always 0
-    ret <<= 1;
-    bool bit = GetBit(i);
-    ret |= bit ? 0x1UL : 0x0UL;
+    bool bit = GetBit(range_start + i);
+    ret |= ((bit ? 0x1UL : 0x0UL) << i);
   }
 
   return ret;

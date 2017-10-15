@@ -8,6 +8,9 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 BIN_DIR = ./bin
 
+# This will let make shutup
+MAKEFLAGS += -s
+
 # We print the mode fir the first invocation, but 
 # not the following
 MODE_PRINT = 1
@@ -31,11 +34,11 @@ test-all: common test
 
 COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
 common: 
-	@$(MAKE) -s -C ./src/common
+	@$(MAKE) -C ./src/common
 
 TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))
 test: 
-	@$(MAKE) -s -C ./src/test
+	@$(MAKE) -C ./src/test
 
 test-common: common test ./test/test-common.cpp
 	$(info >>> Building binary for test-common)
@@ -49,6 +52,7 @@ test-binary-util: common test ./test/test-binary-util.cpp
 
 
 clean:
+	$(info >>> Cleaning files)
 	$(RM) -f ./build/*
 	$(RM) -f ./bin/*
 	$(RM) -f *-bin

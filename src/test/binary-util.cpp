@@ -184,6 +184,37 @@ uint64_t BitSequence::GetRange(size_t range_start, size_t range_end) const {
   return ret;
 }
 
+/*
+ * GetRange() - Writes the data in the given range into a pointer
+ * 
+ * Note that the data in the pointer will be changed not only for specified 
+ * bits, but also for all affected bytes, i.e. of the number of bits is not 
+ * a multiple of 8, then the last byte in the output will be cleared
+ * 
+ * We assume the length of the given buffer could hold at least (length + 7) / 8
+ * bytes (i.e. the minimum number of bytes for these bits)
+ */
+void BitSequence::GetRange(size_t range_start, 
+                           size_t range_end, 
+                           void *output_p) const {
+  always_assert(range_start < length && range_end <= length);
+  size_t range_length = range_end - range_start;
+
+  // Make a new construct and operates on it. After doing that 
+  BitSequence bs{};
+  // This will zero out all bytes
+  bs.Make(range_length);
+  for(size_t i = 0;i < range_length;i++) {
+    bs.SetBit(i, GetBit(range_start + i));
+  }
+
+  assert(bs.capacity == ALLOC_SIZE(range_length));
+  // Copy the entire array into the destination, using minimum
+  // possible bytes
+  memcpy(output_p, bs.GetData(), ALLOC_SIZE(range_length));
+
+  return;
+}
 
 /*
  * Print() - Prints the sequence using digit 0 and 1.

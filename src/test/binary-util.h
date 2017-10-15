@@ -98,7 +98,14 @@ class BitSequence {
               const void *p_data_p) : length{p_length},
                                       capacity{ALLOC_SIZE(p_length)},
                                       data_p{new uint8_t[ALLOC_SIZE(p_length)]} {
+    // This is not enough. We need to mask off unused bits in the highest byte
     memcpy(data_p, p_data_p, capacity);
+    // The high k bits in this mask is 0; k is the number of unused bits
+    // in the last byte
+    uint8_t mask = 0xFF >> UNUSED_BITS(length, sizeof(uint8_t) * 8);
+    // Mask off unused bits
+    data_p[capacity - 1] &= mask;
+
     return;
   }
 
@@ -178,6 +185,13 @@ class BitSequence {
    */
   static inline size_t UNUSED_BITS(size_t length, size_t alignment_unit) {
     return (alignment_unit - (length % alignment_unit)) % alignment_unit;
+  }
+
+  /*
+   * GetData() - Returns the const data pointer
+   */
+  inline const uint8_t *GetData() const {
+    return data_p;
   }
 
   // Get a zeroed-out sequence with certain size

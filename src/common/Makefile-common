@@ -17,8 +17,15 @@ LN = ln
 
 # We can also use DEBUG=1 to specify mode
 ifdef DEBUG
-  ifeq (&(DEBUG), 1)
+  ifeq ($(DEBUG), 1)
     MODE=DEBUG
+  endif
+endif
+
+# We can also use RELEASE=1 to specify mode
+ifdef RELEASE
+  ifeq ($(RELEASE), 1)
+    MODE=RELEASE
   endif
 endif
 

@@ -227,7 +227,7 @@ class NodeBase {
    * NodeBase() - Constructor
    */
   NodeBase(NodeType ptype, uint16_t pdepth, uint32_t psize,
-           void *low_key_p, void *high_key_p) :
+           void *plow_key_p, void *phigh_key_p) :
     type{ptype}, depth{pdepth}, size{psize},
     low_key_p{plow_key_p}, high_key_p{phigh_key_p} {}
 
@@ -311,9 +311,9 @@ class DefaultBaseNode : NodeBase {
   }
 
   // * GetEnd() - Return the first out-of-bound pointer
-  inline KeyValuePairType *GetEnd() { return begin + size; }
+  inline KeyValuePairType *GetEnd() { return kv_begin + size; }
   // * begin() and * end() - C++ iterator interface
-  inline KeyValuePairType *begin() { return begin; }
+  inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
   
   // * KeyInNode() - Return whether a given key is within the node's range
@@ -331,14 +331,14 @@ class DefaultBaseNode : NodeBase {
   // * KeySmallerThanNode() - Returns whether the given key is smaller than
   //                          all keys in the node
   inline bool KeySmallerThanNode(const KeyType &key) {
-    key < static_cast<KeyValuePairType *>(low_key_p)->first;
+    return key < static_cast<KeyValuePairType *>(low_key_p)->first;
   }
 
  private:
   DeltaChainType delta_chain;
   // This member does not take any storage, but let us to obtain the address
   // of the memory address after all class members
-  KeyValuePairType begin[0];
+  KeyValuePairType kv_begin[0];
 };
 
 } // namespace index_building_block

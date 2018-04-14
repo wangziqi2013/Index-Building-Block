@@ -28,7 +28,7 @@ BEGIN_TEST(MappingTableTest) {
     char *p = reinterpret_cast<char *>(begin_node_id);
     for(size_t i = begin_node_id;i < end_node_id;i++) {
       NodeIDType node_id = mapping_table->AllocateNodeID(p);
-      always_assert(mapping_table->Get(node_id) == \
+      always_assert(mapping_table->At(node_id) == \
                     reinterpret_cast<char *>(p));
       p++;
     }
@@ -40,7 +40,7 @@ BEGIN_TEST(MappingTableTest) {
   // And will change its content
   auto verify = [mapping_table]() {
     for(size_t i = 0;i < size;i++) {
-      char *node_p = mapping_table->Get(i);
+      char *node_p = mapping_table->At(i);
       bool ret;
       ret = \
         mapping_table->CAS(i, node_p, node_p + 1);

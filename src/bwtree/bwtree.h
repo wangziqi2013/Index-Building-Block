@@ -33,18 +33,42 @@ class DefaultMappingTable {
   // External class should def this
   using NodeIDType = uint64_t;
 
+ private:
   /*
    * DefaultMappingTable() - Constructor
+   * 
+   * The constructor is private to avoid allocating a mapping table on the stack
+   * or directly putting it as a memory, as the table can be potentially large
    */
   DefaultMappingTable() : 
     next_slot{NodeIDType{0}} {
     return;
   }
 
+ public: 
+
   /*
    * ~DefaultMappingTable() - Destructor
    */
   ~DefaultMappingTable() {}
+
+  /*
+   * Get() - Allocate an instance of the mapping table
+   * 
+   * Do not use new() to instanciate a mapping table.
+   */
+  static DefaultMappingTable *Get() {
+    return new DefaultMappingTable{};
+  }
+
+  /*
+   * Destroy() - The destructor of the mapping table instance
+   * 
+   * Do not use delete directly
+   */
+  static void Destroy(DefaultMappingTable *mapping_table_p) {
+    delete mapping_table_p;
+  }
 
   /*
    * AllocateNodeID() - Allocate a slot and put the given node_p into it
@@ -86,9 +110,9 @@ class DefaultMappingTable {
   }
 
   /*
-   * Get() - Returns the content on a given index
+   * At() - Returns the content on a given index
    */
-  inline BaseNodeType *Get(NodeIDType node_id) {
+  inline BaseNodeType *At(NodeIDType node_id) {
     assert(node_id < TABLE_SIZE);
     return mapping_table[node_id].load();
   }
@@ -135,19 +159,19 @@ class DefaultDeltaChain {
   /*
    * DefaultDeltaChain() - Constructor
    */
-  DefaultDeltaChain() :
-    mem_usage{0UL} {
+  DefaultDeltaChain() {
+    IF_DEBUG(mem_usage.store(0UL));
     return;
   }
 
   template<typename DeltaType, typename ...Args>
   inline void AllocateDelta() {
-    
+    IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaType)));
     return new DeltaType{Args...};
   }
 
  private:
-  size_t mem_usage;
+  IF_DEBUG(std::atomic<size_t> mem_usage);
 };
 
 /*

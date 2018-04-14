@@ -28,4 +28,9 @@
                           test_printf("=\n"); \
                         } while(0);
 
+// This macro adds a new test by declaring the test name and then 
+// call the macro to print test name. The following { and } also
+// matches C++'s syntax
+#define AddNewTest(test_name) void test_name() { PrintTestName();
+
 #endif

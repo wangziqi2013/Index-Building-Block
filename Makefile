@@ -40,19 +40,19 @@ TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/
 test: 
 	@$(MAKE) -C ./src/test
 
-test-common: common test ./test/test-common.cpp
+common-test: common test ./test/common-test.cpp
 	$(info >>> Building binary for $@)
-	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/common-test.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
-test-binary-util: common test ./test/test-binary-util.cpp
+binary-util-test: common test ./test/binary-util-test.cpp
 	$(info >>> Building binary for $@)
-	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-binary-util.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/binary-util-test.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
-test-bwtree: common test ./test/test-bwtree.cpp ./src/bwtree/bwtree.h
+bwtree-test: common test ./test/bwtree-test.cpp ./src/bwtree/bwtree.h
 	$(info >>> Building binary for $@)
-	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-bwtree.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/bwtree-test.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
 clean:

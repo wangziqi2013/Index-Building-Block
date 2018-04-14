@@ -239,20 +239,30 @@ class DefaultDeltaChain {
 };
 
 /*
- * class NodeBase - Type agnostic base class of base node and delta node types
+ * class NodeBase - Base class of base node and delta node types
  * 
- * All type agnostic constants and types are defined in this class, including 
- * the delta type enum and node-related parameters
+ * Virtual node abstraction is defined in this class
  */
 class NodeBase {
  public:
+  using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
   using NodeSizeType = uint32_t;
-  using NodeDepthType = uint16_t;
+  using NodeHeightType = uint16_t;
 
+ protected:
+  /*
+   * NodeBase() - Constructor
+   */
+  NodeBase(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+           KeyValuePairType *plow_key_p, KeyValuePairType *phigh_key_p) :
+    type{ptype}, height{pheight}, size{psize},
+    low_key_p{plow_key_p}, high_key_p{phigh_key_p} {}
+
+ public:
   // * GetSize() - Returns the size
   inline NodeSizeType GetSize() const { return size; }
   // * GetDepth() - Returns the depth
-  inline NodeDepthType GetDepth() const { return depth; }
+  inline NodeDepthType GetHeight() const { return height; }
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
 
@@ -265,32 +275,24 @@ class NodeBase {
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
   inline bool KeyLargerThanNode(const KeyType &key) {
-    return key >= static_cast<KeyValuePairType *>(high_key_p)->first;
+    return *high_key_p <= key;
   }
 
   // * KeySmallerThanNode() - Returns whether the given key is smaller than
   //                          all keys in the node
   inline bool KeySmallerThanNode(const KeyType &key) {
-    return key < static_cast<KeyValuePairType *>(low_key_p)->first;
+    return *low_key_p > key;
   }
 
- protected:
-  /*
-   * NodeBase() - Constructor
-   */
-  NodeBase(NodeType ptype, uint16_t pdepth, uint32_t psize,
-           void *plow_key_p, void *phigh_key_p) :
-    type{ptype}, depth{pdepth}, size{psize},
-    low_key_p{plow_key_p}, high_key_p{phigh_key_p} {}
-
+ private:
   // The following three are packed into a 64 bit integer
   NodeType type;
-  // Depth in the delta chain (0 means base node)
-  uint16_t depth;
+  // Height in the delta chain (0 means base node)
+  NodeHeightType height;
   // Number of elements
-  uint32_t size;
-  void *low_key_p;
-  void *high_key_p;
+  NodeSizeType size;
+  KeyValuePairType *low_key_p;
+  KeyValuePairType *high_key_p;
 };
 
 /*
@@ -304,17 +306,15 @@ template <typename KeyType,
           typename ValueType, 
           typename DeltaChainType>
 class DefaultBaseNode : NodeBase {
- public:
-  using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
  private:
   /*
    * DefaultBaseNode() - Private Constructor
    */
   DefaultBaseNode(NodeType ptype, 
-                  NodeDepthType pdepth,
+                  NodeHeightType pheight,
                   NodeSizeType psize,
                   const KeyValuePairType &phigh_key) :
-    NodeBase{ptype, pdepth, psize, begin(), &high_key},
+    NodeBase{ptype, pheight, psize, begin(), &high_key},
     delta_chain{} {
     return;
   } 
@@ -333,7 +333,7 @@ class DefaultBaseNode : NodeBase {
    *    values
    */
   static DefaultBaseNode *Get(NodeType ptype, 
-                              NodeDepthType pdepth,
+                              NodeHeightType pheight,
                               NodeSizeType psize,
                               const KeyValuePairType &phigh_key) {
     // Size for key value pairs and size for the structure itself
@@ -343,7 +343,7 @@ class DefaultBaseNode : NodeBase {
     void *p = new unsigned char[total_size];
     DefaultBaseNode *node_p = \
       static_cast<DefaultBaseNode *>(
-        new (p) DefaultBaseNode{ptype, pdepth, psize, phigh_key});
+        new (p) DefaultBaseNode{ptype, pheight, psize, phigh_key});
     
     return node_p;
   }

@@ -64,7 +64,7 @@ class DefaultMappingTable {
                   BaseNodeType *old_value, 
                   BaseNodeType *new_value) {
     assert(node_id < TABLE_SIZE);
-    return mapping_table[node_id].compare_and_exchange_strong(old_value, new_value);
+    return mapping_table[node_id].compare_exchange_strong(old_value, new_value);
   }
 
  private:

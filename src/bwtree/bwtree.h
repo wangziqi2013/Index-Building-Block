@@ -29,7 +29,7 @@ template <typename BaseNodeType, size_t TABLE_SIZE>
 class DefaultMappingTable {
  public:
   friend void MappingTableTest();
-  
+
   // External class should def this
   using NodeIDType = uint64_t;
 
@@ -106,6 +106,18 @@ class DefaultMappingTable {
   // Fixed sized mapping table with atomic type as elements
   std::atomic<BaseNodeType *> mapping_table[TABLE_SIZE];
   std::atomic<NodeIDType> next_slot;
+};
+
+/*
+ * class DefaultBaseNode - This class defines the way key and values are stored
+ *                         in the base node
+ * 
+ * 1. Delta allocation is not defined
+ * 2. Node consolidation is not defined
+ */
+template <KeyType, ValueType>
+class DefaultBaseNode {
+
 };
 
 } // namespace index_building_block

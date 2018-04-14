@@ -62,3 +62,8 @@
     if(!(cond)) err_printf("Assertion \"" #cond "\" fails\n"); \
   } while (0); 
 #endif
+
+// If debug flag is turned on then add the statement
+// NOTE: Do not add semicolon after this
+#define IF_DEBUG(s) #ifndef NDEBUG {s;} #endif
+#define IF_NDEBUG(s) #ifdef NDEBUG {s;} #endif

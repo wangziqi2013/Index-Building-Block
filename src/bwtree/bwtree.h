@@ -35,7 +35,7 @@ class DefaultMappingTable {
    * DefaultMappingTable() - Constructor
    */
   DefaultMappingTable() : 
-    next_slot{NodeIDType(0)} {
+    next_slot{NodeIDType{0}} {
     return;
   }
 
@@ -89,6 +89,18 @@ class DefaultMappingTable {
   inline BaseNodeType *Get(NodeIDType node_id) {
     assert(node_id < TABLE_SIZE);
     return mapping_table[node_id].load();
+  }
+
+ protected:
+  friend void MappingTableTest();
+
+  /*
+   * Reset() - Clear the content as well as the index
+   */
+  void Reset() {
+    memset(mapping_table, 0x00, sizeof(mapping_table));
+    next_slot = NodeIDType{0};
+    return;
   }
 
  private:

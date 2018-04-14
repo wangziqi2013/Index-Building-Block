@@ -36,6 +36,11 @@
 // Or use this macro to make it prettier
 #define END_TEST }
 
+// This requires the test to run under debug mode
+#define BEGIN_DEBUG_TEST(n) void n() { \
+  PrintTestName(); \
+  IF_NDEBUG(err_printf("The test must be run under debug mode\n"));
+
 /*
  * StartThread() - Starts a given number of threads with parameters
  * 

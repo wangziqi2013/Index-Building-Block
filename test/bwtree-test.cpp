@@ -13,7 +13,7 @@ using namespace index_building_block;
  * 3. CAS
  * 4. Overflow under debug mode
  */
-BEGIN_TEST(MappingTableTest) {
+BEGIN_DEBUG_TEST(MappingTableTest) {
   constexpr size_t size = 1024 * 1024;
   constexpr size_t thread_num = 16;
   using MappingTableType = DefaultMappingTable<char, size>;

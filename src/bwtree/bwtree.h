@@ -165,9 +165,9 @@ class DefaultDeltaChain {
   }
 
   template<typename DeltaType, typename ...Args>
-  inline void AllocateDelta() {
+  inline void AllocateDelta(Args &&...args) {
     IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaType)));
-    return new DeltaType{Args...};
+    return new DeltaType{args...};
   }
 
  private:
@@ -181,7 +181,9 @@ class DefaultDeltaChain {
  * 1. Delta allocation is not defined
  * 2. Node consolidation is not defined
  */
-template <KeyType, ValueType, DeltaChainType>
+template <typename KeyType, 
+          typename ValueType, 
+          typename DeltaChainType>
 class DefaultNode {
  private:
   DeltaChainType delta_chain;

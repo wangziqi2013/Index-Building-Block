@@ -28,6 +28,7 @@
 
 // This defines the exit status if there is an error
 #define ERROR_EXIT_STATUS 1
+
 // Error printing: Always print no matter whether the NDEBUG flag is set
 // also, it exits with return number 1 if called
 #define err_printf(fmt, ...)                              \
@@ -37,6 +38,17 @@
             __LINE__, ##__VA_ARGS__);                     \
     fflush(stderr);                                       \
     exit(ERROR_EXIT_STATUS);                              \
+  } while (0);
+
+// Error printing that allows us to specify the exit status
+// as the first argument
+#define err_printf_status(status, fmt, ...)               \
+  do {                                                    \
+    fprintf(stderr, "%-24s: ERROR @ File %s Line %d: " fmt, \
+            __FUNCTION__, __FILE__,                       \
+            __LINE__, ##__VA_ARGS__);                     \
+    fflush(stderr);                                       \
+    exit(status);                              \
   } while (0);
 
 // Under debug mode, always assert is a normal assert

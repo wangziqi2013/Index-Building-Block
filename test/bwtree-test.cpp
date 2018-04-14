@@ -32,15 +32,42 @@ BEGIN_TEST(MappingTableTest) {
       p++;
     }
 
-    // Single thread allocation test
-    func(0, 1);
-    // Multithreaded test
-    StartThread(thread_num, func, thread_num);
-
     return;
   }
 
-  func(0);
+  // This function checks the mapping table
+  // And will change its content
+  auto verify = [mapping_table]() {
+    for(size_t i = 0;i < size;i++) {
+      void *node_p = mapping_table.Get(i);
+      assert(node_p == reinterpret_cast<void *>(i));
+      bool ret;
+      ret = \
+        mapping_table.CAS(i, reinterpret_cast<void *>(i), 
+                          reinterpret_cast<void *>(i + 1));
+      assert(ret == true);
+      ret = \
+        mapping_table.CAS(i, reinterpret_cast<void *>(i), 
+                          reinterpret_cast<void *>(i + 1));
+      assert(ret == false);
+      ret = \
+        mapping_table.CAS(i, reinterpret_cast<void *>(i + 1), 
+                          reinterpret_cast<void *>(i));
+      assert(ret == true);
+    }
+
+    return;
+  }
+  test_printf("Single thread test");
+  // Single thread allocation test
+  func(0, 1);
+  verify();
+  // Reset
+  mapping_table.Reset();
+  test_printf("Multithread test");
+  // Multithreaded test
+  StartThread(thread_num, func, thread_num);
+  verufy();
 
   return;
 } END_TEST

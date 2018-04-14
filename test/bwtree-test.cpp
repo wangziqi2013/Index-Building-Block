@@ -4,6 +4,7 @@
 
 using namespace wangziqi2013;
 using namespace index_building_block;
+using namespace bwtree;
 
 /*
  * MappingTableTest() - Tests mapping table

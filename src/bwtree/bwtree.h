@@ -12,6 +12,7 @@
 
 namespace wangziqi2013 {
 namespace index_building_block {
+namespace bwtree {
 
 template <typename KeyType,
           typename ValueType,
@@ -43,6 +44,39 @@ class DefaultOperator {
   inline bool ValueEq(const ValueType &v1, const ValueType &v2) 
   { return _value_eq(v1, v2); }
 };
+
+/*
+ * class KeyValuePair - Operators involving key comparison
+ */
+template <typename KeyType, typename ValueType>
+class KeyValuePair {
+ public:
+  KeyType key;
+  ValueType value;
+
+  // Operators for checking magnitude with either a key, or another key 
+  // value pair
+  // * operator<
+  inline bool operator<(const KeyValuePair &kvp) const { return key < kvp.key; }
+  // * operator<
+  inline bool operator<(const KeyType &k) const { return key < k; }
+  // * operator>
+  inline bool operator>(const KeyValuePair &kvp) const { return key < kvp.key; }
+  // * operator>
+  inline bool operator>(const KeyType &k) const { return key > k; }
+  // * operator==
+  inline bool operator==(const KeyValuePair &kvp) const { return key == kvp.key; }
+  // * operator==
+  inline bool operator==(const KeyType &k) const { return key == k; }
+  // * operator>=
+  inline bool operator>=(const KeyValuePair &kvp) const { return key >= kvp.key; }
+  // * operator>=
+  inline bool operator>=(const KeyType &k) const { return key >= k; }
+  // * operator<=
+  inline bool operator<=(const KeyValuePair &kvp) const { return key <= kvp.key; }
+  // * operator<=
+  inline bool operator<=(const KeyType &k) const { return key <= k; }
+}
 
 /*
  * class DefaultMappingTable - This class implements the minimal mapping table
@@ -253,11 +287,7 @@ template <typename KeyType,
           typename DeltaChainType>
 class DefaultBaseNode : NodeBase {
  public:
-  class KeyValuePairType {
-   public:
-    KeyType key;
-    ValueType value;
-  }
+  using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
  private:
   /*
    * DefaultBaseNode() - Private Constructor
@@ -320,8 +350,8 @@ class DefaultBaseNode : NodeBase {
   
   // * KeyInNode() - Return whether a given key is within the node's range
   inline bool KeyInNode(const KeyType &key) { 
-    return key >= static_cast<KeyValuePairType *>(low_key_p)->first && \
-           key < static_cast<KeyValuePairType *>(high_key_p)->first;
+    return *low_key_p <= key && \
+           *high_key_p > key;
   }
 
   // * KeyLargerThanNode() - Return whether a given key is larger than
@@ -345,6 +375,7 @@ class DefaultBaseNode : NodeBase {
   KeyValuePairType kv_begin[0];
 };
 
+} // namespace bwtree
 } // namespace index_building_block
 } // namespace wangziqi2013
 

@@ -35,7 +35,7 @@ class DefaultMappingTable {
 
  private:
   /*
-   * DefaultMappingTable() - Constructor
+   * DefaultMappingTable() - Private Constructor
    * 
    * The constructor is private to avoid allocating a mapping table on the stack
    * or directly putting it as a memory, as the table can be potentially large
@@ -45,13 +45,12 @@ class DefaultMappingTable {
     return;
   }
 
- public: 
-
   /*
-   * ~DefaultMappingTable() - Destructor
+   * ~DefaultMappingTable() - Private Destructor
    */
   ~DefaultMappingTable() {}
 
+ public: 
   /*
    * Get() - Allocate an instance of the mapping table
    * 
@@ -167,20 +166,23 @@ class NodeBase {
    * enum class NodeType - Defines the enum of node type
    */
   enum class NodeType : uint16_t {
-    InnerBase = 0,
+    InnerBase = 1,
     InnerInsert,
     InnerDelete,
     InnerSplit,
     InnerRemove,
     InnerMerge,
 
-    LeafBase,
+    LeafBase = 10,
     LeafInsert,
     LeafDelete,
     LeafSplit,
     LeafRemove,
     LeafMerge,
   };
+
+  using NodeSizeType = uint32_t;
+  using NodeDepthType = uint16_t;
 
  protected:
   /*
@@ -210,24 +212,59 @@ template <typename KeyType,
 class DefaultBaseNode : NodeBase {
  public:
   using KeyValuePairType = std::pair<KeyType, ValueType>;
-  using NodeType = typename NodeBase::NodeType;
  private:
+  /*
+   * DefaultBaseNode() - Private Constructor
+   */
   DefaultBaseNode(NodeType ptype, 
-                 uint16_t pdepth,
-                 uint32_t psize,
-                 KeyValuePairType *plow_key_p, 
-                 KeyValuePairType *phigh_key_p) :
+                  NodeDepthType pdepth,
+                  NodeSizeType psize,
+                  KeyValuePairType *plow_key_p, 
+                  KeyValuePairType *phigh_key_p) :
     NodeBase{ptype, pdepth, psize},
     low_key_p{plow_key_p},
     high_key_p{phigh_key_p},
     delta_chain{} {
     return;
   } 
+  
+  /*
+   * ~DefaultBaseNode() - Private Destructor
+   */
+  ~DefaultBaseNode() {}
+
+ public:
+  /*
+   * Get() - Returns a base node with extended storage for key and value pairs
+   * 
+   * 1. The size of the node is determined at run time
+   * 2. We allocate the sizeof() the class plus the extra storage for key and 
+   *    values
+   */
+  static DefaultBaseNode *Get(NodeType ptype, 
+                              NodeDepthType pdepth,
+                              NodeSizeType psize,
+                              KeyValuePairType *plow_key_p, 
+                              KeyValuePairType *phigh_key_p) {
+    // Size for key value pairs and size for the structure itself
+    size_t extra_size = size_t{psize} * sizeof(KeyValuePairType);
+    size_t total_size = extra_size + sizeof(DefaultBaseNode);
+
+    void *p = new unsigned char[total_size];
+    DefaultBaseNode *ret = \
+      static_cast<DefaultBaseNode *>(
+        new (p) DefaultBaseNode{ptype, pdepth, psize, plow_key_p, phigh_key_p});
+    
+    return ret;
+  }
 
  private:
   KeyValuePairType *low_key_p;
   KeyValuePairType *high_key_p;
   DeltaChainType delta_chain;
+  // This member does not take any storage, but let us to obtain the address
+  // of the memory address after all class members
+  KeyValuePairType begin[0];
 };
 
 } // namespace index_building_block

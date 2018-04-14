@@ -151,15 +151,17 @@ class DefaultDeltaChain {
 };
 
 /*
- * class DefaultBaseNode - This class defines the way key and values are stored
- *                         in the base node
+ * class DefaultNode - This class defines the way key and values are stored
+ *                     in the base node
  * 
  * 1. Delta allocation is not defined
  * 2. Node consolidation is not defined
  */
-template <KeyType, ValueType>
-class DefaultBaseNode {
-
+template <KeyType, ValueType, DeltaChainType>
+class DefaultNode {
+ private:
+  DeltaChainType delta_chain;
+  KeyType low_key;
 };
 
 } // namespace index_building_block

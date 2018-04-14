@@ -18,7 +18,7 @@ BEGIN_TEST(MappingTableTest) {
   constexpr size_t thread_num = 16;
   using MappingTableType = DefaultMappingTable<char, size>;
   using NodeIDType = typename MappingTableType::NodeIDType;
-  MappingTableType *mapping_table = new MappingTableType{};
+  MappingTableType *mapping_table = MappingTableType::Get();
 
   auto func = [size, mapping_table](size_t thread_id, size_t thread_num) {
     always_assert(thread_id < thread_num);

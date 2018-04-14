@@ -312,11 +312,26 @@ class DefaultBaseNode : NodeBase {
 
   // * GetEnd() - Return the first out-of-bound pointer
   inline KeyValuePairType *GetEnd() { return begin + size; }
+  // * begin() and * end() - C++ iterator interface
+  inline KeyValuePairType *begin() { return begin; }
+  inline KeyValuePairType *end() { return GetEnd(); }
   
-  // * KeyInNode() - Return whether a given key is inside a node
+  // * KeyInNode() - Return whether a given key is within the node's range
   inline bool KeyInNode(const KeyType &key) { 
     return key >= static_cast<KeyValuePairType *>(low_key_p)->first && \
-           key < static_cast<KeyValuePairType *>(high_key_p)->second;
+           key < static_cast<KeyValuePairType *>(high_key_p)->first;
+  }
+
+  // * KeyLargerThanNode() - Return whether a given key is larger than
+  //                         all keys in the node
+  inline bool KeyLargerThanNode(const KeyType &key) {
+    return key >= static_cast<KeyValuePairType *>(high_key_p)->first;
+  }
+
+  // * KeySmallerThanNode() - Returns whether the given key is smaller than
+  //                          all keys in the node
+  inline bool KeySmallerThanNode(const KeyType &key) {
+    key < static_cast<KeyValuePairType *>(low_key_p)->first;
   }
 
  private:

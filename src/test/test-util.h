@@ -36,23 +36,29 @@
 // Or use this macro to make it prettier
 #define END_TEST }
 
-
+/*
+ * StartThread() - Starts a given number of threads with parameters
+ * 
+ * The thread function must have the first argument being size_t, which is
+ * the current thread ID, starting from 0
+ */
 template <typename Function, typename... Args>
 void StartThread(size_t thread_num, 
                  Function &&fn, 
                  Args &&...args) {
-  std::vector<std::thread> thread_group;  
+  // Store thread ID here
+  std::thread thread_group[thread_num];
 
   // Launch a group of threads
   for (size_t thread_id = 0; thread_id < thread_num; thread_id++) {
-    thread_group.push_back(std::thread{fn, thread_id, std::ref(args...)});
+    thread_group[thread_id] = std::thread{fn, thread_id, std::ref(args...)};
   }
 
   // Join the threads with the main thread
   for (size_t thread_id = 0; thread_id < thread_num; ++thread_id) {
     thread_group[thread_id].join();
   }
-    
+
   return;
 }
 

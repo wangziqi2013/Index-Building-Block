@@ -39,6 +39,8 @@ class DefaultMappingTable {
     return;
   }
 
+  ~DefaultMappingTable() {}
+
   /*
    * AllocateNodeID() - Allocate a slot and put the given node_p into it
    * 

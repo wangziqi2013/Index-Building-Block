@@ -32,6 +32,14 @@ class DefaultMappingTable {
   using NodeIDType = uint64_t;
 
   /*
+   * DefaultMappingTable() - Constructor
+   */
+  DefaultMappingTable() : 
+    next_slot{NodeIDType(0)} {
+    return;
+  }
+
+  /*
    * AllocateNodeID() - Allocate a slot and put the given node_p into it
    * 
    * If allocation fails because of table overflow, an error is raised under 

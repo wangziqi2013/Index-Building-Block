@@ -25,24 +25,24 @@ class DefaultOperator {
   _ValueEq _value_eq;
   
   // * KeyLess()
-  inline static bool KeyLess(const KeyType &k1, const KeyType &k2) const 
+  inline bool KeyLess(const KeyType &k1, const KeyType &k2) 
   { return _key_kess(k1, k2); }
   // * KeyGreater()
-  inline static bool KeyGreater(const KeyType &k1, const KeyType &k2) const 
+  inline bool KeyGreater(const KeyType &k1, const KeyType &k2) 
   { return _key_kess(k2, k1); }
   // * KeyEq()
-  inline static bool KeyEq(const KeyType &k1, const KeyType &k2) const 
+  inline bool KeyEq(const KeyType &k1, const KeyType &k2) 
   { return _key_eq(k1, k2); }
   // * KeyLessEq()
-  inline static bool KeyLessEq(const KeyType &k1, const KeyType &k2) const 
+  inline bool KeyLessEq(const KeyType &k1, const KeyType &k2) 
   { return !KeyGreater(k1, k2); }
   // * KeyGreaterEq()
-  inline static bool KeyGreaterEq(const KeyType &k1, const KeyType &k2) const 
+  inline bool KeyGreaterEq(const KeyType &k1, const KeyType &k2) 
   { return !KeyLess(k1, k2); }
   // * ValueEq()
-  inline static bool ValueEq(const ValueType &v1, const ValueType &v2) const 
+  inline bool ValueEq(const ValueType &v1, const ValueType &v2) 
   { return _value_eq(v1, v2); }
-}
+};
 
 /*
  * class DefaultMappingTable - This class implements the minimal mapping table
@@ -239,9 +239,7 @@ class NodeBase {
  */
 template <typename KeyType, 
           typename ValueType, 
-          typename DeltaChainType,
-          typename KeyLess = std::less<KeyType>,
-          typename KeyEq = std::equal_to<KeyType>>
+          typename DeltaChainType>
 class DefaultBaseNode : NodeBase {
  public:
   using KeyValuePairType = std::pair<KeyType, ValueType>;
@@ -309,7 +307,7 @@ class DefaultBaseNode : NodeBase {
   NodeDepthType GetDepth() { return depth; }
   // * GetEnd() - Return the first out-of-bound pointer
   KeyValuePairType *GetEnd() { return begin + size; }
-  bool KeyInNode() { return (KeyLess{}() == false) &&  }
+  //bool KeyInNode() { return (KeyLess{}() == false) &&  }
 
  private:
   KeyValuePairType *low_key_p;

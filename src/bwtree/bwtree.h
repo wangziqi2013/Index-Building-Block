@@ -13,6 +13,20 @@
 namespace wangziqi2013 {
 namespace index_building_block {
 
+template <typename KeyType,
+          typename ValueType,
+          typename _KeyLess = std::less<KeyType>,
+          typename _KeyEq = std::equal_to<KeyType>,
+          typename _ValueEq = std::equal_to<ValueType>>
+class DefaultOperator {
+ public:
+  _KeyEq _key_eq; 
+  _KeyLess _key_less;
+  _ValueEq _value_eq;
+  
+  inline static bool KeyEq()
+}
+
 /*
  * class DefaultMappingTable - This class implements the minimal mapping table
  *                             which supports the allocation and CAS of node IDs
@@ -208,7 +222,9 @@ class NodeBase {
  */
 template <typename KeyType, 
           typename ValueType, 
-          typename DeltaChainType>
+          typename DeltaChainType,
+          typename KeyLess = std::less<KeyType>,
+          typename KeyEq = std::equal_to<KeyType>>
 class DefaultBaseNode : NodeBase {
  public:
   using KeyValuePairType = std::pair<KeyType, ValueType>;
@@ -260,12 +276,23 @@ class DefaultBaseNode : NodeBase {
 
   /*
    * Destroy() - Frees the memory and calls destructor
+   * 
+   * 1. The delta chain's destructor will be called in this case. Make sure
+   *    all delta chain elements have been destroyed before this is called
    */
   static void Destroy(DefaultBaseNode *node_p) {
     ~DefaultBaseNode(node_p);
     delete[] reinterpret_cast<unsigned char *>(node_p);
     return;
   }
+  
+  // * GetSize() - Returns the size
+  NodeSizeType GetSize() { return size; }
+  // * GetDepth() - Returns the depth
+  NodeDepthType GetDepth() { return depth; }
+  // * GetEnd() - Return the first out-of-bound pointer
+  KeyValuePairType *GetEnd() { return begin + size; }
+  bool KeyInNode() { return (KeyLess{}() == false) &&  }
 
  private:
   KeyValuePairType *low_key_p;

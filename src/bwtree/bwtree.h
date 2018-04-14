@@ -303,6 +303,8 @@ class NodeBase {
  * 
  * 1. Delta allocation is not defined
  * 2. Node consolidation is not defined
+ * 3. Only unique key is supported; Non-unique key must be implemented
+ *    outside the index
  */
 template <typename KeyType, 
           typename ValueType, 
@@ -372,6 +374,17 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
   // * begin() and * end() - C++ iterator interface
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
+
+  /*
+   * Search() - Find the lower bound item of the key
+   * 
+   * The lower bound item I is defined as the largest I such that key >= I
+   */
+  KeyValuePairType *Search(const KeyType &key) {
+    assert(BaseClassType::KeyInNode(key));
+    KeyValuePairType *kv_p = std::upper_bound(begin(), end(), key);
+    return kv_p == GetEnd() ? nullptr : kv_p - 1;
+  }
 
  private:
   // Instance of high key

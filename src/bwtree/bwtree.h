@@ -183,14 +183,12 @@ class NodeBase {
   };
 
  protected:
-  // These two should be pointers to specific types. The derived class should
-  // cast this pointer to the template type
-  void *low_key_p;
-  void *high_key_p;
-  // Number of elements
-  uint32_t size;
+  // The following three are packed into a 64 bit integer
+  NodeType type;
   // Depth in the delta chain (0 means base node)
   uint16_t depth;
+  // Number of elements
+  uint32_t size;
 };
 
 /*
@@ -204,7 +202,26 @@ template <typename KeyType,
           typename ValueType, 
           typename DeltaChainType>
 class DefaultNode : NodeBase {
+ public:
+  using KeyValuePairType = std::pair<KeyType, ValueType>;
  private:
+  NodeBase(NodeType ptype, 
+           uint16_t pdepth,
+           uint32_t psize,
+           KeyValuePairType *plow_key_p, 
+           KeyValuePairType *phigh_key_p,) :
+    type{ptype},
+    depth{pdepth},
+    size{psize},
+    low_key_p{plow_key_p},
+    high_key_p{phigh_key_p},
+    delta_chain{} {
+    return;
+  } 
+
+ private:
+  KeyValuePairType *low_key_p;
+  KeyValuePairType *high_key_p;
   DeltaChainType delta_chain;
 };
 

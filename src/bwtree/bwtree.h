@@ -215,12 +215,21 @@ class NodeBase {
   using NodeSizeType = uint32_t;
   using NodeDepthType = uint16_t;
 
+  // * GetSize() - Returns the size
+  inline NodeSizeType GetSize() const { return size; }
+  // * GetDepth() - Returns the depth
+  inline NodeDepthType GetDepth() const { return depth; }
+  // * GetType() - Returns the type enum
+  inline NodeType GetType() const { return type; }
+
  protected:
   /*
    * NodeBase() - Constructor
    */
-  NodeBase(NodeType ptype, uint16_t pdepth, uint32_t psize) :
-    type{ptype}, depth{pdepth}, size{psize} {}
+  NodeBase(NodeType ptype, uint16_t pdepth, uint32_t psize,
+           void *low_key_p, void *high_key_p) :
+    type{ptype}, depth{pdepth}, size{psize},
+    low_key_p{plow_key_p}, high_key_p{phigh_key_p} {}
 
   // The following three are packed into a 64 bit integer
   NodeType type;
@@ -228,6 +237,8 @@ class NodeBase {
   uint16_t depth;
   // Number of elements
   uint32_t size;
+  void *low_key_p;
+  void *high_key_p;
 };
 
 /*
@@ -252,9 +263,7 @@ class DefaultBaseNode : NodeBase {
                   NodeSizeType psize,
                   KeyValuePairType *plow_key_p, 
                   KeyValuePairType *phigh_key_p) :
-    NodeBase{ptype, pdepth, psize},
-    low_key_p{plow_key_p},
-    high_key_p{phigh_key_p},
+    NodeBase{ptype, pdepth, psize, low_key_p, high_key_p},
     delta_chain{} {
     return;
   } 
@@ -300,18 +309,17 @@ class DefaultBaseNode : NodeBase {
     delete[] reinterpret_cast<unsigned char *>(node_p);
     return;
   }
-  
-  // * GetSize() - Returns the size
-  NodeSizeType GetSize() { return size; }
-  // * GetDepth() - Returns the depth
-  NodeDepthType GetDepth() { return depth; }
+
   // * GetEnd() - Return the first out-of-bound pointer
-  KeyValuePairType *GetEnd() { return begin + size; }
-  //bool KeyInNode() { return (KeyLess{}() == false) &&  }
+  inline KeyValuePairType *GetEnd() { return begin + size; }
+  
+  // * KeyInNode() - Return whether a given key is inside a node
+  inline bool KeyInNode(const KeyType &key) { 
+    return key >= static_cast<KeyValuePairType *>(low_key_p)->first && \
+           key < static_cast<KeyValuePairType *>(high_key_p)->second;
+  }
 
  private:
-  KeyValuePairType *low_key_p;
-  KeyValuePairType *high_key_p;
   DeltaChainType delta_chain;
   // This member does not take any storage, but let us to obtain the address
   // of the memory address after all class members

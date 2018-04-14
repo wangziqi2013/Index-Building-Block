@@ -24,7 +24,21 @@ class DefaultOperator {
   _KeyLess _key_less;
   _ValueEq _value_eq;
   
-  inline static bool KeyEq()
+  // * KeyLess()
+  inline static bool KeyLess(const KeyType &k1, const KeyType &k2) const 
+  { return _key_kess(k1, k2); }
+  // * KeyGreater()
+  inline static bool KeyGreater(const KeyType &k1, const KeyType &k2) const 
+  { return _key_kess(k2, k1); }
+  // * KeyEq()
+  inline static bool KeyEq(const KeyType &k1, const KeyType &k2) const 
+  { return _key_eq(k1, k2); }
+  // * KeyLessEq()
+  inline static bool KeyLessEq(const KeyType &k1, const KeyType &k2) const 
+  { return !KeyGreater(k1, k2); }
+  // * KeyGreaterEq()
+  inline static bool KeyGreaterEq(const KeyType &k1, const KeyType &k2) const 
+  { return !KeyLess(k1, k2); }
 }
 
 /*

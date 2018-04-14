@@ -109,6 +109,48 @@ class DefaultMappingTable {
 };
 
 /*
+ * class DefaultDeltaChain - This class defines the storage of the delta chain
+ */
+class DefaultDeltaChain {
+ public:
+  /*
+   * enum class NodeType - Defines the enum of node type
+   */
+  enum class NodeType : uint16_t {
+    InnerBase = 0,
+    InnerInsert,
+    InnerDelete,
+    InnerSplit,
+    InnerRemove,
+    InnerMerge,
+
+    LeafBase,
+    LeafInsert,
+    LeafDelete,
+    LeafSplit,
+    LeafRemove,
+    LeafMerge,
+  };
+
+  /*
+   * DefaultDeltaChain() - Constructor
+   */
+  DefaultDeltaChain() :
+    mem_usage{0UL} {
+    return;
+  }
+
+  template<typename DeltaType, typename ...Args>
+  inline void AllocateDelta() {
+    
+    return new DeltaType{Args...};
+  }
+
+ private:
+  size_t mem_usage;
+};
+
+/*
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node
  * 

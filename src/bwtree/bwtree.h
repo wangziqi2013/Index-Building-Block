@@ -253,7 +253,11 @@ template <typename KeyType,
           typename DeltaChainType>
 class DefaultBaseNode : NodeBase {
  public:
-  using KeyValuePairType = std::pair<KeyType, ValueType>;
+  class KeyValuePairType {
+   public:
+    KeyType key;
+    ValueType value;
+  }
  private:
   /*
    * DefaultBaseNode() - Private Constructor
@@ -261,9 +265,8 @@ class DefaultBaseNode : NodeBase {
   DefaultBaseNode(NodeType ptype, 
                   NodeDepthType pdepth,
                   NodeSizeType psize,
-                  KeyValuePairType *plow_key_p, 
-                  KeyValuePairType *phigh_key_p) :
-    NodeBase{ptype, pdepth, psize, low_key_p, high_key_p},
+                  const KeyValuePairType &phigh_key) :
+    NodeBase{ptype, pdepth, psize, begin(), &high_key},
     delta_chain{} {
     return;
   } 
@@ -284,8 +287,7 @@ class DefaultBaseNode : NodeBase {
   static DefaultBaseNode *Get(NodeType ptype, 
                               NodeDepthType pdepth,
                               NodeSizeType psize,
-                              KeyValuePairType *plow_key_p, 
-                              KeyValuePairType *phigh_key_p) {
+                              const KeyValuePairType &phigh_key) {
     // Size for key value pairs and size for the structure itself
     size_t extra_size = size_t{psize} * sizeof(KeyValuePairType);
     size_t total_size = extra_size + sizeof(DefaultBaseNode);
@@ -293,7 +295,7 @@ class DefaultBaseNode : NodeBase {
     void *p = new unsigned char[total_size];
     DefaultBaseNode *node_p = \
       static_cast<DefaultBaseNode *>(
-        new (p) DefaultBaseNode{ptype, pdepth, psize, plow_key_p, phigh_key_p});
+        new (p) DefaultBaseNode{ptype, pdepth, psize, phigh_key});
     
     return node_p;
   }
@@ -335,8 +337,10 @@ class DefaultBaseNode : NodeBase {
   }
 
  private:
+  // Instance of high key
+  KeyValuePair high_key;
   DeltaChainType delta_chain;
-  // This member does not take any storage, but let us to obtain the address
+  // This member does not take any storage, but let us obtain the address
   // of the memory address after all class members
   KeyValuePairType kv_begin[0];
 };

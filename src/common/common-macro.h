@@ -65,5 +65,10 @@
 
 // If debug flag is turned on then add the statement
 // NOTE: Do not add semicolon after this
-#define IF_DEBUG(s) #ifndef NDEBUG {s;} #endif
-#define IF_NDEBUG(s) #ifdef NDEBUG {s;} #endif
+#ifdef NDEBUG
+#define IF_DEBUG(s) 
+#define IF_NDEBUG(s) s
+#else
+#define IF_DEBUG(s) s
+#define IF_NDEBUG(s) 
+#endif

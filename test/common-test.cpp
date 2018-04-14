@@ -14,7 +14,7 @@ using namespace index_building_block;
  * 
  * This should print if MODE=DEBUGl in all other modes there is no printing
  */
-AddNewTest(TestDebugPrint) {
+BEGIN_TEST(TestDebugPrint) {
   PrintTestName();
   dbg_printf("This is a debug printf\n");
   test_printf("This is a test printf\n");
@@ -25,7 +25,7 @@ AddNewTest(TestDebugPrint) {
 /*
  * TestErrorPrint() - Tests whether error printing works
  */
-AddNewTest(TestErrorPrint) {
+BEGIN_TEST(TestErrorPrint) {
   PrintTestName();
 
   test_printf("Now calling fork() to test err_printf\n");
@@ -58,7 +58,7 @@ AddNewTest(TestErrorPrint) {
  * TestAlwaysAssert() - This function tests whether always_assert() works as 
  *                      expected even under non-debug mode
  */
-AddNewTest(TestAlwaysAssert) {
+BEGIN_TEST(TestAlwaysAssert) {
   #ifdef NDEBUG
   test_printf("Under non-debug mode\n");
   assert(false);

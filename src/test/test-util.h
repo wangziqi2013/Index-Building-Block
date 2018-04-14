@@ -10,6 +10,7 @@
 #define _TEST_UTIL_H
 
 #include "common.h"
+#include <thread>
 
 // This defines test printing. Note that this is not affected by the flag
 // i.e. It always prints even under debug mode
@@ -30,9 +31,29 @@
 
 // This macro adds a new test by declaring the test name and then 
 // call the macro to print test name.
-// Note that the test body definition must have 2 }}
+// Note that the block must be ended by 2 '}}'
 #define BEGIN_TEST(n) void n() { PrintTestName();
 // Or use this macro to make it prettier
 #define END_TEST }
+
+
+template <typename Function, typename... Args>
+void StartThread(size_t thread_num, 
+                 Function &&fn, 
+                 Args &&...args) {
+  std::vector<std::thread> thread_group;  
+
+  // Launch a group of threads
+  for (size_t thread_id = 0; thread_id < thread_num; thread_id++) {
+    thread_group.push_back(std::thread{fn, thread_id, std::ref(args...)});
+  }
+
+  // Join the threads with the main thread
+  for (size_t thread_id = 0; thread_id < thread_num; ++thread_id) {
+    thread_group[thread_id].join();
+  }
+    
+  return;
+}
 
 #endif

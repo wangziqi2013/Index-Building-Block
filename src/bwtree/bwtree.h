@@ -39,6 +39,9 @@ class DefaultMappingTable {
     return;
   }
 
+  /*
+   * ~DefaultMappingTable() - Destructor
+   */
   ~DefaultMappingTable() {}
 
   /*

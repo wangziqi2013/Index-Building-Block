@@ -28,6 +28,8 @@ namespace index_building_block {
 template <typename BaseNodeType, size_t TABLE_SIZE>
 class DefaultMappingTable {
  public:
+  friend void MappingTableTest();
+  
   // External class should def this
   using NodeIDType = uint64_t;
 
@@ -90,9 +92,6 @@ class DefaultMappingTable {
     assert(node_id < TABLE_SIZE);
     return mapping_table[node_id].load();
   }
-
- protected:
-  friend void MappingTableTest();
 
   /*
    * Reset() - Clear the content as well as the index

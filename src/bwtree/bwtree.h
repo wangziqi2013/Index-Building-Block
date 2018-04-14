@@ -10,6 +10,9 @@
 #include "common.h"
 #include <atomic>
 
+namespace wangziqi2013 {
+namespace index_building_block {
+
 /*
  * class DefaultMappingTable - This class implements the minimal mapping table
  *                             which supports the allocation and CAS of node IDs
@@ -22,7 +25,7 @@
  * type to the pointer of the element type is stored. Another to specify the 
  * size of the mapping table, which is the number of elements
  */
-template <typedef BaseNodeType, size_t TABLE_SIZE>
+template <typename BaseNodeType, size_t TABLE_SIZE>
 class DefaultMappingTable {
  public:
   // External class should def this
@@ -36,7 +39,7 @@ class DefaultMappingTable {
    */
   inline NodeIDType AllocateNodeID(BaseNodeType *node_p) {
     // Use atomic instruction to allocate slots
-    NodeIDType slot = next_slot.fetch_and_add(1);
+    NodeIDType slot = next_slot.fetch_add(1);
     // Only do this after the atomic inc
     assert(slot < TABLE_SIZE);
     mapping_table[slot] = node_p;

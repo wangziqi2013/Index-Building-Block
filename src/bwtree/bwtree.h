@@ -183,6 +183,12 @@ class NodeBase {
   };
 
  protected:
+  /*
+   * NodeBase() - Constructor
+   */
+  NodeBase(NodeType ptype, uint16_t pdepth, uint32_t psize) :
+    type{ptype}, depth{pdepth}, size{psize} {}
+
   // The following three are packed into a 64 bit integer
   NodeType type;
   // Depth in the delta chain (0 means base node)
@@ -192,8 +198,8 @@ class NodeBase {
 };
 
 /*
- * class DefaultNode - This class defines the way key and values are stored
- *                     in the base node
+ * class DefaultBaseNode - This class defines the way key and values are stored
+ *                         in the base node
  * 
  * 1. Delta allocation is not defined
  * 2. Node consolidation is not defined
@@ -201,18 +207,17 @@ class NodeBase {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultNode : NodeBase {
+class DefaultBaseNode : NodeBase {
  public:
   using KeyValuePairType = std::pair<KeyType, ValueType>;
+  using NodeType = typename NodeBase::NodeType;
  private:
-  NodeBase(NodeType ptype, 
-           uint16_t pdepth,
-           uint32_t psize,
-           KeyValuePairType *plow_key_p, 
-           KeyValuePairType *phigh_key_p,) :
-    type{ptype},
-    depth{pdepth},
-    size{psize},
+  DefaultBaseNode(NodeType ptype, 
+                 uint16_t pdepth,
+                 uint32_t psize,
+                 KeyValuePairType *plow_key_p, 
+                 KeyValuePairType *phigh_key_p) :
+    NodeBase{ptype, pdepth, psize},
     low_key_p{plow_key_p},
     high_key_p{phigh_key_p},
     delta_chain{} {

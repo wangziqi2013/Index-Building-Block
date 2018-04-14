@@ -57,7 +57,15 @@ class DefaultMappingTable {
     return;
   }
 
-  
+  /*
+   * CAS() - Performs compare and swap on a table element
+   */
+  inline bool CAS(NodeIDType node_id, 
+                  BaseNodeType *old_value, 
+                  BaseNodeType *new_value) {
+    assert(node_id < TABLE_SIZE);
+    return mapping_table[node_id].compare_and_exchange_strong(old_value, new_value);
+  }
 
  private:
   // Fixed sized mapping table with atomic type as elements

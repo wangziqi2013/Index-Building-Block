@@ -41,15 +41,19 @@ test:
 	@$(MAKE) -C ./src/test
 
 test-common: common test ./test/test-common.cpp
-	$(info >>> Building binary for test-common)
+	$(info >>> Building binary for $@)
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-common.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
 test-binary-util: common test ./test/test-binary-util.cpp
-	$(info >>> Building binary for test-binary-util)
+	$(info >>> Building binary for $@)
 	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-binary-util.cpp $(CXXFLAGS) $(LDFLAGS)
 	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
+test-bwtree: common test ./test/test-bwtree.cpp ./src/bwtree/bwtree.h
+	$(info >>> Building binary for $@)
+	$(CXX) -o $(BIN_DIR)/$@ $(COMMON_OBJ) $(TEST_OBJ) ./test/test-bwtree.cpp $(CXXFLAGS) $(LDFLAGS)
+	@$(LN) -sf $(BIN_DIR)/$@ ./$@-bin
 
 clean:
 	$(info >>> Cleaning files)

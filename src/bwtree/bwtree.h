@@ -79,6 +79,25 @@ class KeyValuePair {
 }
 
 /*
+  * enum class NodeType - Defines the enum of node type
+  */
+enum class NodeType : uint16_t {
+  InnerBase = 1,
+  InnerInsert,
+  InnerDelete,
+  InnerSplit,
+  InnerRemove,
+  InnerMerge,
+
+  LeafBase = 10,
+  LeafInsert,
+  LeafDelete,
+  LeafSplit,
+  LeafRemove,
+  LeafMerge,
+};
+
+/*
  * class DefaultMappingTable - This class implements the minimal mapping table
  *                             which supports the allocation and CAS of node IDs
  * 
@@ -227,25 +246,6 @@ class DefaultDeltaChain {
  */
 class NodeBase {
  public:
-  /*
-   * enum class NodeType - Defines the enum of node type
-   */
-  enum class NodeType : uint16_t {
-    InnerBase = 1,
-    InnerInsert,
-    InnerDelete,
-    InnerSplit,
-    InnerRemove,
-    InnerMerge,
-
-    LeafBase = 10,
-    LeafInsert,
-    LeafDelete,
-    LeafSplit,
-    LeafRemove,
-    LeafMerge,
-  };
-
   using NodeSizeType = uint32_t;
   using NodeDepthType = uint16_t;
 
@@ -255,6 +255,24 @@ class NodeBase {
   inline NodeDepthType GetDepth() const { return depth; }
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
+
+  // * KeyInNode() - Return whether a given key is within the node's range
+  inline bool KeyInNode(const KeyType &key) { 
+    return *low_key_p <= key && \
+           *high_key_p > key;
+  }
+
+  // * KeyLargerThanNode() - Return whether a given key is larger than
+  //                         all keys in the node
+  inline bool KeyLargerThanNode(const KeyType &key) {
+    return key >= static_cast<KeyValuePairType *>(high_key_p)->first;
+  }
+
+  // * KeySmallerThanNode() - Returns whether the given key is smaller than
+  //                          all keys in the node
+  inline bool KeySmallerThanNode(const KeyType &key) {
+    return key < static_cast<KeyValuePairType *>(low_key_p)->first;
+  }
 
  protected:
   /*
@@ -347,24 +365,6 @@ class DefaultBaseNode : NodeBase {
   // * begin() and * end() - C++ iterator interface
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
-  
-  // * KeyInNode() - Return whether a given key is within the node's range
-  inline bool KeyInNode(const KeyType &key) { 
-    return *low_key_p <= key && \
-           *high_key_p > key;
-  }
-
-  // * KeyLargerThanNode() - Return whether a given key is larger than
-  //                         all keys in the node
-  inline bool KeyLargerThanNode(const KeyType &key) {
-    return key >= static_cast<KeyValuePairType *>(high_key_p)->first;
-  }
-
-  // * KeySmallerThanNode() - Returns whether the given key is smaller than
-  //                          all keys in the node
-  inline bool KeySmallerThanNode(const KeyType &key) {
-    return key < static_cast<KeyValuePairType *>(low_key_p)->first;
-  }
 
  private:
   // Instance of high key

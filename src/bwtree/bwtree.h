@@ -138,25 +138,6 @@ class DefaultMappingTable {
 class DefaultDeltaChain {
  public:
   /*
-   * enum class NodeType - Defines the enum of node type
-   */
-  enum class NodeType : uint16_t {
-    InnerBase = 0,
-    InnerInsert,
-    InnerDelete,
-    InnerSplit,
-    InnerRemove,
-    InnerMerge,
-
-    LeafBase,
-    LeafInsert,
-    LeafDelete,
-    LeafSplit,
-    LeafRemove,
-    LeafMerge,
-  };
-
-  /*
    * DefaultDeltaChain() - Constructor
    */
   DefaultDeltaChain() {
@@ -175,6 +156,44 @@ class DefaultDeltaChain {
 };
 
 /*
+ * class NodeBase - Type agnostic base class of base node and delta node types
+ * 
+ * All type agnostic constants and types are defined in this class, including 
+ * the delta type enum and node-related parameters
+ */
+class NodeBase {
+ public:
+  /*
+   * enum class NodeType - Defines the enum of node type
+   */
+  enum class NodeType : uint16_t {
+    InnerBase = 0,
+    InnerInsert,
+    InnerDelete,
+    InnerSplit,
+    InnerRemove,
+    InnerMerge,
+
+    LeafBase,
+    LeafInsert,
+    LeafDelete,
+    LeafSplit,
+    LeafRemove,
+    LeafMerge,
+  };
+
+ protected:
+  // These two should be pointers to specific types. The derived class should
+  // cast this pointer to the template type
+  void *low_key_p;
+  void *high_key_p;
+  // Number of elements
+  uint32_t size;
+  // Depth in the delta chain (0 means base node)
+  uint16_t depth;
+};
+
+/*
  * class DefaultNode - This class defines the way key and values are stored
  *                     in the base node
  * 
@@ -184,10 +203,9 @@ class DefaultDeltaChain {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultNode {
+class DefaultNode : NodeBase {
  private:
   DeltaChainType delta_chain;
-  KeyType low_key;
 };
 
 } // namespace index_building_block

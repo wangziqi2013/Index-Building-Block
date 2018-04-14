@@ -39,6 +39,9 @@ class DefaultOperator {
   // * KeyGreaterEq()
   inline static bool KeyGreaterEq(const KeyType &k1, const KeyType &k2) const 
   { return !KeyLess(k1, k2); }
+  // * ValueEq()
+  inline static bool ValueEq(const ValueType &v1, const ValueType &v2) const 
+  { return _value_eq(v1, v2); }
 }
 
 /*

@@ -29,8 +29,10 @@
                         } while(0);
 
 // This macro adds a new test by declaring the test name and then 
-// call the macro to print test name. The following { and } also
-// matches C++'s syntax
-#define AddNewTest(test_name) void test_name() { PrintTestName();
+// call the macro to print test name.
+// Note that the test body definition must have 2 }}
+#define AddNewTest(n) void n() { PrintTestName();
+// Or use this macro to make it prettier
+#define END_TEST }
 
 #endif

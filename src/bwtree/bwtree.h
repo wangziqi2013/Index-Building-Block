@@ -83,6 +83,14 @@ class DefaultMappingTable {
     return mapping_table[node_id].compare_exchange_strong(old_value, new_value);
   }
 
+  /*
+   * Get() - Returns the content on a given index
+   */
+  inline BaseNodeType *Get(NodeIDType node_id) {
+    assert(node_id < TABLE_SIZE);
+    return mapping_table[node_id].load();
+  }
+
  private:
   // Fixed sized mapping table with atomic type as elements
   std::atomic<BaseNodeType *> mapping_table[TABLE_SIZE];

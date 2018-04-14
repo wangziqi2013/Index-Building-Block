@@ -251,11 +251,20 @@ class DefaultBaseNode : NodeBase {
     size_t total_size = extra_size + sizeof(DefaultBaseNode);
 
     void *p = new unsigned char[total_size];
-    DefaultBaseNode *ret = \
+    DefaultBaseNode *node_p = \
       static_cast<DefaultBaseNode *>(
         new (p) DefaultBaseNode{ptype, pdepth, psize, plow_key_p, phigh_key_p});
     
-    return ret;
+    return node_p;
+  }
+
+  /*
+   * Destroy() - Frees the memory and calls destructor
+   */
+  static void Destroy(DefaultBaseNode *node_p) {
+    ~DefaultBaseNode(node_p);
+    delete[] reinterpret_cast<unsigned char *>(node_p);
+    return;
   }
 
  private:

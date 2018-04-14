@@ -76,7 +76,7 @@ class KeyValuePair {
   inline bool operator<=(const KeyValuePair &kvp) const { return key <= kvp.key; }
   // * operator<=
   inline bool operator<=(const KeyType &k) const { return key <= k; }
-}
+};
 
 /*
   * enum class NodeType - Defines the enum of node type
@@ -238,16 +238,18 @@ class DefaultDeltaChain {
   IF_DEBUG(std::atomic<size_t> mem_usage);
 };
 
+using NodeSizeType = uint32_t;
+using NodeHeightType = uint16_t;
+
 /*
  * class NodeBase - Base class of base node and delta node types
  * 
  * Virtual node abstraction is defined in this class
  */
+template <typename KeyType, typename ValueType>
 class NodeBase {
  public:
   using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
-  using NodeSizeType = uint32_t;
-  using NodeHeightType = uint16_t;
 
  protected:
   /*
@@ -262,7 +264,7 @@ class NodeBase {
   // * GetSize() - Returns the size
   inline NodeSizeType GetSize() const { return size; }
   // * GetDepth() - Returns the depth
-  inline NodeDepthType GetHeight() const { return height; }
+  inline NodeHeightType GetHeight() const { return height; }
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
 
@@ -305,7 +307,10 @@ class NodeBase {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultBaseNode : NodeBase {
+class DefaultBaseNode : NodeBase<KeyType, ValueType> {
+ public:
+  using BaseClassType = NodeBase<KeyType, ValueType>;
+  using KeyValuePairType = typename BaseClassType::KeyValuePairType;
  private:
   /*
    * DefaultBaseNode() - Private Constructor
@@ -314,7 +319,7 @@ class DefaultBaseNode : NodeBase {
                   NodeHeightType pheight,
                   NodeSizeType psize,
                   const KeyValuePairType &phigh_key) :
-    NodeBase{ptype, pheight, psize, begin(), &high_key},
+    BaseClassType{ptype, pheight, psize, begin(), &high_key},
     delta_chain{} {
     return;
   } 
@@ -361,14 +366,16 @@ class DefaultBaseNode : NodeBase {
   }
 
   // * GetEnd() - Return the first out-of-bound pointer
-  inline KeyValuePairType *GetEnd() { return kv_begin + size; }
+  inline KeyValuePairType *GetEnd() { 
+    return kv_begin + BaseClassType::GetSize(); 
+  }
   // * begin() and * end() - C++ iterator interface
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
 
  private:
   // Instance of high key
-  KeyValuePair high_key;
+  KeyValuePairType high_key;
   DeltaChainType delta_chain;
   // This member does not take any storage, but let us obtain the address
   // of the memory address after all class members

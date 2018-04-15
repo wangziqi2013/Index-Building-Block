@@ -70,15 +70,21 @@ void StartThread(size_t thread_num,
   return;
 }
 
-template <typename Function, typename... Args>
-bool TestAssertionFail(Function &&fn, 
-                       Args &&...args) {
+/*
+ * TestAssertionFail() - This function forks a new process to test whether 
+ *                       assertion would fail
+ */
+template <typename Function>
+bool TestAssertionFail(Function &&fn) {
   pid_t fork_ret = fork();
   // Did not fork, only one process
   if(fork_ret == -1) {
     err_printf("Fork() returned -1; exit\n");
   } else if(fork_ret == 0) {
-    fn(std::ref(args...));
+    fn();
+    // If the call does not fail then we exit with status code 0
+    // which can be detected by the parent process
+    exit(0);
   } else {
     int child_status = 0;
     int exit_pid = waitpid(fork_ret, &child_status, 0);

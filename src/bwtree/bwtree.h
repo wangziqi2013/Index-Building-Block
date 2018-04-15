@@ -47,6 +47,8 @@ class KeyValuePair {
   inline bool operator<=(const KeyType &k) const { return key <= k; }
 };
 
+
+
 /*
   * enum class NodeType - Defines the enum of node type
   */
@@ -85,6 +87,8 @@ class DefaultMappingTable {
 
   // External class should def this
   using NodeIDType = uint64_t;
+  // Invalid node ID is defined as the largest possible unsigned value
+  static constexpr INVALID_NODE_ID = NodeIDType{-1};
 
  private:
   /*

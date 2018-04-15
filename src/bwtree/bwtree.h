@@ -88,7 +88,7 @@ class DefaultMappingTable {
   // External class should def this
   using NodeIDType = uint64_t;
   // Invalid node ID is defined as the largest possible unsigned value
-  static constexpr INVALID_NODE_ID = NodeIDType{-1};
+  static constexpr NodeIDType INVALID_NODE_ID = static_cast<NodeIDType>(-1);
 
  private:
   /*

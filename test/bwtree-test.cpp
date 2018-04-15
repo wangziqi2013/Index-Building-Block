@@ -21,6 +21,10 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
   using NodeIDType = typename MappingTableType::NodeIDType;
   MappingTableType *mapping_table = MappingTableType::Get();
 
+  // Print this
+  test_printf("INVALID_NODE_ID = 0x%lX\n", MappingTableType::INVALID_NODE_ID);
+  always_assert(MappingTableType::INVALID_NODE_ID + 1 == 0);
+
   auto func = [size, mapping_table](size_t thread_id, size_t thread_num) {
     always_assert(thread_id < thread_num);
     const size_t per_thread = size / thread_num;

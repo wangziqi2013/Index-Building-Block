@@ -110,6 +110,16 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   TestAssertionFail([node_p](){node_p->Search(-1);});
   TestAssertionFail([node_p, high_key](){node_p->Search(high_key);});
 
+  // Split the new node
+  BaseNodeType *new_node_p = node_p->Split();
+  always_assert(new_node_p->GetSize() == size / 2);
+  always_assert(new_node_p->begin()->key == size);
+  always_assert(new_node_p->begin()->value == size + 1);
+  always_assert((new_node_p->end() - 1)->key == (size - 1) * 2);
+  always_assert((new_node_p->end() - 1)->value == (size - 1) * 2 + 1);
+  always_assert(new_node_p->GetHighKeyValuePair()->key == high_key);
+  always_assert(new_node_p->GetHighKeyValuePair()->value == high_key + 1);
+
   BaseNodeType::Destroy(node_p);
 
   return;

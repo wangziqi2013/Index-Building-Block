@@ -100,15 +100,15 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
   for(int i = 0;i < high_key;i++) {
     int index = node_p->Search(i);
-    always_assert(kv_p != nullptr);
+    const int &value = node_p->ValueAt(index);
     if(i < (int)size * 2) { 
       if(i % 2 == 0) {
-        always_assert(node_p->ValueAt(i) == i + 1);
+        always_assert(value == i + 1);
       } else {
-        always_assert(node_p->ValueAt(i) == i);
+        always_assert(value == i);
       }
     } else {
-      always_assert(node_p->ValueAt(i) == size * 2 - 1);
+      always_assert(value == size * 2 - 1);
     }
   }
 
@@ -118,12 +118,13 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
   // Split the new node
   BaseNodeType *new_node_p = node_p->Split();
+  NodeSizeType new_size = new_node_p->GetSize();
   always_assert(new_node_p->GetSize() == size / 2);
-  always_assert(new_node_p->KeyBegin() == size);
-  always_assert(new_node_p->ValueBegin() == size + 1);
-  always_assert((new_node_p->KeyEnd() - 1) == (size - 1) * 2);
-  always_assert((new_node_p->ValueEnd() - 1) == (size - 1) * 2 + 1);
-  always_assert(new_node_p->GetHighKey()->Key == high_key);
+  always_assert(new_node_p->KeyAt(0) == size);
+  always_assert(new_node_p->ValueAt(0) == size + 1);
+  always_assert((new_node_p->KeyAt(new_size - 1) == (size - 1) * 2);
+  always_assert((new_node_p->ValueAt(new_size - 1)) == (size - 1) * 2 + 1);
+  always_assert(new_node_p->GetHighKey()->key == high_key);
 
   int key = new_node_p->KeyBegin();
   for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {

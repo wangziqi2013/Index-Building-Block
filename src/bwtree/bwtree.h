@@ -394,9 +394,9 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   // * KeyBegin() - Return the first pointer for values
   inline ValueType *KeyBegin() { return key_begin; }
   // * KeyEnd() - Return the first out-of-bound pointer for keys
-  inline KeyType *KeyEnd() { return kv_begin + BaseClassType::GetSize(); }
+  inline KeyType *KeyEnd() { return key_begin + BaseClassType::GetSize(); }
   // * ValueBegin() - Return the first pointer for values
-  inline ValueType *ValueBegin() { return KeyEnd(); }
+  inline ValueType *ValueBegin() { return reinterpret_cast<ValueType *>(KeyEnd()); }
   // * ValueEnd() - Return the first out-of-bound pointer for values
   inline ValueType *ValueEnd() { return ValueBegin() + BaseClassType::GetSize(); }
 

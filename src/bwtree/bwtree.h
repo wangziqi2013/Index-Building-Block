@@ -363,7 +363,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    *    all delta chain elements have been destroyed before this is called
    */
   static void Destroy(DefaultBaseNode *node_p) {
-    ~DefaultBaseNode(node_p);
+    node_p->~DefaultBaseNode();
     delete[] reinterpret_cast<unsigned char *>(node_p);
     return;
   }
@@ -388,7 +388,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    */
   KeyValuePairType *Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));
-    KeyValuePairType *kv_p = std::upper_bound(begin(), end(), key);
+    KeyValuePairType *kv_p = std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}});
     return kv_p == GetEnd() ? nullptr : kv_p - 1;
   }
 

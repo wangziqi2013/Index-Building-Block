@@ -101,5 +101,6 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
 int main() {
   MappingTableTest();
+  BaseNodeTest();
   return 0;
 }

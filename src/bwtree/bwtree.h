@@ -322,6 +322,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
                   NodeSizeType psize,
                   const KeyValuePairType &phigh_key) :
     BaseClassType{ptype, pheight, psize, begin(), &high_key},
+    high_key{phigh_key},
     delta_chain{} {
     return;
   } 
@@ -340,7 +341,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    *    values
    */
   static DefaultBaseNode *Get(NodeType ptype, 
-                              NodeHeightType pheight,
+                              //NodeHeightType pheight,
                               NodeSizeType psize,
                               const KeyValuePairType &phigh_key) {
     // Size for key value pairs and size for the structure itself
@@ -350,7 +351,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
     void *p = new unsigned char[total_size];
     DefaultBaseNode *node_p = \
       static_cast<DefaultBaseNode *>(
-        new (p) DefaultBaseNode{ptype, pheight, psize, phigh_key});
+        new (p) DefaultBaseNode{ptype, NodeHeightType{0}, psize, phigh_key});
     
     return node_p;
   }
@@ -374,6 +375,11 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
   // * begin() and * end() - C++ iterator interface
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
+  // * operator[] - Array semantics with bounds checking under debug mode
+  inline KeyValuePairType &operator[](NodeSizeType index) { 
+    assert(index < BaseClassType::GetSize());
+    return begin()[index]; 
+  }
 
   /*
    * Search() - Find the lower bound item of the key

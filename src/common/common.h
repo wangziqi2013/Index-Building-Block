@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <cassert>
 #include <functional>
+#include <algorithm>
 
 // The following are C++ STL inclusions
 #include <vector>

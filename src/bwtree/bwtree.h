@@ -380,6 +380,8 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
     assert(index < BaseClassType::GetSize());
     return begin()[index]; 
   }
+  // * At() - Access item on a particular index
+  inline KeyValuePairType &At(NodeSizeType index) { return (*this)[index]; }
 
   /*
    * Search() - Find the lower bound item of a search key
@@ -389,9 +391,31 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    * std::upper_bound finds the smallest I' such that key < I'. If no such
    * I' exists, which means the key is >= all items, it returns end()
    */
-  KeyValuePairType *Search(const KeyType &key) {
+  KeyValuePairType *Search(const KeyType &key) const {
     assert(BaseClassType::KeyInNode(key));
     return std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}}) - 1;
+  }
+
+  /*
+   * Split() - Split the node into two smaller halves
+   * 
+   * 1. Only unique key split is supported. For non-unique keys please override
+   *    this method in a derived class
+   * 2. The split point is chosen as the middle of the node. The current node
+   *    is not changed, and we copy the upper half of the content into another
+   *    node and return it
+   * 3. The node size must be greater than 1. Otherwise assertion fails
+   * 4. The low key of the upper half is set to the split key. The high key
+   *    of the upper is the same as the current node. The current node's high
+   *    key should be updated by the split delta
+   */
+  DefaultBaseNode *Split() {
+    NodeSizeType old_size = BaseClassType::GetSize();
+    assert(old_size > 1);
+    // The index of the split key which is also the low key of the new node
+    NodeSizeType pivot = old_size / 2;
+    NodeSizeType new_size = old_size - pivot;
+    DefaultBaseNode *node_p = DefaultBaseNode::Get();
   }
 
  private:

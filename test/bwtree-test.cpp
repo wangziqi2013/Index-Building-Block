@@ -80,21 +80,21 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
  */
 BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Ignore delta chain type here
-  using BaseNodeType = BaseNode<int, int, DefaultDeltaChain>;
+  using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChain>;
   constexpr NodeSizeType size = 256;
-  using KeyValuePairType = NodeSizeType::KeyValuePairType;
+  using KeyValuePairType = typename BaseNodeType::KeyValuePairType;
 
   BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {1000, 1001});
-  for(int i = 0;i < size;i++) {
-    node_p[i] = {i * 2, i * 2 + 1};
+  for(NodeSizeType i = 0;i < size;i++) {
+    (*node_p)[i] = KeyValuePairType{(int)i * 2, (int)i * 2 + 1};
   }
 
-  for(int i = 0;i < size;i++) {
+  for(NodeSizeType i = 0;i < size;i++) {
     KeyValuePairType *kv_p = node_p->Search(i);
-    always_assert(kv_p->value == i + 1);
+    always_assert(kv_p->value == (int)i + 1);
   }
 
-  node_p->Destroy();
+  BaseNodeType::Destroy(node_p);
 
   return;
 } END_TEST

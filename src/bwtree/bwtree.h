@@ -267,6 +267,10 @@ class NodeBase {
   inline NodeHeightType GetHeight() const { return height; }
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
+  // * GetHighKeyValuePair() - Returns high key and value pair
+  inline const KeyValuePairType *GetHighKeyValuePair() const { return high_key_p; }
+  // * GetLowKeyValuePair() - Returns low key and value pair
+  inline const KeyValuePairType *GetLowKeyValuePair() const { return low_key_p; }
 
   // * KeyInNode() - Return whether a given key is within the node's range
   inline bool KeyInNode(const KeyType &key) { 
@@ -309,7 +313,7 @@ class NodeBase {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultBaseNode : NodeBase<KeyType, ValueType> {
+class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
  public:
   using BaseClassType = NodeBase<KeyType, ValueType>;
   using KeyValuePairType = typename BaseClassType::KeyValuePairType;
@@ -391,7 +395,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    * std::upper_bound finds the smallest I' such that key < I'. If no such
    * I' exists, which means the key is >= all items, it returns end()
    */
-  KeyValuePairType *Search(const KeyType &key) const {
+  KeyValuePairType *Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));
     return std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}}) - 1;
   }
@@ -415,8 +419,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
     // The index of the split key which is also the low key of the new node
     NodeSizeType pivot = old_size / 2;
     NodeSizeType new_size = old_size - pivot;
-    DefaultBaseNode *node_p = \
-      DefaultBaseNode::Get(BaseClassType.GetType(), new_size, high_key);
+    DefaultBaseNode *node_p = Get(BaseClassType::GetType(), new_size, high_key);
     // Copy the upper half of the current node into the new node
     std::copy(begin() + pivot, end(), node_p->begin());
 

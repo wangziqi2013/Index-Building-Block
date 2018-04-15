@@ -210,7 +210,7 @@ class DefaultDeltaChain {
  * 
  * Virtual node abstraction is defined in this class
  */
-template <typename KeyType, typename ValueType>
+template <typename KeyType>
 class NodeBase {
  public:
   using BoundKeyType = BoundKey<KeyType>;
@@ -266,6 +266,14 @@ class NodeBase {
   BoundKeyType *high_key_p;
 };
 
+template <typename KeyType>
+class DeltaNode : public NodeBase<KeyType> {
+ public:
+  inline NodeBase<KeyType> *GetNext() const { return next_node_p; }
+ private:
+  NodeBase<KeyType> *next_node_p;
+};
+
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node
@@ -282,7 +290,7 @@ class NodeBase {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
+class DefaultBaseNode : public NodeBase<KeyType> {
  public:
   using BaseClassType = NodeBase<KeyType, ValueType>;
   using NodeSizeType = typename BaseClassType::NodeSizeType;

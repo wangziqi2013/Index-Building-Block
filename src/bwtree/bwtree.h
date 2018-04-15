@@ -248,7 +248,7 @@ class NodeBase {
 
   // * KeyInNode() - Return whether a given key is within the node's range
   inline bool KeyInNode(const KeyType &key) { 
-    return KeyLargerThanNode() == false && KeySmallerThanNode() == false;
+    return KeyLargerThanNode(key) == false && KeySmallerThanNode(key) == false;
   }
 
  private:

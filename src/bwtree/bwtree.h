@@ -14,37 +14,6 @@ namespace wangziqi2013 {
 namespace index_building_block {
 namespace bwtree {
 
-template <typename KeyType,
-          typename ValueType,
-          typename _KeyLess = std::less<KeyType>,
-          typename _KeyEq = std::equal_to<KeyType>,
-          typename _ValueEq = std::equal_to<ValueType>>
-class DefaultOperator {
- public:
-  _KeyEq _key_eq; 
-  _KeyLess _key_less;
-  _ValueEq _value_eq;
-  
-  // * KeyLess()
-  inline bool KeyLess(const KeyType &k1, const KeyType &k2) 
-  { return _key_kess(k1, k2); }
-  // * KeyGreater()
-  inline bool KeyGreater(const KeyType &k1, const KeyType &k2) 
-  { return _key_kess(k2, k1); }
-  // * KeyEq()
-  inline bool KeyEq(const KeyType &k1, const KeyType &k2) 
-  { return _key_eq(k1, k2); }
-  // * KeyLessEq()
-  inline bool KeyLessEq(const KeyType &k1, const KeyType &k2) 
-  { return !KeyGreater(k1, k2); }
-  // * KeyGreaterEq()
-  inline bool KeyGreaterEq(const KeyType &k1, const KeyType &k2) 
-  { return !KeyLess(k1, k2); }
-  // * ValueEq()
-  inline bool ValueEq(const ValueType &v1, const ValueType &v2) 
-  { return _value_eq(v1, v2); }
-};
-
 /*
  * class KeyValuePair - Operators involving key comparison
  */

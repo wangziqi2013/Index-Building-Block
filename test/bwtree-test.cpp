@@ -122,11 +122,11 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   always_assert(new_node_p->GetSize() == size / 2);
   always_assert(new_node_p->KeyAt(0) == size);
   always_assert(new_node_p->ValueAt(0) == size + 1);
-  always_assert((new_node_p->KeyAt(new_size - 1) == (size - 1) * 2);
+  always_assert((new_node_p->KeyAt(new_size - 1)) == (size - 1) * 2);
   always_assert((new_node_p->ValueAt(new_size - 1)) == (size - 1) * 2 + 1);
   always_assert(new_node_p->GetHighKey()->key == high_key);
 
-  int key = new_node_p->KeyBegin();
+  int key = new_node_p->KeyAt(0);
   for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
     always_assert(new_node_p->KeyAt(i) == key);
     always_assert(new_node_p->ValueAt(i) == key + 1);

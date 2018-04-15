@@ -38,9 +38,9 @@ class BoundKey {
   // * operator<=
   inline bool operator<=(const KeyType &k) const { assert(!inf); return key <= k; }
   // * GetInf() - Returns the infinite key
-  inline static GetInf() { return BoundKey{KeyType{}, true}; }
+  inline static BoundKey GetInf() { return BoundKey{KeyType{}, true}; }
   // * Get() - Returns a key
-  inline static Get(const KeyType &key) { return BoundKey(key, false); }
+  inline static BoundKey Get(const KeyType &key) { return BoundKey(key, false); }
 };
 
 /*
@@ -292,7 +292,7 @@ template <typename KeyType,
           typename DeltaChainType>
 class DefaultBaseNode : public NodeBase<KeyType> {
  public:
-  using BaseClassType = NodeBase<KeyType, ValueType>;
+  using BaseClassType = NodeBase<KeyType>;
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseClassType::BoundKeyType;

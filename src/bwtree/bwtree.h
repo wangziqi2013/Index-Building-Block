@@ -209,7 +209,7 @@ class DefaultDeltaChain {
 template <typename KeyType, typename ValueType>
 class NodeBase {
  public:
-  using BoundKeyType = BoundKey<KeyType, uint64_t, static_cast<uint64_t>(-1)>;
+  using BoundKeyType = BoundKey<KeyType>;
   using NodeSizeType = uint32_t;
   using NodeHeightType = uint16_t;
 
@@ -229,16 +229,10 @@ class NodeBase {
   inline NodeHeightType GetHeight() const { return height; }
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
-  // * GetHighKeyValuePair() - Returns high key and value pair
-  inline const KeyValuePairType *GetHighKeyValuePair() const { return high_key_p; }
-  // * GetLowKeyValuePair() - Returns low key and value pair
-  inline const KeyValuePairType *GetLowKeyValuePair() const { return low_key_p; }
-
-  // * KeyInNode() - Return whether a given key is within the node's range
-  inline bool KeyInNode(const KeyType &key) { 
-    return *low_key_p <= key && \
-           *high_key_p > key;
-  }
+  // * GetHighKey() - Returns high key
+  inline const BoundKeyType *GetHighKey() const { return high_key_p; }
+  // * GetLowKey() - Returns low key
+  inline const BoundKeyType *GetLowKey() const { return low_key_p; }
 
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
@@ -250,6 +244,11 @@ class NodeBase {
   //                          all keys in the node
   inline bool KeySmallerThanNode(const KeyType &key) {
     return low_key_p->IsInf() == false && *low_key_p > key;
+  }
+
+  // * KeyInNode() - Return whether a given key is within the node's range
+  inline bool KeyInNode(const KeyType &key) { 
+    return KeyLargerThanNode() == false && KeySmallerThanNode() == false;
   }
 
  private:
@@ -280,6 +279,7 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   using BaseClassType = NodeBase<KeyType, ValueType>;
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
+  using BoundKeyType = typename BaseClassType::BoundKeyType;
  private:
   /*
    * DefaultBaseNode() - Private Constructor
@@ -287,12 +287,11 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   DefaultBaseNode(NodeType ptype, 
                   NodeHeightType pheight,
                   NodeSizeType psize,
-                  const BoundKey &plow_key,
-                  const BoundKey &phigh_key) :
+                  const BoundKeyType &plow_key,
+                  const BoundKeyType &phigh_key) :
     BaseClassType{ptype, pheight, psize, &low_key, &high_key},
     low_key{plow_key},
     high_key{phigh_key},
-    value_begin{key_begin + psize * sizeof(KeyType)},
     delta_chain{} {
     return;
   } 
@@ -338,28 +337,12 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     return;
   }
 
-  // * KeyEnd() - Return the first out-of-bound pointer for keys
-  inline KeyType *KeyEnd() { 
-    return kv_begin + BaseClassType::GetSize(); 
-  }
-  // * ValueEnd() - Return the first out-of-bound pointer for values
-  inline ValueType *ValueEnd() {
-    return value_begin + BaseClassType::GetSize(); 
-  }
-  // * begin() and * end() - C++ iterator interface for keys
-  inline KeyValuePairType *begin() { return kv_begin; }
-  inline KeyValuePairType *end() { return KeyEnd(); }
-  // * operator[] - Array semantics with bounds checking under debug mode
-  inline KeyType &operator[](int index) { 
-    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
-    return begin()[index]; 
-  }
   // * KeyAt() - Access key on a particular index
   inline KeyType &KeyAt(int index) { return (*this)[index]; }
   // * ValueAt() - Access value on a particular index
   inline ValueType &ValueAt(int index) {
     assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
-    return value_begin[index];
+    return ValueBegin()[index];
   }
 
   /*
@@ -405,11 +388,25 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   }
 
  private:
+  // * KeyEnd() - Return the first out-of-bound pointer for keys
+  inline KeyType *KeyEnd() { return kv_begin + BaseClassType::GetSize(); }
+  // * ValueBegin() - Return the first pointer for values
+  inline ValueType *ValueBegin() { return KeyEnd(); }
+  // * ValueEnd() - Return the first out-of-bound pointer for values
+  inline ValueType *ValueEnd() { return ValueBegin() + BaseClassType::GetSize(); }
+  // * begin() and * end() - C++ iterator interface for keys
+  inline KeyValuePairType *begin() { return kv_begin; }
+  inline KeyValuePairType *end() { return KeyEnd(); }
+  // * operator[] - Array semantics with bounds checking under debug mode
+  inline KeyType &operator[](int index) { 
+    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
+    return begin()[index]; 
+  }
+
   // Instance of low and high key
   BoundKeyType low_key;
   BoundKeyType high_key;
   DeltaChainType delta_chain;
-  ValueType *value_begin;
   // This member does not take any storage, but let us obtain the address
   // of the memory address after all class members
   KeyType key_begin[0];

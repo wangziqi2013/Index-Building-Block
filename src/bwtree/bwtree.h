@@ -313,6 +313,7 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
                               NodeSizeType psize,
                               const KeyValuePairType &plow_key
                               const KeyValuePairType &phigh_key) {
+    assert(type == NodeType::InnerBase || type == NodeType::LeafBase);
     // Size for key value pairs and size for the structure itself
     size_t extra_size = size_t{psize} * (sizeof(KeyType) + sizeof(ValueType));
     size_t total_size = extra_size + sizeof(DefaultBaseNode);
@@ -382,7 +383,7 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     DefaultBaseNode *node_p = Get(BaseClassType::GetType(), new_size, KeyAt(static_cast<int>(pivot)), high_key);
     // Copy the upper half of the current node into the new node
     std::copy(begin() + pivot, end(), node_p->begin());
-    std::copy(value_begin + pivot, )
+    std::copy(ValueBegin() + pivot, ValueEnd(), node_p->ValueBegin());
 
     return node_p;
   }

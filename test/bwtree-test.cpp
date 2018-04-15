@@ -113,8 +113,8 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   }
 
   // The following two would not fail beause the low key and high key are set to inf
-  TestAssertionFail([node_p](){node_p->Search(-1);});
-  TestAssertionFail([node_p, high_key](){node_p->Search(high_key);});
+  always_assert(TestAssertionFail([node_p](){node_p->Search(-1);}) == 0);
+  always_assert(TestAssertionFail([node_p, high_key](){node_p->Search(high_key);}) == 0);
 
   // Split the new node
   BaseNodeType *new_node_p = node_p->Split();
@@ -138,9 +138,9 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Test illegal split (size = 1); Should fail assertion
   // Also illegal search would fail as the low key and high key are finite (0 and 1000 resp.)
   node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {low_key, false}, {high_key, false});
-  TestAssertionFail([node_p](){node_p->Split();});
-  TestAssertionFail([node_p](){node_p->Search(-1);});
-  TestAssertionFail([node_p](){node_p->Search(high_key);});
+  always_assert(TestAssertionFail([node_p](){node_p->Split();}));
+  always_assert(TestAssertionFail([node_p](){node_p->Search(-1);}));
+  always_assert(TestAssertionFail([node_p](){node_p->Search(high_key);}));
   BaseNodeType::Destroy(node_p);
 
   return;

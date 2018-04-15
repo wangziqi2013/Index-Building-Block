@@ -73,6 +73,8 @@ void StartThread(size_t thread_num,
 /*
  * TestAssertionFail() - This function forks a new process to test whether 
  *                       assertion would fail
+ * 
+ * Returns 0 if assertion not triggered; 1 if triggered
  */
 template <typename Function>
 bool TestAssertionFail(Function &&fn) {
@@ -92,10 +94,11 @@ bool TestAssertionFail(Function &&fn) {
       err_printf("waitpid() returned -1; exit\n");
     } else {
       const int exit_status = WEXITSTATUS(child_status);
-      test_printf("Child process %d returns with status %d\n", 
-                  exit_pid, exit_status);
+      const int exited_flag = WIFEXITED(child_status);
+      test_printf("Child process %d returns with status %d (exit flag %d)\n", 
+                  exit_pid, exit_status, exited_flag);
       // If not zero then it failed
-      return exit_status != 0;
+      return !exited_flag;
     }
   }
 }

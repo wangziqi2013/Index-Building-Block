@@ -382,9 +382,12 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
   }
 
   /*
-   * Search() - Find the lower bound item of the key
+   * Search() - Find the lower bound item of a search key
    * 
    * The lower bound item I is defined as the largest I such that key >= I
+   * We implement this using std::upper_bound and then decrement by 1. 
+   * std::upper_bound finds the smallest I' such that key < I'. If no such
+   * I' exists, which means the key is >= all items, it returns end()
    */
   KeyValuePairType *Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));

@@ -71,6 +71,34 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
   return;
 } END_TEST
 
+/*
+ * BaseNodeTest() - Tests whether base nodes work correctly
+ * 
+ * 1. The allocation and destruction of base nodes
+ * 2. The iterator semantics
+ * 3. Search semantics
+ */
+BEGIN_DEBUG_TEST(BaseNodeTest) {
+  // Ignore delta chain type here
+  using BaseNodeType = BaseNode<int, int, DefaultDeltaChain>;
+  constexpr NodeSizeType size = 256;
+  using KeyValuePairType = NodeSizeType::KeyValuePairType;
+
+  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {1000, 1001});
+  for(int i = 0;i < size;i++) {
+    node_p[i] = {i * 2, i * 2 + 1};
+  }
+
+  for(int i = 0;i < size;i++) {
+    KeyValuePairType *kv_p = node_p->Search(i);
+    always_assert(kv_p->value == i + 1);
+  }
+
+  node_p->Destroy();
+
+  return;
+} END_TEST
+
 int main() {
   MappingTableTest();
   return 0;

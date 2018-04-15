@@ -37,6 +37,10 @@ class BoundKey {
   inline bool operator>=(const KeyType &k) const { assert(!inf); return key >= k; }
   // * operator<=
   inline bool operator<=(const KeyType &k) const { assert(!inf); return key <= k; }
+  // * GetInf() - Returns the infinite key
+  inline static GetInf() { return BoundKey{KeyType{}, true}; }
+  // * Get() - Returns a key
+  inline static Get(const KeyType &key) { return BoundKey(key, false); }
 };
 
 /*

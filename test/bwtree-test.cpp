@@ -87,8 +87,9 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
 BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Ignore delta chain type here
   using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChain>;
-  constexpr NodeSizeType size = 256;
+  using NodeSizeType = typename BaseNodeType::NodeSizeType;
   using KeyValuePairType = typename BaseNodeType::KeyValuePairType;
+  constexpr NodeSizeType size = 256;
   constexpr int high_key = 1000;
 
   BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {high_key, high_key + 1});

@@ -211,9 +211,6 @@ class DefaultDeltaChain {
   IF_DEBUG(std::atomic<size_t> mem_usage);
 };
 
-using NodeSizeType = uint32_t;
-using NodeHeightType = uint16_t;
-
 /*
  * class NodeBase - Base class of base node and delta node types
  * 
@@ -223,6 +220,8 @@ template <typename KeyType, typename ValueType>
 class NodeBase {
  public:
   using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
+  using NodeSizeType = uint32_t;
+  using NodeHeightType = uint16_t;
 
  protected:
   /*
@@ -290,6 +289,8 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
  public:
   using BaseClassType = NodeBase<KeyType, ValueType>;
   using KeyValuePairType = typename BaseClassType::KeyValuePairType;
+  using NodeSizeType = typename BaseClassType::NodeSizeType;
+  using NodeHeightType = typename BaseClassType::NodeHeightType;
  private:
   /*
    * DefaultBaseNode() - Private Constructor

@@ -338,22 +338,26 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     return;
   }
 
-  // * GetEnd() - Return the first out-of-bound pointer for keys
-  inline KeyValuePairType *GetEnd() { 
+  // * KeyEnd() - Return the first out-of-bound pointer for keys
+  inline KeyType *KeyEnd() { 
     return kv_begin + BaseClassType::GetSize(); 
+  }
+  // * ValueEnd() - Return the first out-of-bound pointer for values
+  inline ValueType *ValueEnd() {
+    return value_begin + BaseClassType::GetSize(); 
   }
   // * begin() and * end() - C++ iterator interface for keys
   inline KeyValuePairType *begin() { return kv_begin; }
-  inline KeyValuePairType *end() { return GetEnd(); }
+  inline KeyValuePairType *end() { return KeyEnd(); }
   // * operator[] - Array semantics with bounds checking under debug mode
   inline KeyType &operator[](int index) { 
     assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
     return begin()[index]; 
   }
-  // * At() - Access item on a particular index
-  inline KeyType &At(int index) { return (*this)[index]; }
-  // * GetValue() - Returns the value at a given index
-  inline ValueType GetValue(int index) {
+  // * KeyAt() - Access key on a particular index
+  inline KeyType &KeyAt(int index) { return (*this)[index]; }
+  // * ValueAt() - Access value on a particular index
+  inline ValueType &ValueAt(int index) {
     assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
     return value_begin[index];
   }
@@ -392,9 +396,10 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     // The index of the split key which is also the low key of the new node
     NodeSizeType pivot = old_size / 2;
     NodeSizeType new_size = old_size - pivot;
-    DefaultBaseNode *node_p = Get(BaseClassType::GetType(), new_size, high_key);
+    DefaultBaseNode *node_p = Get(BaseClassType::GetType(), new_size, KeyAt(static_cast<int>(pivot)), high_key);
     // Copy the upper half of the current node into the new node
     std::copy(begin() + pivot, end(), node_p->begin());
+    std::copy(value_begin + pivot, )
 
     return node_p;
   }

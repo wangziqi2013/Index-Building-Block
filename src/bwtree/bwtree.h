@@ -339,7 +339,7 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   }
 
   // * KeyAt() - Access key on a particular index
-  inline KeyType &KeyAt(int index) { return (*this)[index]; }
+  inline KeyType &KeyAt(int index) { return KeyBegin()[index]; }
   // * ValueAt() - Access value on a particular index
   inline ValueType &ValueAt(int index) {
     assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
@@ -354,11 +354,13 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
    * std::upper_bound finds the smallest I' such that key < I'. If no such
    * I' exists, which means the key is >= all items, it returns end()
    */
-  KeyValuePairType *Search(const KeyType &key) {
+  int Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));
     // Note that the first key do not need to be searched for both leaf and 
     // inner nodes
-    return std::upper_bound(begin() + 1, end(), key, ValueType{}) - 1;
+    int ret = (std::upper_bound(KeyBegin() + 1, KeyEnd(), key) - KeyBegin()) - 1;
+    assert(ret >= 0 && ret < static_cast<int>(BaseClassType::GetSize()));
+    return ret;
   }
 
   /*
@@ -382,27 +384,21 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     NodeSizeType new_size = old_size - pivot;
     DefaultBaseNode *node_p = Get(BaseClassType::GetType(), new_size, KeyAt(static_cast<int>(pivot)), high_key);
     // Copy the upper half of the current node into the new node
-    std::copy(begin() + pivot, end(), node_p->begin());
+    std::copy(KeyBegin() + pivot, KeyEnd(), node_p->KeyBegin());
     std::copy(ValueBegin() + pivot, ValueEnd(), node_p->ValueBegin());
 
     return node_p;
   }
 
  private:
+  // * KeyBegin() - Return the first pointer for values
+  inline ValueType *KeyBegin() { return key_begin; }
   // * KeyEnd() - Return the first out-of-bound pointer for keys
   inline KeyType *KeyEnd() { return kv_begin + BaseClassType::GetSize(); }
   // * ValueBegin() - Return the first pointer for values
   inline ValueType *ValueBegin() { return KeyEnd(); }
   // * ValueEnd() - Return the first out-of-bound pointer for values
   inline ValueType *ValueEnd() { return ValueBegin() + BaseClassType::GetSize(); }
-  // * begin() and * end() - C++ iterator interface for keys
-  inline KeyValuePairType *begin() { return kv_begin; }
-  inline KeyValuePairType *end() { return KeyEnd(); }
-  // * operator[] - Array semantics with bounds checking under debug mode
-  inline KeyType &operator[](int index) { 
-    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
-    return begin()[index]; 
-  }
 
   // Instance of low and high key
   BoundKeyType low_key;

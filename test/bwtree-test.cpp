@@ -88,26 +88,27 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Ignore delta chain type here
   using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChain>;
   using NodeSizeType = typename BaseNodeType::NodeSizeType;
-  using KeyValuePairType = typename BaseNodeType::KeyValuePairType;
   constexpr NodeSizeType size = 256;
   constexpr int high_key = 1000;
+  constexpr int low_key = 0;
 
-  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {high_key, high_key + 1});
+  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
   for(int i = 0;i < (int)size;i++) {
-    (*node_p)[i] = KeyValuePairType{i * 2, i * 2 + 1};
+    node_p->KeyAt(i) = i * 2;
+    node_p->ValueAt(i) = i * 2 + 1;
   }
 
   for(int i = 0;i < high_key;i++) {
-    KeyValuePairType *kv_p = node_p->Search(i);
+    int index = node_p->Search(i);
     always_assert(kv_p != nullptr);
     if(i < (int)size * 2) { 
       if(i % 2 == 0) {
-        always_assert(kv_p->value == i + 1);
+        always_assert(node_p->ValueAt(i) == i + 1);
       } else {
-        always_assert(kv_p->value == i);
+        always_assert(node_p->ValueAt(i) == i);
       }
     } else {
-      always_assert(kv_p->value == size * 2 - 1);
+      always_assert(node_p->ValueAt(i) == size * 2 - 1);
     }
   }
 
@@ -118,25 +119,25 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Split the new node
   BaseNodeType *new_node_p = node_p->Split();
   always_assert(new_node_p->GetSize() == size / 2);
-  always_assert(new_node_p->begin()->key == size);
-  always_assert(new_node_p->begin()->value == size + 1);
-  always_assert((new_node_p->end() - 1)->key == (size - 1) * 2);
-  always_assert((new_node_p->end() - 1)->value == (size - 1) * 2 + 1);
-  always_assert(new_node_p->GetHighKeyValuePair()->key == high_key);
-  always_assert(new_node_p->GetHighKeyValuePair()->value == high_key + 1);
+  always_assert(new_node_p->KeyBegin() == size);
+  always_assert(new_node_p->ValueBegin() == size + 1);
+  always_assert((new_node_p->KeyEnd() - 1) == (size - 1) * 2);
+  always_assert((new_node_p->ValueEnd() - 1) == (size - 1) * 2 + 1);
+  always_assert(new_node_p->GetHighKey()->Key == high_key);
 
-  int key = new_node_p->begin()->key;
-  for(const KeyValuePairType &kvp : *new_node_p) {
-    always_assert(kvp.key == key);
-    always_assert(kvp.value == key + 1);
+  int key = new_node_p->KeyBegin();
+  for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
+    always_assert(new_node_p->KeyAt(i) == key);
+    always_assert(new_node_p->ValueAt(i) == key + 1);
     key += 2;
   }
 
   BaseNodeType::Destroy(node_p);
 
   // Test illegal split (size = 1); Should fail assertion
-  node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {high_key, high_key + 1});
+  node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {low_key, true}, {high_key, true});
   TestAssertionFail([node_p](){node_p->Split();});
+  BaseNodeType::Destroy(node_p);
 
   return;
 } END_TEST

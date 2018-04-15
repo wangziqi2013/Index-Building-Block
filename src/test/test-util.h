@@ -10,6 +10,9 @@
 #define _TEST_UTIL_H
 
 #include "common.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <thread>
 
 // This defines test printing. Note that this is not affected by the flag
@@ -65,6 +68,30 @@ void StartThread(size_t thread_num,
   }
 
   return;
+}
+
+template <typename Function, typename... Args>
+bool TestAssertionFail(Function &&fn, 
+                       Args &&...args) {
+  pid_t fork_ret = fork();
+  // Did not fork, only one process
+  if(fork_ret == -1) {
+    err_printf("Fork() returned -1; exit\n");
+  } else if(fork_ret == 0) {
+    fn(std::ref(args...));
+  } else {
+    int child_status = 0;
+    int exit_pid = waitpid(fork_ret, &child_status, 0);
+    if(exit_pid == -1) {
+      err_printf("waitpid() returned -1; exit\n");
+    } else {
+      const int exit_status = WEXITSTATUS(child_status);
+      test_printf("Child process %d returns with status %d\n", 
+                  exit_pid, exit_status);
+      // If not zero then it failed
+      return exit_status != 0;
+    }
+  }
 }
 
 #endif

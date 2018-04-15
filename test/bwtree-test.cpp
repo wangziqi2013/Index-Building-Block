@@ -107,8 +107,8 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   }
 
   // The following two would fail
-  //node_p->Search(-1);
-  //node_p->Search(high_key);
+  TestAssertionFail([node_p](){node_p->Search(-1)});
+  TestAssertionFail([node_p, high_key](){node_p->Search(high_key)});
 
   BaseNodeType::Destroy(node_p);
 

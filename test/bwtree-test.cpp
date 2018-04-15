@@ -83,16 +83,30 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChain>;
   constexpr NodeSizeType size = 256;
   using KeyValuePairType = typename BaseNodeType::KeyValuePairType;
+  constexpr int high_key = 1000;
 
-  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {1000, 1001});
+  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {high_key, high_key + 1});
   for(NodeSizeType i = 0;i < size;i++) {
     (*node_p)[i] = KeyValuePairType{(int)i * 2, (int)i * 2 + 1};
   }
 
-  for(NodeSizeType i = 0;i < size;i++) {
+  for(int i = 0;i < high_key;i++) {
     KeyValuePairType *kv_p = node_p->Search(i);
-    always_assert(kv_p->value == (int)i + 1);
+    always_assert(kv_p != nullptr);
+    if(i < (int)size * 2) { 
+      if(i % 2 == 0) {
+        always_assert(kv_p->value == (int)i + 1);
+      } else {
+        always_assert(kv_p->value == (int)i);
+      }
+    } else {
+      always_assert(kv_p->value == size * 2 - 1);
+    }
   }
+
+  // The following two would fail
+  //node_p->Search(-1);
+  //node_p->Search(high_key);
 
   BaseNodeType::Destroy(node_p);
 

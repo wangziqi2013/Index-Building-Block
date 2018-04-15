@@ -388,8 +388,7 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
    */
   KeyValuePairType *Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));
-    KeyValuePairType *kv_p = std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}});
-    return kv_p == GetEnd() ? nullptr : kv_p - 1;
+    return std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}}) - 1;
   }
 
  private:

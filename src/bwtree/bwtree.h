@@ -15,39 +15,29 @@ namespace index_building_block {
 namespace bwtree {
 
 /*
- * class KeyValuePair - Operators involving key comparison
+ * BoundKey() - Represents low key and high key which can be infinities
  */
-template <typename KeyType, typename ValueType>
-class KeyValuePair {
+template <typename KeyType>
+class BoundKey : WrappedKey<KeyType> {
  public:
   KeyType key;
-  ValueType value;
-
-  // Operators for checking magnitude with either a key, or another key 
-  // value pair
+  bool inf;
+  inline bool IsInf() const { return inf; }
+  // Operators for checking magnitude with a key
+  // An inf key could not be compared with a key using key comparator
   // * operator<
-  inline bool operator<(const KeyValuePair &kvp) const { return key < kvp.key; }
-  // * operator<
-  inline bool operator<(const KeyType &k) const { return key < k; }
+  inline bool operator<(const KeyType &k) const { assert(!inf); return key < k; }
   // * operator>
-  inline bool operator>(const KeyValuePair &kvp) const { return key < kvp.key; }
-  // * operator>
-  inline bool operator>(const KeyType &k) const { return key > k; }
+  inline bool operator>(const KeyType &k) const { assert(!inf); return key > k; }
   // * operator==
-  inline bool operator==(const KeyValuePair &kvp) const { return key == kvp.key; }
-  // * operator==
-  inline bool operator==(const KeyType &k) const { return key == k; }
+  inline bool operator==(const KeyType &k) const { assert(!inf); return key == k; }
+  // * operator!=
+  inline bool operator!=(const KeyType &k) const { assert(!inf); return key != k; }
   // * operator>=
-  inline bool operator>=(const KeyValuePair &kvp) const { return key >= kvp.key; }
-  // * operator>=
-  inline bool operator>=(const KeyType &k) const { return key >= k; }
+  inline bool operator>=(const KeyType &k) const { assert(!inf); return key >= k; }
   // * operator<=
-  inline bool operator<=(const KeyValuePair &kvp) const { return key <= kvp.key; }
-  // * operator<=
-  inline bool operator<=(const KeyType &k) const { return key <= k; }
+  inline bool operator<=(const KeyType &k) const { assert(!inf); return key <= k; }
 };
-
-
 
 /*
   * enum class NodeType - Defines the enum of node type
@@ -219,7 +209,7 @@ class DefaultDeltaChain {
 template <typename KeyType, typename ValueType>
 class NodeBase {
  public:
-  using KeyValuePairType = KeyValuePair<KeyType, ValueType>;
+  using BoundKeyType = BoundKey<KeyType, uint64_t, static_cast<uint64_t>(-1)>;
   using NodeSizeType = uint32_t;
   using NodeHeightType = uint16_t;
 
@@ -228,7 +218,7 @@ class NodeBase {
    * NodeBase() - Constructor
    */
   NodeBase(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
-           KeyValuePairType *plow_key_p, KeyValuePairType *phigh_key_p) :
+           BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p) :
     type{ptype}, height{pheight}, size{psize},
     low_key_p{plow_key_p}, high_key_p{phigh_key_p} {}
 
@@ -253,13 +243,13 @@ class NodeBase {
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
   inline bool KeyLargerThanNode(const KeyType &key) {
-    return *high_key_p <= key;
+    return high_key_p->IsInf() == false && *high_key_p <= key;
   }
 
   // * KeySmallerThanNode() - Returns whether the given key is smaller than
   //                          all keys in the node
   inline bool KeySmallerThanNode(const KeyType &key) {
-    return *low_key_p > key;
+    return low_key_p->IsInf() == false && *low_key_p > key;
   }
 
  private:
@@ -269,8 +259,8 @@ class NodeBase {
   NodeHeightType height;
   // Number of elements
   NodeSizeType size;
-  KeyValuePairType *low_key_p;
-  KeyValuePairType *high_key_p;
+  BoundKeyType *low_key_p;
+  BoundKeyType *high_key_p;
 };
 
 /*
@@ -288,7 +278,6 @@ template <typename KeyType,
 class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
  public:
   using BaseClassType = NodeBase<KeyType, ValueType>;
-  using KeyValuePairType = typename BaseClassType::KeyValuePairType;
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
  private:
@@ -298,9 +287,12 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   DefaultBaseNode(NodeType ptype, 
                   NodeHeightType pheight,
                   NodeSizeType psize,
-                  const KeyValuePairType &phigh_key) :
-    BaseClassType{ptype, pheight, psize, begin(), &high_key},
+                  const BoundKey &plow_key,
+                  const BoundKey &phigh_key) :
+    BaseClassType{ptype, pheight, psize, &low_key, &high_key},
+    low_key{plow_key},
     high_key{phigh_key},
+    value_begin{key_begin + psize * sizeof(KeyType)},
     delta_chain{} {
     return;
   } 
@@ -319,17 +311,17 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
    *    values
    */
   static DefaultBaseNode *Get(NodeType ptype, 
-                              //NodeHeightType pheight,
                               NodeSizeType psize,
+                              const KeyValuePairType &plow_key
                               const KeyValuePairType &phigh_key) {
     // Size for key value pairs and size for the structure itself
-    size_t extra_size = size_t{psize} * sizeof(KeyValuePairType);
+    size_t extra_size = size_t{psize} * (sizeof(KeyType) + sizeof(ValueType));
     size_t total_size = extra_size + sizeof(DefaultBaseNode);
 
     void *p = new unsigned char[total_size];
     DefaultBaseNode *node_p = \
       static_cast<DefaultBaseNode *>(
-        new (p) DefaultBaseNode{ptype, NodeHeightType{0}, psize, phigh_key});
+        new (p) DefaultBaseNode{ptype, NodeHeightType{0}, psize, plow_key, phigh_key});
     
     return node_p;
   }
@@ -401,12 +393,14 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   }
 
  private:
-  // Instance of high key
-  KeyValuePairType high_key;
+  // Instance of low and high key
+  BoundKeyType low_key;
+  BoundKeyType high_key;
   DeltaChainType delta_chain;
+  ValueType *value_begin;
   // This member does not take any storage, but let us obtain the address
   // of the memory address after all class members
-  KeyValuePairType kv_begin[0];
+  KeyType key_begin[0];
 };
 
 } // namespace bwtree

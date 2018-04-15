@@ -380,12 +380,12 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
   // * operator[] - Array semantics with bounds checking under debug mode
-  inline KeyValuePairType &operator[](NodeSizeType index) { 
-    assert(index < BaseClassType::GetSize());
+  inline KeyValuePairType &operator[](int index) { 
+    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
     return begin()[index]; 
   }
   // * At() - Access item on a particular index
-  inline KeyValuePairType &At(NodeSizeType index) { return (*this)[index]; }
+  inline KeyValuePairType &At(int index) { return (*this)[index]; }
 
   /*
    * Search() - Find the lower bound item of a search key

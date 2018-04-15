@@ -88,8 +88,8 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   constexpr int high_key = 1000;
 
   BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {high_key, high_key + 1});
-  for(NodeSizeType i = 0;i < size;i++) {
-    (*node_p)[i] = KeyValuePairType{(int)i * 2, (int)i * 2 + 1};
+  for(int i = 0;i < (int)size;i++) {
+    (*node_p)[i] = KeyValuePairType{i * 2, i * 2 + 1};
   }
 
   for(int i = 0;i < high_key;i++) {
@@ -97,9 +97,9 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
     always_assert(kv_p != nullptr);
     if(i < (int)size * 2) { 
       if(i % 2 == 0) {
-        always_assert(kv_p->value == (int)i + 1);
+        always_assert(kv_p->value == i + 1);
       } else {
-        always_assert(kv_p->value == (int)i);
+        always_assert(kv_p->value == i);
       }
     } else {
       always_assert(kv_p->value == size * 2 - 1);
@@ -120,7 +120,18 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   always_assert(new_node_p->GetHighKeyValuePair()->key == high_key);
   always_assert(new_node_p->GetHighKeyValuePair()->value == high_key + 1);
 
+  int key = new_node_p->begin()->key;
+  for(const KeyValuePairType &kvp : *new_node_p) {
+    always_assert(kvp.key == key);
+    always_assert(kvp.value == key + 1);
+    key += 2;
+  }
+
   BaseNodeType::Destroy(node_p);
+
+  // Test illegal split (size = 1); Should fail assertion
+  node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {high_key, high_key + 1});
+  TestAssertionFail([node_p](){node_p->Split();});
 
   return;
 } END_TEST

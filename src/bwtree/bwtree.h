@@ -266,10 +266,14 @@ class NodeBase {
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node
  * 
- * 1. Delta allocation is not defined
- * 2. Node consolidation is not defined
+ * 1. Delta allocation is defined in delta chain class
+ * 2. Node consolidation is defined in node consolidator class
  * 3. Only unique key is supported; Non-unique key must be implemented
  *    outside the index
+ * 4. The node should not expose its storage of keys and values to the external
+ *    That requires that no method for accessing internal storage other than
+ *    individual keys and values are provided. Iterators are not available.
+ *    Search routine should only return an index rather than raw pointer
  */
 template <typename KeyType, 
           typename ValueType, 

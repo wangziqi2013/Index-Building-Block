@@ -18,7 +18,7 @@ namespace bwtree {
  * BoundKey() - Represents low key and high key which can be infinities
  */
 template <typename KeyType>
-class BoundKey : WrappedKey<KeyType> {
+class BoundKey {
  public:
   KeyType key;
   bool inf;
@@ -311,9 +311,9 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
    */
   static DefaultBaseNode *Get(NodeType ptype, 
                               NodeSizeType psize,
-                              const KeyValuePairType &plow_key
-                              const KeyValuePairType &phigh_key) {
-    assert(type == NodeType::InnerBase || type == NodeType::LeafBase);
+                              const BoundKeyType &plow_key,
+                              const BoundKeyType &phigh_key) {
+    assert(ptype == NodeType::InnerBase || ptype == NodeType::LeafBase);
     // Size for key value pairs and size for the structure itself
     size_t extra_size = size_t{psize} * (sizeof(KeyType) + sizeof(ValueType));
     size_t total_size = extra_size + sizeof(DefaultBaseNode);

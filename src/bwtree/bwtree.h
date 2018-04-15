@@ -338,20 +338,25 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
     return;
   }
 
-  // * GetEnd() - Return the first out-of-bound pointer
+  // * GetEnd() - Return the first out-of-bound pointer for keys
   inline KeyValuePairType *GetEnd() { 
     return kv_begin + BaseClassType::GetSize(); 
   }
-  // * begin() and * end() - C++ iterator interface
+  // * begin() and * end() - C++ iterator interface for keys
   inline KeyValuePairType *begin() { return kv_begin; }
   inline KeyValuePairType *end() { return GetEnd(); }
   // * operator[] - Array semantics with bounds checking under debug mode
-  inline KeyValuePairType &operator[](int index) { 
+  inline KeyType &operator[](int index) { 
     assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
     return begin()[index]; 
   }
   // * At() - Access item on a particular index
-  inline KeyValuePairType &At(int index) { return (*this)[index]; }
+  inline KeyType &At(int index) { return (*this)[index]; }
+  // * GetValue() - Returns the value at a given index
+  inline ValueType GetValue(int index) {
+    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
+    return value_begin[index];
+  }
 
   /*
    * Search() - Find the lower bound item of a search key
@@ -363,7 +368,9 @@ class DefaultBaseNode : public NodeBase<KeyType, ValueType> {
    */
   KeyValuePairType *Search(const KeyType &key) {
     assert(BaseClassType::KeyInNode(key));
-    return std::upper_bound(begin(), end(), KeyValuePairType{key, ValueType{}}) - 1;
+    // Note that the first key do not need to be searched for both leaf and 
+    // inner nodes
+    return std::upper_bound(begin() + 1, end(), key, ValueType{}) - 1;
   }
 
   /*

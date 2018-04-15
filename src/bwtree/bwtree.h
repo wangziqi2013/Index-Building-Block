@@ -415,7 +415,12 @@ class DefaultBaseNode : NodeBase<KeyType, ValueType> {
     // The index of the split key which is also the low key of the new node
     NodeSizeType pivot = old_size / 2;
     NodeSizeType new_size = old_size - pivot;
-    DefaultBaseNode *node_p = DefaultBaseNode::Get();
+    DefaultBaseNode *node_p = \
+      DefaultBaseNode::Get(BaseClassType.GetType(), new_size, high_key);
+    // Copy the upper half of the current node into the new node
+    std::copy(begin() + pivot, end(), node_p->begin());
+
+    return node_p;
   }
 
  private:

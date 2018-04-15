@@ -68,6 +68,8 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
   StartThread(thread_num, func, thread_num);
   verify();
 
+  MappingTableType::Destroy(mapping_table);
+
   return;
 } END_TEST
 

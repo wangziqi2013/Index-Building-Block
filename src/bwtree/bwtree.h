@@ -269,8 +269,28 @@ class DeltaNode : public NodeBase<KeyType> {
   BaseClassType *next_node_p;
 };
 
-//template <>
-//class InsertDeltaNode
+// * class KeyDeltaNode - Base class for delta nodes that contain the key
+template <typename KeyType>
+class KeyDeltaNode : DeltaNode<KeyType> {
+ public:
+  using BaseClassType = DeltaNode<KeyType>;
+  using BaseBaseClassType = typename BaseClassType::BaseClassType;
+  // * KeyDeltaNode() - Constructor
+  KeyDeltaNode(BaseBaseClassType *pnext_node_p, const KeyType &pkey) : 
+    key{pkey},
+    BaseClassType {}
+  // * GetKey() - Returns the key
+  KeyType &GetKey() { return key; }
+ private:
+  KeyType key;
+};
+
+template <typename KeyType, typename ValueType>
+class KeyValueDeltaNode : KeyDeltaNode<KeyType> {
+ public:
+
+ private:
+};
 
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
@@ -284,6 +304,9 @@ class DeltaNode : public NodeBase<KeyType> {
  *    That requires that no method for accessing internal storage other than
  *    individual keys and values are provided. Iterators are not available.
  *    Search routine should only return an index rather than raw pointer
+ * 5. Non-unique key support should be expposed by a constexpr var
+ *    and the caller is responsible for checking consistency between 
+ *    feature supports
  */
 template <typename KeyType, 
           typename ValueType, 
@@ -415,7 +438,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   // * ValueEnd() - Return the first out-of-bound pointer for values
   inline ValueType *ValueEnd() { return ValueBegin() + BaseClassType::GetSize(); }
 
-  // Instance of low and high key
+  // Instances of low and high keys
   BoundKeyType low_key;
   BoundKeyType high_key;
   DeltaChainType delta_chain;

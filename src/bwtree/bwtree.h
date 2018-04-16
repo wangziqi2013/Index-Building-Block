@@ -103,23 +103,10 @@ class DefaultMappingTable {
   ~DefaultMappingTable() {}
 
  public: 
-  /*
-   * Get() - Allocate an instance of the mapping table
-   * 
-   * Do not use new() to instanciate a mapping table.
-   */
-  static DefaultMappingTable *Get() {
-    return new DefaultMappingTable{};
-  }
-
-  /*
-   * Destroy() - The destructor of the mapping table instance
-   * 
-   * Do not use delete directly
-   */
-  static void Destroy(DefaultMappingTable *mapping_table_p) {
-    delete mapping_table_p;
-  }
+  // * Get() - Allocate an instance of the mapping table
+  static DefaultMappingTable *Get() { return new DefaultMappingTable{}; }
+  // * Destroy() - The destructor of the mapping table instance
+  static void Destroy(DefaultMappingTable *mapping_table_p) { delete mapping_table_p; }
 
   /*
    * AllocateNodeID() - Allocate a slot and put the given node_p into it
@@ -160,17 +147,13 @@ class DefaultMappingTable {
     return mapping_table[node_id].compare_exchange_strong(old_value, new_value);
   }
 
-  /*
-   * At() - Returns the content on a given index
-   */
+  // * At() - Returns the content on a given index
   inline BaseNodeType *At(NodeIDType node_id) {
     assert(node_id < TABLE_SIZE);
     return mapping_table[node_id].load();
   }
 
-  /*
-   * Reset() - Clear the content as well as the index
-   */
+  // * Reset() - Clear the content as well as the index
   void Reset() {
     memset(mapping_table, 0x00, sizeof(mapping_table));
     next_slot = NodeIDType{0};
@@ -185,6 +168,10 @@ class DefaultMappingTable {
 
 /*
  * class DefaultDeltaChain - This class defines the storage of the delta chain
+ * 
+ * 1. No pre-allocation is implemented. Override this class to 
+ *    implement pre-allocation
+ * 2. This class has zero size under release mode
  */
 class DefaultDeltaChain {
  public:
@@ -196,6 +183,7 @@ class DefaultDeltaChain {
     return;
   }
 
+  // * AllocateDelta() - Allocate a delta record of a given type
   template<typename DeltaType, typename ...Args>
   inline void AllocateDelta(Args &&...args) {
     IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaType)));
@@ -274,14 +262,15 @@ class DeltaNode : public NodeBase<KeyType> {
   using BaseClassType = NodeBase<KeyType>;
   inline BaseClassType *GetNext() const { return next_node_p; }
  protected:
-  /*
-   * DeltaNode() - Constructor
-   */
+  //* DeltaNode() - Constructor
   DeltaNode(BaseClassType *pnext_node_p) :
     next_node_p{pnext_node_p} {}
  private:
   BaseClassType *next_node_p;
 };
+
+//template <>
+//class InsertDeltaNode
 
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
@@ -305,10 +294,10 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseClassType::BoundKeyType;
+  // Whether only support unique keys
+  static constexpt bool support_non_unique_key = false;
  private:
-  /*
-   * DefaultBaseNode() - Private Constructor
-   */
+  // * DefaultBaseNode() - Private Constructor
   DefaultBaseNode(NodeType ptype, 
                   NodeHeightType pheight,
                   NodeSizeType psize,
@@ -321,9 +310,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
     return;
   } 
   
-  /*
-   * ~DefaultBaseNode() - Private Destructor
-   */
+  // * ~DefaultBaseNode() - Private Destructor
   ~DefaultBaseNode() {}
 
  public:

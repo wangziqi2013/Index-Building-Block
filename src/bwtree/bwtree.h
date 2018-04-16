@@ -266,12 +266,20 @@ class NodeBase {
   BoundKeyType *high_key_p;
 };
 
+// * class DeltaNode - Stores the next node pointer
 template <typename KeyType>
 class DeltaNode : public NodeBase<KeyType> {
  public:
-  inline NodeBase<KeyType> *GetNext() const { return next_node_p; }
+  using BaseClassType = NodeBase<KeyType>;
+  inline BaseClassType *GetNext() const { return next_node_p; }
+ protected:
+  /*
+   * DeltaNode() - Constructor
+   */
+  DeltaNode(BaseClassType *pnext_node_p) :
+    next_node_p{pnext_node_p} {}
  private:
-  NodeBase<KeyType> *next_node_p;
+  BaseClassType *next_node_p;
 };
 
 /*

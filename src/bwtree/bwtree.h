@@ -24,7 +24,8 @@ class BoundKey {
   bool inf;
   inline bool IsInf() const { return inf; }
   // Operators for checking magnitude with a key
-  // An inf key could not be compared with a key using key comparator
+  // An inf key could not be compared with a key using key comparator. The caller
+  // should first call GetInf() to determine
   // * operator<
   inline bool operator<(const KeyType &k) const { assert(!inf); return key < k; }
   // * operator>
@@ -40,7 +41,7 @@ class BoundKey {
   // * GetInf() - Returns the infinite key
   inline static BoundKey GetInf() { return BoundKey{KeyType{}, true}; }
   // * Get() - Returns a key
-  inline static BoundKey Get(const KeyType &key) { return BoundKey(key, false); }
+  inline static BoundKey Get(const KeyType &key) { return BoundKey{key, false}; }
 };
 
 /*

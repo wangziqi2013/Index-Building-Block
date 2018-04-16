@@ -71,13 +71,13 @@ void StartThread(size_t thread_num,
 }
 
 /*
- * TestAssertionFail() - This function forks a new process to test whether 
- *                       assertion would fail
+ * _TestAssertionFail() - This function forks a new process to test whether 
+ *                        assertion would fail
  * 
  * Returns 0 if assertion not triggered; 1 if triggered
  */
 template <typename Function>
-bool TestAssertionFail(Function &&fn) {
+bool _TestAssertionFail(Function &&fn) {
   pid_t fork_ret = fork();
   // Did not fork, only one process
   if(fork_ret == -1) {
@@ -102,5 +102,8 @@ bool TestAssertionFail(Function &&fn) {
     }
   }
 }
+
+// This macro automates the declaration of lambda
+#define TestAssertionFail(s) _TestAssertionFail([&](){ s; })
 
 #endif

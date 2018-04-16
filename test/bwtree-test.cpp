@@ -78,6 +78,29 @@ BEGIN_DEBUG_TEST(MappingTableTest) {
 } END_TEST
 
 /*
+ * BoundKeyTest() - Tests whether bound key works correctly
+ */
+BEGIN_DEBUG_TEST(BoundKeyTest) {
+  using BoundKeyType = BoundKey<int>;
+  BoundKeyType inf_key = BoundKeyType::GetInf();
+  BoundKeyType normal_key = BoundKeyType::Get(100);
+
+  always_assert(TestAssertionFail(inf_key > 1));
+  always_assert(TestAssertionFail(inf_key < 1));
+  always_assert(TestAssertionFail(inf_key == 1));
+  always_assert(TestAssertionFail(inf_key != 1));
+
+  always_assert(normal_key == 100);
+  always_assert(normal_key < 101);
+  always_assert(normal_key > 99);
+  always_assert(normal_key != -1);
+  always_assert(normal_key >= 100);
+  always_assert(normal_key <= 100);
+
+  return;
+} END_TEST
+
+/*
  * BaseNodeTest() - Tests whether base nodes work correctly
  * 
  * 1. The allocation and destruction of base nodes
@@ -113,8 +136,8 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   }
 
   // The following two would not fail beause the low key and high key are set to inf
-  always_assert(TestAssertionFail([node_p](){node_p->Search(-1);}) == 0);
-  always_assert(TestAssertionFail([node_p, high_key](){node_p->Search(high_key);}) == 0);
+  always_assert(TestAssertionFail(node_p->Search(-1)) == 0);
+  always_assert(TestAssertionFail(node_p->Search(high_key)) == 0);
 
   // Split the new node
   BaseNodeType *new_node_p = node_p->Split();
@@ -138,9 +161,9 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Test illegal split (size = 1); Should fail assertion
   // Also illegal search would fail as the low key and high key are finite (0 and 1000 resp.)
   node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {low_key, false}, {high_key, false});
-  always_assert(TestAssertionFail([node_p](){node_p->Split();}));
-  always_assert(TestAssertionFail([node_p](){node_p->Search(-1);}));
-  always_assert(TestAssertionFail([node_p](){node_p->Search(high_key);}));
+  always_assert(TestAssertionFail(node_p->Split()));
+  always_assert(TestAssertionFail(node_p->Search(-1)));
+  always_assert(TestAssertionFail(node_p->Search(high_key)));
   BaseNodeType::Destroy(node_p);
 
   return;
@@ -148,6 +171,7 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
 int main() {
   MappingTableTest();
+  BoundKeyTest();
   BaseNodeTest();
   return 0;
 }

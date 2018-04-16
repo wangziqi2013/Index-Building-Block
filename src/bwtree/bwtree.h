@@ -260,10 +260,17 @@ template <typename KeyType>
 class DeltaNode : public NodeBase<KeyType> {
  public:
   using BaseClassType = NodeBase<KeyType>;
+  using NodeSizeType = typename BaseClassType::NodeSizeType;
+  using NodeHeightType = typename BaseClassType::NodeHeightType;
+  using BoundKeyType = typename BaseClassType::BoundKeyType;
+
   inline BaseClassType *GetNext() const { return next_node_p; }
  protected:
   //* DeltaNode() - Constructor
-  DeltaNode(BaseClassType *pnext_node_p) :
+  DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+            BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
+            BaseClassType *pnext_node_p) :
+    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p} {}
  private:
   BaseClassType *next_node_p;
@@ -275,12 +282,19 @@ class KeyDeltaNode : DeltaNode<KeyType> {
  public:
   using BaseClassType = DeltaNode<KeyType>;
   using BaseBaseClassType = typename BaseClassType::BaseClassType;
-  // * KeyDeltaNode() - Constructor
-  KeyDeltaNode(BaseBaseClassType *pnext_node_p, const KeyType &pkey) : 
-    key{pkey},
-    BaseClassType {}
+  using NodeSizeType = typename BaseClassType::NodeSizeType;
+  using NodeHeightType = typename BaseClassType::NodeHeightType;
+  using BoundKeyType = typename BaseClassType::BoundKeyType;
+  
   // * GetKey() - Returns the key
   KeyType &GetKey() { return key; }
+ protected:
+  // * KeyDeltaNode() - Constructor
+  KeyDeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+               BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
+               BaseBaseClassType *pnext_node_p, const KeyType &pkey) : 
+    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p, pnext_node_p},
+    key{pkey} {}
  private:
   KeyType key;
 };
@@ -318,7 +332,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   using NodeHeightType = typename BaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseClassType::BoundKeyType;
   // Whether only support unique keys
-  static constexpt bool support_non_unique_key = false;
+  static constexpr bool support_non_unique_key = false;
  private:
   // * DefaultBaseNode() - Private Constructor
   DefaultBaseNode(NodeType ptype, 

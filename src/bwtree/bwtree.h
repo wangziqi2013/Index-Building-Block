@@ -307,7 +307,7 @@ class DeltaNode : public NodeBase<KeyType> {
 
   inline BaseClassType *GetNext() const { return next_node_p; }
  protected:
-  //* DeltaNode() - Constructor
+  //* DeltaNode() - Constructors
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
             BaseClassType *pnext_node_p, 
@@ -358,21 +358,21 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T1 &GetDeleteKey() { return t1; }
   inline T1 &GetSplitKey() { return t1; }
   inline T1 &GetMergeKey() { return t1; }
-  inline T1 GetRemoveNodeID() { return t1; }
+  inline T1 &GetRemoveNodeID() { return t1; }
   
   inline T2 &GetInsertValue() { return t2; }
   inline T2 &GetDeleteValue() { return t2; }
-  inline T2 GetInsertNodeID() { return t2; }
-  inline T2 GetDeleteNodeID() { return t2; }
-  inline T2 GetSplitNodeID() { return t2; }
-  inline T2 GetMergeNodeID() { return t2; }
+  inline T2 &GetInsertNodeID() { return t2; }
+  inline T2 &GetDeleteNodeID() { return t2; }
+  inline T2 &GetSplitNodeID() { return t2; }
+  inline T2 &GetMergeNodeID() { return t2; }
 
-  inline T3 GetMergeSibling() { return t3; }
+  inline T3 &GetMergeSibling() { return t3; }
   inline T3 &GetNextKey() { return t3; }
 
-  inline T4 GetNextNodeID() { return t4; }
+  inline T4 &GetNextNodeID() { return t4; }
   inline T5 &GetPrevKey() { return t5; }
-  inline T6 GetPrevNodeID() { return t6; }
+  inline T6 &GetPrevNodeID() { return t6; }
 };
 
 //template <typename KeyType>

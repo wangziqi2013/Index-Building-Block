@@ -378,34 +378,6 @@ class DeltaNode : public NodeBase<KeyType> {
   T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
 };
 
-//template <typename KeyType>
-//class LeafInsertDelta : public DeltaNode
-
-// * class KeyDeltaNode - Base class for delta nodes that contain the key
-/*
-template <typename KeyType>
-class KeyDeltaNode : DeltaNode<KeyType> {
- public:
-  using BaseClassType = DeltaNode<KeyType>;
-  using BaseBaseClassType = typename BaseClassType::BaseClassType;
-  using NodeSizeType = typename BaseClassType::NodeSizeType;
-  using NodeHeightType = typename BaseClassType::NodeHeightType;
-  using BoundKeyType = typename BaseClassType::BoundKeyType;
-
-  // * GetKey() - Returns the key
-  KeyType &GetKey() { return key; }
- protected:
-  // * KeyDeltaNode() - Constructor
-  KeyDeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
-               BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
-               BaseBaseClassType *pnext_node_p, const KeyType &pkey) : 
-    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p, pnext_node_p},
-    key{pkey} {}
- private:
-  KeyType key;
-};
-*/
-
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node

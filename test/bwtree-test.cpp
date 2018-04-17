@@ -169,6 +169,28 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   return;
 } END_TEST
 
+/*
+ * DeltaNodeTest() - Tests whether delta node template works as expected
+ */
+BEGIN_DEBUG_TEST(DeltaNodeTest) {
+  using KeyType = int;
+  using ValueType = std::string;
+  using NodeIDType = uint64_t;
+
+  using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
+  using LeafDeleteType = LEAF_INSERT_TYPE(KeyType, ValueType);
+  using LeafSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using LeafMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using LeafRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerInsertType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerDeleteType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+
+  DeltaChain dc;
+} END_TEST
+
 int main() {
   MappingTableTest();
   BoundKeyTest();

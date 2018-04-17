@@ -490,6 +490,16 @@ class DefaultBaseNode : public NodeBase<KeyType> {
     return ret;
   }
 
+  // * PointSearch() - Returns the index if exact match is found or -1 otherwise
+  int PointSearch(const KeyType &key) {
+    int index = Search(key);
+    if(KeyAt(index) == key) {
+      return index;
+    }
+
+    return -1;
+  }
+
   /*
    * Split() - Split the node into two smaller halves
    * 

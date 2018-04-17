@@ -185,7 +185,7 @@ class DefaultDeltaChain {
 
   // * AllocateDelta() - Allocate a delta record of a given type
   template<typename DeltaType, typename ...Args>
-  inline void AllocateDelta(Args &&...args) {
+  inline DeltaType *AllocateDelta(Args &&...args) {
     IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaType)));
     return new DeltaType{args...};
   }
@@ -482,6 +482,12 @@ class DefaultBaseNode : public NodeBase<KeyType> {
     node_p->~DefaultBaseNode();
     delete[] reinterpret_cast<unsigned char *>(node_p);
     return;
+  }
+
+  // * AllocateDelta() - Wrapping around the delta chain
+  template <typename DeltaType, typename ...Args>
+  inline DeltaType *AllocateDelta(Args &&...args) {
+    return dc.AllocateDelta<DeltaType>(args...);
   }
 
   // * KeyAt() - Access key on a particular index

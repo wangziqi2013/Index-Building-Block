@@ -255,6 +255,27 @@ class NodeBase {
   BoundKeyType *high_key_p;
 };
 
+#define LEAF_INSERT_TYPE(KeyType, ValueType) \
+  DeltaNode<KeyType, KeyType, ValueType, char[0], char[0], char[0], char[0]>
+#define LEAF_DELETE_TYPE(KeyType, ValueType) \
+  DeltaNode<KeyType, KeyType, ValueType, char[0], char[0], char[0], char[0]>
+#define LEAF_SPLIT_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+#define INNER_SPLIT_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+#define LEAF_MERGE_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, NodeBase<KeyType> *, char[0], char[0], char[0]>
+#define INNER_MERGE_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, NodeBase<KeyType> *, char[0], char[0], char[0]>
+#define LEAF_REMOVE_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, NodeIDType, char[0], char[0], char[0], char[0], char[0]>
+#define INNER_REMOVE_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, NodeIDType, char[0], char[0], char[0], char[0], char[0]>
+#define INNER_INSERT_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, KeyType, NodeIDType, char[0], char[0]>
+#define INNER_DELETE_TYPE(KeyType, NodeIDType) \
+  DeltaNode<KeyType, KeyType, NodeIDType, KeyType, NodeIDType, KeyType, NodeIDType>
+
 /*
  * class DeltaNode - Stores the next node pointer
  * 

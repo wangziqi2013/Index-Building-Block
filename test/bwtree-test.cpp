@@ -188,7 +188,16 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using InnerMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   using InnerRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
 
-  DeltaChain dc;
+  using LeafBaseNodeType = DefaultBaseNode<KeyType, ValueType, DefaultDeltaChain>;
+  using NodeSizeType = typename LeafBaseNodeType::NodeSizeType;
+  constexpr NodeSizeType size = 256;
+  constexpr int high_key = 1000;
+  constexpr int low_key = 0;
+
+  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
+
+  DefaultDeltaChain dc;
+  dc.AllocateDelta<LeafInsertType>()
 } END_TEST
 
 int main() {

@@ -378,6 +378,23 @@ class DeltaNode : public NodeBase<KeyType> {
   T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
 };
 
+// * class DeltaType - Declares the full type of deltas
+template <KeyType, ValueType, NodeIDType>
+class Delta {
+ public:
+  using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
+  using LeafDeleteType = LEAF_DELETE_TYPE(KeyType, ValueType);
+  using LeafSplitType = LEAF_SPLIT_TYPE(KeyType, NodeIDType);
+  using LeafMergeType = LEAF_MERGE_TYPE(KeyType, NodeIDType);
+  using LeafRemoveType = LEAF_REMOVE_TYPE(KeyType, NodeIDType);
+
+  using InnerInsertType = INNER_INSERT_TYPE(KeyType, NodeIDType);
+  using InnerDeleteType = INNER_DELETE_TYPE(KeyType, NodeIDType);
+  using InnerSplitType = INNER_SPLIT_TYPE(KeyType, NodeIDType);
+  using InnerMergeType = INNER_MERGE_TYPE(KeyType, NodeIDType);
+  using InnerRemoveType = INNER_REMOVE_TYPE(KeyType, NodeIDType);
+};
+
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node
@@ -544,6 +561,8 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   // of the memory address after all class members
   KeyType key_begin[0];
 };
+
+
 
 } // namespace bwtree
 } // namespace index_building_block

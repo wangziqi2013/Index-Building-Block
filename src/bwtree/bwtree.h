@@ -255,7 +255,25 @@ class NodeBase {
   BoundKeyType *high_key_p;
 };
 
-// * class DeltaNode - Stores the next node pointer
+/*
+ * class DeltaNode - Stores the next node pointer
+ * 
+ * This class is heavily templatized. Different combinations of types
+ * yield different delta types:
+ * 
+ * LeafInsertType/LeafDeleteType = 
+ *   DeltaNode<KeyType, KeyType, ValueType, char[0], char[0], char[0], char[0]>
+ * LeafSplitType/InnerSplitType = 
+ *   DeltaNode<KeyType, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+ * LeafMergeType/InnerMergeType = 
+ *   DeltaNode<KeyType, KeyType, NodeIDType, NodeBase<KeyType> *, char[0], char[0], char[0]>
+ * LeafRemoveType/InnerRemoveType = 
+ *   DeltaNode<KeyType, NodeIDType, char[0], char[0], char[0], char[0], char[0]>
+ * InnerInsertType = 
+ *   DeltaNode<KeyType, KeyType, NodeIDType, KeyType, NodeIDType, char[0], char[0]>
+ * InnerDeleteType = 
+ *   DeltaNode<KeyType, KeyType, NodeIDType, KeyType, NodeIDType, KeyType, NodeIDType>
+ */
 template <typename KeyType, 
           typename T1, typename T2, typename T3, 
           typename T4, typename T5, typename T6>
@@ -307,9 +325,9 @@ class DeltaNode : public NodeBase<KeyType> {
   // Delta node elements
   T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
   inline T1 &GetInsertKey() { return t1; }
+  inline T1 &GetDeleteKey() { return t1; }
   inline T1 &GetSplitKey() { return t1; }
   inline T1 &GetMergeKey() { return t1; }
-  inline T1 &GetDeleteKey() { return t1; }
   inline T1 GetRemoveNodeID() { return t1; }
   
   inline T2 &GetInsertValue() { return t2; }

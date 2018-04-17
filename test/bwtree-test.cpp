@@ -179,25 +179,32 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
 
   using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
   using LeafDeleteType = LEAF_INSERT_TYPE(KeyType, ValueType);
-  using LeafSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using LeafMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using LeafRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using InnerInsertType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using InnerDeleteType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using InnerSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using InnerMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using InnerRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using LeafSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using LeafMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using LeafRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using InnerInsertType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using InnerDeleteType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using InnerSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using InnerMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  //using InnerRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
 
   using LeafBaseNodeType = DefaultBaseNode<KeyType, ValueType, DefaultDeltaChain>;
   using NodeSizeType = typename LeafBaseNodeType::NodeSizeType;
-  constexpr NodeSizeType size = 256;
-  constexpr int high_key = 1000;
-  constexpr int low_key = 0;
+  using NodeHeightType = typename LeafBaseNodeType::NodeHeightType;
+  NodeSizeType size = 256;
+  NodeHeightType height = 0;
+  int high_key = 1000;
+  int low_key = 0;
 
-  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
+  LeafBaseNodeType *node_p = LeafBaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
 
-  DefaultDeltaChain dc;
-  dc.AllocateDelta<LeafInsertType>()
+  LeafInsertType *insert_node_p = node_p->AllocateDelta<LeafInsertType>(
+    NodeType::LeafInsert, ++height, ++size, node_p->GetLowKey(), node_p->GetHighKey(), node_p, 100, "key = 100");
+  LeafDeleteType *delete_node_p = node_p->AllocateDelta<LeafDeleteType>(
+    NodeType::LeafInsert, ++height, --size, node_p->GetLowKey(), node_p->GetHighKey(), insert_node_p, 100, "key = 100");
+
+  (void)insert_node_p; (void)delete_node_p;
+  return;
 } END_TEST
 
 int main() {

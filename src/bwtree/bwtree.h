@@ -256,7 +256,7 @@ class NodeBase {
 };
 
 // * class DeltaNode - Stores the next node pointer
-template <typename KeyType>
+template <typename KeyType, T1, T2, T3, T4, T5, T6>
 class DeltaNode : public NodeBase<KeyType> {
  public:
   using BaseClassType = NodeBase<KeyType>;
@@ -269,11 +269,62 @@ class DeltaNode : public NodeBase<KeyType> {
   //* DeltaNode() - Constructor
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
-            BaseClassType *pnext_node_p) :
+            BaseClassType *pnext_node_p, 
+            const T1 &pt1) :
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
-    next_node_p{pnext_node_p} {}
+    next_node_p{pnext_node_p}, 
+    t1{pt1} {}
+  
+  DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+            BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
+            BaseClassType *pnext_node_p, 
+            const T1 &pt1, const T2 &pt2) :
+    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
+    next_node_p{pnext_node_p}, 
+    t1{pt1}, t2{pt2} {}
+
+  DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+            BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
+            BaseClassType *pnext_node_p, 
+            const T1 &pt2, const T2 &pt2, const T3 &pt3) :
+    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
+    next_node_p{pnext_node_p}, 
+    t1{pt1}, t2{pt2}, t3{pt3} {}
+
+  DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
+            BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
+            BaseClassType *pnext_node_p, 
+            const T1 &pt2, const T1 &pt2, const T3 &pt3
+            const T4 &pt4, const T5 &pt5, const T6 &pt6) :
+    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
+    next_node_p{pnext_node_p}, 
+    t1{pt1}, t2{pt2}, t3{pt3}, t4{pt4}, t5{pt5}, t6{pt6} {}
  private:
   BaseClassType *next_node_p;
+  // Delta node elements
+  T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
+  inline T1 &GetInsertKey() { return t1; }
+  inline T1 &GetSplitKey() { return t1; }
+  inline T1 &GetMergeKey() { return t1; }
+  inline T1 &GetDeleteKey() { return t1; }
+  inline T1 GetRemoveNodeID() { return t1; }
+  
+  inline T2 &GetInsertValue() { return t2; }
+  inline T2 &GetDeleteValue() { return t2; }
+  inline T2 GetInsertNodeID() { return t2; }
+  inline T2 GetDeleteNodeID() { return t2; }
+  inline T2 GetSplitNodeID() { return t2; }
+  inline T2 GetSplitNodeID() { return t2; }
+  inline T2 GetMergeNodeID() { return t2; }
+  inline T2 GetMergeNodeID() { return t2; }
+
+  inline T3 GetMergeSibling() { return t3; }
+  inline T3 GetMergeSibling() { return t3; }
+  inline T3 &GetNextKey() { return t3; }
+
+  inline T4 GetNextNodeID() { return t4; }
+  inline T5 &GetPrevKey() { return t5; }
+  inline T6 GetPrevNodeID() { return t6; }
 };
 
 // * class KeyDeltaNode - Base class for delta nodes that contain the key
@@ -285,7 +336,7 @@ class KeyDeltaNode : DeltaNode<KeyType> {
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseClassType::BoundKeyType;
-  
+
   // * GetKey() - Returns the key
   KeyType &GetKey() { return key; }
  protected:
@@ -297,13 +348,6 @@ class KeyDeltaNode : DeltaNode<KeyType> {
     key{pkey} {}
  private:
   KeyType key;
-};
-
-template <typename KeyType, typename ValueType>
-class KeyValueDeltaNode : KeyDeltaNode<KeyType> {
- public:
-
- private:
 };
 
 /*

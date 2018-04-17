@@ -181,12 +181,12 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using KeyType = int;
   using ValueType = std::string;
   using NodeIDType = uint64_t;
-
-  using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
-  using LeafDeleteType = LEAF_DELETE_TYPE(KeyType, ValueType);
-  using LeafSplitType = LEAF_SPLIT_TYPE(KeyType, NodeIDType);
-  using LeafMergeType = LEAF_MERGE_TYPE(KeyType, NodeIDType);
-  using LeafRemoveType = LEAF_REMOVE_TYPE(KeyType, NodeIDType);
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
+  using LeafInsertType = typename DeltaType::LeafInsertType;
+  using LeafDeleteType = typename DeltaType::LeafDeleteType;
+  using LeafSplitType = typename DeltaType::LeafSplitType;
+  using LeafMergeType = typename DeltaType::LeafMergeType;
+  using LeafRemoveType = typename DeltaType::LeafRemoveType;
   //using InnerInsertType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   //using InnerDeleteType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   //using InnerSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);

@@ -379,7 +379,7 @@ class DeltaNode : public NodeBase<KeyType> {
 };
 
 // * class DeltaType - Declares the full type of deltas
-template <KeyType, ValueType, NodeIDType>
+template <typename KeyType, typename ValueType, typename NodeIDType>
 class Delta {
  public:
   using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
@@ -565,7 +565,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
 template <typename KeyType, typename ValueType, typename NodeIDType>
 class NodeTraverser {
  public:
-  using DeltaType = Delta<KeyType, ValueType, NodeIDType>
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
 };
 
 } // namespace bwtree

@@ -123,15 +123,20 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
   for(int i = 0;i < high_key;i++) {
     int index = node_p->Search(i);
-    const int &value = node_p->ValueAt(index);
+    int index2 = node_p->PointSearch(i);
+    int value = node_p->ValueAt(index);
     if(i < (int)size * 2) { 
       if(i % 2 == 0) {
+        int value2 = node_p->ValueAt(index2);
         always_assert(value == i + 1);
+        always_assert(value2 == i + 1);
       } else {
         always_assert(value == i);
+        always_assert(index2 == -1);
       }
     } else {
       always_assert(value == size * 2 - 1);
+      always_assert(index2 == -1);
     }
   }
 

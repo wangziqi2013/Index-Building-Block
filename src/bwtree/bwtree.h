@@ -223,9 +223,9 @@ class NodeBase {
   // * GetType() - Returns the type enum
   inline NodeType GetType() const { return type; }
   // * GetHighKey() - Returns high key
-  inline const BoundKeyType *GetHighKey() const { return high_key_p; }
+  inline BoundKeyType *GetHighKey() const { return high_key_p; }
   // * GetLowKey() - Returns low key
-  inline const BoundKeyType *GetLowKey() const { return low_key_p; }
+  inline BoundKeyType *GetLowKey() const { return low_key_p; }
 
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
@@ -306,7 +306,7 @@ class DeltaNode : public NodeBase<KeyType> {
   using BoundKeyType = typename BaseClassType::BoundKeyType;
 
   inline BaseClassType *GetNext() const { return next_node_p; }
- protected:
+
   //* DeltaNode() - Constructors
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,

@@ -175,7 +175,7 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using KeyType = int;
   using ValueType = std::string;
-  using NodeIDType = uint64_t;
+  //using NodeIDType = uint64_t;
 
   using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
   using LeafDeleteType = LEAF_INSERT_TYPE(KeyType, ValueType);

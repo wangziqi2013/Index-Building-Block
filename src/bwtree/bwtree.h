@@ -581,54 +581,60 @@ class DeltaChainTraverser {
   using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
 
   // * Begin() - Starts traversing the delta chain
-  static void Begin(NodeBaseType *node_p) {
-    // It may have local states, so create an instance
-    TraverseHandlerType handler;
-    bool finished = false;
-    while(finished == false) {
+  static void Begin(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
+    // Initialization may also be based on the attributes of the virtual node.
+    handler_p->Init(node_p);
+    while(true) {
       NodeType type = node_p->GetType();
       switch(type) {
         case NodeType::LeafBase:
-          finished = handler.HandleLeafBase(static_cast<LeafBaseType *>(node_p));
-          assert(finished == true);
+          handler_p->HandleLeafBase(static_cast<LeafBaseType *>(node_p));
+          assert(handler_p->Finished() == true);
           break;
         case NodeType::InnerBase:
-          finished = handler.HandleInnerBase(static_cast<InnerBaseType *>(node_p));
-          assert(finished == true);
+          handler_p->HandleInnerBase(static_cast<InnerBaseType *>(node_p));
+          assert(handler_p->Finished() == true);
           break;
         case NodeType::LeafInsert:
-          finished = handler.HandleLeafInsert(static_cast<typename DeltaType::LeafInsertType *>(node_p));
+          handler_p->HandleLeafInsert(static_cast<typename DeltaType::LeafInsertType *>(node_p));
           break;
         case NodeType::InnerInsert:
-          finished = handler.HandleInnerInsert(static_cast<typename DeltaType::InnerInsertType *>(node_p));
+          handler_p->HandleInnerInsert(static_cast<typename DeltaType::InnerInsertType *>(node_p));
           break;
         case NodeType::LeafDelete:
-          finished = handler.HandleLeafDelete(static_cast<typename DeltaType::LeafDeleteType *>(node_p));
+          handler_p->HandleLeafDelete(static_cast<typename DeltaType::LeafDeleteType *>(node_p));
           break;
         case NodeType::InnerDelete:
-          finished = handler.HandleInnerDelete(static_cast<typename DeltaType::InnerDeleteType *>(node_p));
+          handler_p->HandleInnerDelete(static_cast<typename DeltaType::InnerDeleteType *>(node_p));
           break;
         case NodeType::LeafSplit:
-          finished = handler.HandleLeafSplit(static_cast<typename DeltaType::LeafSplitType *>(node_p));
+          handler_p->HandleLeafSplit(static_cast<typename DeltaType::LeafSplitType *>(node_p));
           break;
         case NodeType::InnerSplit:
-          finished = handler.HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
+          handler_p->HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
           break;
         case NodeType::LeafMerge:
-          finished = handler.HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
+          handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
           break;
         case NodeType::InnerMerge:
-          finished = handler.HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
+          handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
           break;
         case NodeType::LeafRemove:
-          finished = handler.HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
+          handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
           break;
         case NodeType::InnerRemove:
-          finished = handler.HandleInnerRemove(static_cast<typename DeltaType::InnerRemoveType *>(node_p));
+          handler_p->HandleInnerRemove(static_cast<typename DeltaType::InnerRemoveType *>(node_p));
           break;
         default:
           assert(false && "Unknown node type during traversal");
       } // switch
+
+      // If the handler says to stop then break
+      if(handler_p->Finished()) {
+        break;
+      } else {
+        node_p->handler_p->GetNext();
+      }
     } // while
 
     return;

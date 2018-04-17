@@ -562,7 +562,11 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   KeyType key_begin[0];
 };
 
-
+template <typename KeyType, typename ValueType, typename NodeIDType>
+class NodeTraverser {
+ public:
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>
+};
 
 } // namespace bwtree
 } // namespace index_building_block

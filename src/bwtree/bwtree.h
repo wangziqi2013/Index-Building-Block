@@ -256,7 +256,9 @@ class NodeBase {
 };
 
 // * class DeltaNode - Stores the next node pointer
-template <typename KeyType, T1, T2, T3, T4, T5, T6>
+template <typename KeyType, 
+          typename T1, typename T2, typename T3, 
+          typename T4, typename T5, typename T6>
 class DeltaNode : public NodeBase<KeyType> {
  public:
   using BaseClassType = NodeBase<KeyType>;
@@ -286,7 +288,7 @@ class DeltaNode : public NodeBase<KeyType> {
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
             BaseClassType *pnext_node_p, 
-            const T1 &pt2, const T2 &pt2, const T3 &pt3) :
+            const T1 &pt1, const T2 &pt2, const T3 &pt3) :
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p}, 
     t1{pt1}, t2{pt2}, t3{pt3} {}
@@ -294,11 +296,12 @@ class DeltaNode : public NodeBase<KeyType> {
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
             BaseClassType *pnext_node_p, 
-            const T1 &pt2, const T1 &pt2, const T3 &pt3
+            const T1 &pt1, const T1 &pt2, const T3 &pt3,
             const T4 &pt4, const T5 &pt5, const T6 &pt6) :
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p}, 
     t1{pt1}, t2{pt2}, t3{pt3}, t4{pt4}, t5{pt5}, t6{pt6} {}
+
  private:
   BaseClassType *next_node_p;
   // Delta node elements
@@ -314,11 +317,8 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T2 GetInsertNodeID() { return t2; }
   inline T2 GetDeleteNodeID() { return t2; }
   inline T2 GetSplitNodeID() { return t2; }
-  inline T2 GetSplitNodeID() { return t2; }
-  inline T2 GetMergeNodeID() { return t2; }
   inline T2 GetMergeNodeID() { return t2; }
 
-  inline T3 GetMergeSibling() { return t3; }
   inline T3 GetMergeSibling() { return t3; }
   inline T3 &GetNextKey() { return t3; }
 
@@ -327,7 +327,11 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T6 GetPrevNodeID() { return t6; }
 };
 
+//template <typename KeyType>
+//class LeafInsertDelta : public DeltaNode
+
 // * class KeyDeltaNode - Base class for delta nodes that contain the key
+/*
 template <typename KeyType>
 class KeyDeltaNode : DeltaNode<KeyType> {
  public:
@@ -349,6 +353,7 @@ class KeyDeltaNode : DeltaNode<KeyType> {
  private:
   KeyType key;
 };
+*/
 
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored

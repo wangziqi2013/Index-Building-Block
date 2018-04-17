@@ -344,7 +344,7 @@ class DeltaNode : public NodeBase<KeyType> {
   DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
             BaseClassType *pnext_node_p, 
-            const T1 &pt1, const T1 &pt2, const T3 &pt3,
+            const T1 &pt1, const T2 &pt2, const T3 &pt3,
             const T4 &pt4, const T5 &pt5, const T6 &pt6) :
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p}, 
@@ -487,7 +487,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   // * AllocateDelta() - Wrapping around the delta chain
   template <typename DeltaType, typename ...Args>
   inline DeltaType *AllocateDelta(Args &&...args) {
-    return delta_chain.AllocateDelta<DeltaType>(args...);
+    return delta_chain.AllocateDelta<DeltaType>(std::forward<Args>(args)...);
   }
 
   // * KeyAt() - Access key on a particular index

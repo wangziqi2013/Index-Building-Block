@@ -178,10 +178,10 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using NodeIDType = uint64_t;
 
   using LeafInsertType = LEAF_INSERT_TYPE(KeyType, ValueType);
-  using LeafDeleteType = LEAF_INSERT_TYPE(KeyType, ValueType);
-  using LeafSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using LeafMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
-  using LeafRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
+  using LeafDeleteType = LEAF_DELETE_TYPE(KeyType, ValueType);
+  using LeafSplitType = LEAF_SPLIT_TYPE(KeyType, NodeIDType);
+  using LeafMergeType = LEAF_MERGE_TYPE(KeyType, NodeIDType);
+  using LeafRemoveType = LEAF_REMOVE_TYPE(KeyType, NodeIDType);
   //using InnerInsertType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   //using InnerDeleteType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   //using InnerSplitType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
@@ -193,37 +193,40 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using NodeHeightType = typename LeafBaseNodeType::NodeHeightType;
   NodeSizeType size = 256;
   NodeHeightType height = 0;
-  int high_key = 1000;
-  int low_key = 25;
-  int insert_key = 100, delete_key = 200;
+  KeyType high_key = 1000;
+  KeyType low_key = 25;
+  KeyType insert_key = 100, delete_key = 200;
   std::string insert_value = "key = 100", delete_value = "key = 200";
-  int split_high_key = 500;
-  int merge_high_key = 2000;
-  int merge_middle_key = 600;
+  KeyType split_high_key = 500;
+  KeyType merge_middle_key = 600;
   NodeIDType merge_sibling_id = NodeIDType{8888};
   NodeIDType split_sibling = NodeIDType{9999};
   NodeIDType remove_id = NodeIDType{7777};
-  LeafBaseNodeType *merge_sibling = nullptr;
+  NodeBase<KeyType> *merge_sibling = nullptr;
 
   LeafBaseNodeType *node_p = LeafBaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
 
   LeafInsertType *insert_node_p = node_p->AllocateDelta<LeafInsertType>(
     NodeType::LeafInsert, ++height, size + 1, node_p->GetLowKey(), node_p->GetHighKey(), node_p, 
     insert_key, insert_value);
+
   LeafDeleteType *delete_node_p = node_p->AllocateDelta<LeafDeleteType>(
     NodeType::LeafDelete, ++height, size - 1, insert_node_p->GetLowKey(), insert_node_p->GetHighKey(), insert_node_p, 
     delete_key, delete_value);
+
   LeafSplitType *split_node_p = node_p->AllocateDelta<LeafSplitType>(
-    NodeType::LeafSplit, ++height, size / 2, delete_node_p->GetLowKey(), {split_high_key, false}, delete_node_p, 
+    NodeType::LeafSplit, ++height, size / 2, delete_node_p->GetLowKey(), delete_node_p->GetHighKey(), delete_node_p, 
     split_high_key, split_sibling);
+
   LeafMergeType *merge_node_p = node_p->AllocateDelta<LeafMergeType>(
-    NodeType::LeafMerge, ++height, size * 2, split_node_p->GetLowKey(), {merge_high_key, false}, split_node_p, 
+    NodeType::LeafMerge, ++height, size * 2, split_node_p->GetLowKey(), split_node_p->GetHighKey(), split_node_p, 
     merge_middle_key, merge_sibling_id, merge_sibling);
+
   LeafRemoveType *remove_node_p = node_p->AllocateDelta<LeafMergeType>(
     NodeType::LeafRemove, ++height, size * 2, merge_node_p->GetLowKey(), merge_node_p->GetHighKey(), merge_node_p, 
     remove_id);
 
-  
+  (void)remove_node_p;
   return;
 } END_TEST
 

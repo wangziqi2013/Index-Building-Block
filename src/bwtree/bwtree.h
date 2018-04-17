@@ -563,8 +563,8 @@ class DefaultBaseNode : public NodeBase<KeyType> {
 };
 
 /*
- * class NodeTraverser - This class implements a state machine for abstracting 
- *                       away details of delta chain traversal. 
+ * class DeltaChainTraverser - This class implements a state machine for abstracting 
+ *                             away details of delta chain traversal. 
  * 
  * The TraverseHandlerType is a template argument that defines states and functions
  * for handling deltas and base nodes. Details of interfacing with the 
@@ -573,7 +573,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType,
           typename TraverseHandlerType>
-class NodeTraverser {
+class DeltaChainTraverser {
  public:
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   using NodeBaseType = NodeBase<KeyType>;
@@ -596,6 +596,38 @@ class NodeTraverser {
           finished = handler.HandleInnerBase(static_cast<InnerBaseType *>(node_p));
           assert(finished == true);
           break;
+        case NodeType::LeafInsert:
+          finished = handler.HandleLeafInsert(static_cast<typename DeltaType::LeafInsertType *>(node_p));
+          break;
+        case NodeType::InnerInsert:
+          finished = handler.HandleInnerInsert(static_cast<typename DeltaType::InnerInsertType *>(node_p));
+          break;
+        case NodeType::LeafDelete:
+          finished = handler.HandleLeafDelete(static_cast<typename DeltaType::LeafDeleteType *>(node_p));
+          break;
+        case NodeType::InnerDelete:
+          finished = handler.HandleInnerDelete(static_cast<typename DeltaType::InnerDeleteType *>(node_p));
+          break;
+        case NodeType::LeafSplit:
+          finished = handler.HandleLeafSplit(static_cast<typename DeltaType::LeafSplitType *>(node_p));
+          break;
+        case NodeType::InnerSplit:
+          finished = handler.HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
+          break;
+        case NodeType::LeafMerge:
+          finished = handler.HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
+          break;
+        case NodeType::InnerMerge:
+          finished = handler.HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
+          break;
+        case NodeType::LeafRemove:
+          finished = handler.HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
+          break;
+        case NodeType::InnerRemove:
+          finished = handler.HandleInnerRemove(static_cast<typename DeltaType::InnerRemoveType *>(node_p));
+          break;
+        default:
+          assert(false && "Unknown node type during traversal");
       } // switch
     } // while
 

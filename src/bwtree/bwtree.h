@@ -562,10 +562,45 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   KeyType key_begin[0];
 };
 
-template <typename KeyType, typename ValueType, typename NodeIDType>
+/*
+ * class NodeTraverser - This class implements a state machine for abstracting 
+ *                       away details of delta chain traversal. 
+ * 
+ * The TraverseHandlerType is a template argument that defines states and functions
+ * for handling deltas and base nodes. Details of interfacing with the 
+ * call back type is presented below:
+ */
+template <typename KeyType, typename ValueType, typename NodeIDType, 
+          typename DeltaChainType,
+          typename TraverseHandlerType>
 class NodeTraverser {
  public:
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
+  using NodeBaseType = NodeBase<KeyType>;
+  using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
+  using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
+
+  // * Begin() - Starts traversing the delta chain
+  static void Begin(NodeBaseType *node_p) {
+    // It may have local states, so create an instance
+    TraverseHandlerType handler;
+    bool finished = false;
+    while(finished == false) {
+      NodeType type = node_p->GetType();
+      switch(type) {
+        case NodeType::LeafBase:
+          finished = handler.HandleLeafBase(static_cast<LeafBaseType *>(node_p));
+          assert(finished == true);
+          break;
+        case NodeType::InnerBase:
+          finished = handler.HandleInnerBase(static_cast<InnerBaseType *>(node_p));
+          assert(finished == true);
+          break;
+      } // switch
+    } // while
+
+    return;
+  }
 };
 
 } // namespace bwtree

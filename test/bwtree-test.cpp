@@ -245,6 +245,7 @@ int main() {
   MappingTableTest();
   BoundKeyTest();
   BaseNodeTest();
+  DeltaNodeTest();
 
   return 0;
 }

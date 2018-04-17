@@ -226,7 +226,18 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
     NodeType::LeafRemove, ++height, size * 2, merge_node_p->GetLowKey(), merge_node_p->GetHighKey(), merge_node_p, 
     remove_id);
 
-  (void)remove_node_p;
+  // Check whether attributes are as expected
+  always_assert(insert_node_p->GetInsertKey() == insert_key);
+  always_assert(insert_node_p->GetInsertValue() == insert_value);
+  always_assert(delete_node_p->GetDeleteKey() == delete_key);
+  always_assert(delete_node_p->GetDeleteValue() == delete_value);
+  always_assert(split_node_p->GetSplitKey() == split_high_key);
+  always_assert(split_node_p->GetSplitNodeID() == split_sibling);
+  always_assert(merge_node_p->GetMergeKey() == merge_middle_key);
+  always_assert(merge_node_p->GetMergeNodeID() == merge_sibling_id);
+  always_assert(merge_node_p->GetMergeSibling() == merge_sibling);
+  always_assert(remove_node_p->GetRemoveNodeID() == remove_id);
+
   return;
 } END_TEST
 

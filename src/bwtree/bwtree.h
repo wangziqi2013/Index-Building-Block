@@ -349,11 +349,9 @@ class DeltaNode : public NodeBase<KeyType> {
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p}, 
     t1{pt1}, t2{pt2}, t3{pt3}, t4{pt4}, t5{pt5}, t6{pt6} {}
-
- private:
-  BaseClassType *next_node_p;
-  // Delta node elements
-  T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
+  
+  // The following series of functions defines methods for retriving
+  // delta attributes according to delta type
   inline T1 &GetInsertKey() { return t1; }
   inline T1 &GetDeleteKey() { return t1; }
   inline T1 &GetSplitKey() { return t1; }
@@ -373,6 +371,11 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T4 &GetNextNodeID() { return t4; }
   inline T5 &GetPrevKey() { return t5; }
   inline T6 &GetPrevNodeID() { return t6; }
+
+ private:
+  BaseClassType *next_node_p;
+  // Delta node elements
+  T1 t1; T2 t2; T3 t3; T4 t4; T5 t5; T6 t6;
 };
 
 //template <typename KeyType>

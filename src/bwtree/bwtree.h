@@ -487,7 +487,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   // * AllocateDelta() - Wrapping around the delta chain
   template <typename DeltaType, typename ...Args>
   inline DeltaType *AllocateDelta(Args &&...args) {
-    return dc.AllocateDelta<DeltaType>(args...);
+    return delta_chain.AllocateDelta<DeltaType>(args...);
   }
 
   // * KeyAt() - Access key on a particular index

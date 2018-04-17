@@ -222,7 +222,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
     NodeType::LeafMerge, ++height, size * 2, split_node_p->GetLowKey(), split_node_p->GetHighKey(), split_node_p, 
     merge_middle_key, merge_sibling_id, merge_sibling);
 
-  LeafRemoveType *remove_node_p = node_p->AllocateDelta<LeafMergeType>(
+  LeafRemoveType *remove_node_p = node_p->AllocateDelta<LeafRemoveType>(
     NodeType::LeafRemove, ++height, size * 2, merge_node_p->GetLowKey(), merge_node_p->GetHighKey(), merge_node_p, 
     remove_id);
 

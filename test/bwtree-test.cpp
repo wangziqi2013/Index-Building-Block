@@ -271,6 +271,10 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
     NodeType::LeafRemove, ++height, size * 2, merge_node_p->GetLowKey(), merge_node_p->GetHighKey(), merge_node_p, 
     remove_id);
 
+  LeafMergeType *merge_node_2_p = node_p->AllocateDelta<LeafMergeType>(
+    NodeType::LeafMerge, ++height, size * 2, split_node_p->GetLowKey(), split_node_p->GetHighKey(), remove_node_p, 
+    merge_middle_key, merge_sibling_id, insert_node_p);
+
   // Check whether attributes are as expected
   always_assert(insert_node_p->GetInsertKey() == insert_key);
   always_assert(insert_node_p->GetInsertValue() == insert_value);
@@ -289,7 +293,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using TraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChain, SimpleTraverseHandlerType>;
 
   SimpleTraverseHandlerType sth{};
-  TraverserType::Traverse(remove_node_p, &sth);
+  TraverserType::Traverse(merge_node_2_p, &sth);
 
   return;
 } END_TEST

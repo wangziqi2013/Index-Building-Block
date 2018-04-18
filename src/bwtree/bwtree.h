@@ -167,18 +167,18 @@ class DefaultMappingTable {
 };
 
 /*
- * class DefaultDeltaChain - This class defines the storage of the delta chain
+ * class DefaultDeltaChainType - This class defines the storage of the delta chain
  * 
  * 1. No pre-allocation is implemented. Override this class to 
  *    implement pre-allocation
  * 2. This class has zero size under release mode
  */
-class DefaultDeltaChain {
+class DefaultDeltaChainType {
  public:
   /*
-   * DefaultDeltaChain() - Constructor
+   * DefaultDeltaChainType() - Constructor
    */
-  DefaultDeltaChain() {
+  DefaultDeltaChainType() {
     IF_DEBUG(mem_usage.store(0UL));
     return;
   }
@@ -672,7 +672,7 @@ class TraverseHandlerBase {
  *    flag to true
  */
 template <typename KeyType, typename ValueType, typename NodeIDType, 
-          typename DeltaChainType, typedef BaseNode, 
+          typename DeltaChainType, template <typename, typename, typename> typename BaseNode, 
           typename TraverseHandlerType>
 class DeltaChainTraverser {
  public:
@@ -772,7 +772,7 @@ class DeltaChainTraverser {
  */
 template <typename KeyType, typename ValueType, 
           typename MappingTableType, typename DeltaChainType, 
-          typename BaseNode>
+          template <typename, typename, typename> typename BaseNode>
 class AppendHelper {
  public:
   using NodeIDType = typename MappingTableType::NodeIDType;
@@ -799,10 +799,11 @@ class AppendHelper {
 };
 
 template <typename KeyType, typename ValueType, 
-          typename MappingTable, typename DeltaChainType, typename BaseNode>
+          template <typename, size_t> typename MappingTable, typename DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode>
 class BwTree {
  public:
-  static constexpr MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
+  static constexpr size_t MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
   using NodeBaseType = NodeBase<KeyType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
   // Metadata variable type
@@ -814,7 +815,7 @@ class BwTree {
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   // Node type definition
   using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
-  using InnerBaseType = BaseNode<KeyType, NodeIDType>;
+  using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
   using LeafInsertType = typename DeltaType::LeafInsertType;
   using LeafDeleteType = typename DeltaType::LeafDeleteType;
   using LeafSplitType = typename DeltaType::LeafSplitType;

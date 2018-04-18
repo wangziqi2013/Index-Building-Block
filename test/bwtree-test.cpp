@@ -109,7 +109,7 @@ BEGIN_DEBUG_TEST(BoundKeyTest) {
  */
 BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Ignore delta chain type here
-  using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChain>;
+  using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChainType>;
   using NodeSizeType = typename BaseNodeType::NodeSizeType;
   constexpr NodeSizeType size = 256;
   constexpr int high_key = 1000;
@@ -230,7 +230,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   //using InnerMergeType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
   //using InnerRemoveType = LEAF_INSERT_TYPE(KeyType, NodeIDType);
 
-  using LeafBaseNodeType = DefaultBaseNode<KeyType, ValueType, DefaultDeltaChain>;
+  using LeafBaseNodeType = DefaultBaseNode<KeyType, ValueType, DefaultDeltaChainType>;
   using NodeSizeType = typename LeafBaseNodeType::NodeSizeType;
   using NodeHeightType = typename LeafBaseNodeType::NodeHeightType;
   NodeSizeType size = 256;
@@ -289,9 +289,9 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
 
   test_printf("Testing delta chain traversal\n");
 
-  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChain>;
+  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChainType>;
   using TraverserType = \
-    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChain, DefaultBaseNode, SimpleTraverseHandlerType>;
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
 
   SimpleTraverseHandlerType sth{};
   TraverserType::Traverse(merge_node_2_p, &sth);

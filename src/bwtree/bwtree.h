@@ -595,10 +595,13 @@ class TraverseHandlerBase {
   NodeBaseType *GetNext() { return next_p; }
   // * Finished() - Returns true if the traverse terminates
   bool Finished() { return finished; }
+  // * Init() - Initialize states
+  void Init(NodeBaseType *node_p) = delete;
  private:
   // * Fail() - Called if the handler is not defined
   inline void Fail() { assert(false && "Unknown delta nodes"); }
 
+ protected:
   bool finished;
   NodeBaseType *next_p;
 };
@@ -630,7 +633,7 @@ class TraverseHandlerBase {
     void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { }
     void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { }
 
-    void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { }
+    void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { }
     void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { }
 
     void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { }
@@ -638,6 +641,8 @@ class TraverseHandlerBase {
 
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
+
+    void Init(NodeBaseType *node_p) { ... }
   };
  * 
  * 1. Base nodes must be the terminating node because they do not have next pointer.
@@ -711,7 +716,7 @@ class DeltaChainTraverser {
       if(handler_p->Finished()) {
         break;
       } else {
-        node_p->handler_p->GetNext();
+        node_p = handler_p->GetNext();
       }
     } // while
 

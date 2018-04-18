@@ -174,6 +174,41 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   return;
 } END_TEST
 
+template <typename KeyType, typename ValueType, typename NodeIDType, 
+          typename DeltaChainType>
+class SimpleTraverseHandler : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+public:
+  using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using NodeBaseType = typename BaseClassType::NodeBaseType;
+  using DeltaType = typename BaseClassType::DeltaType;
+  using LeafBaseType = typename BaseClassType::LeafBaseType;
+  using InnerBaseType = typename BaseClassType::InnerBaseType;
+
+  void HandleLeafBase(LeafBaseType *node_p) { test_printf("LeafBase\n"); }
+  void HandleInnerBase(InnerBaseType *node_p) { test_printf("InnerBase\n"); }
+
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { test_printf("LeafInsert\n"); }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { test_printf("InnerInsert\n"); }
+
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { test_printf("LeafDelete\n"); }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { test_printf("InnerDelete\n"); }
+
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { test_printf("LeafSplit\n"); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { test_printf("InnerSplit\n"); }
+
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); }
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); }
+
+  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { test_printf("LeafRemove\n"); }
+  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { test_printf("InnerRemove\n"); }
+
+  void Init(NodeBaseType *node_p) {
+    BaseClassType::finished = false;
+    BaseClassType::next_p = nullptr;
+    return;
+  }
+};
+
 /*
  * DeltaNodeTest() - Tests whether delta node template works as expected
  */
@@ -209,6 +244,8 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   NodeIDType remove_id = NodeIDType{7777};
   NodeBase<KeyType> *merge_sibling = nullptr;
 
+  test_printf("Testing basic delta chain type completeness\n");
+
   LeafBaseNodeType *node_p = LeafBaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
 
   LeafInsertType *insert_node_p = node_p->AllocateDelta<LeafInsertType>(
@@ -242,6 +279,14 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   always_assert(merge_node_p->GetMergeNodeID() == merge_sibling_id);
   always_assert(merge_node_p->GetMergeSibling() == merge_sibling);
   always_assert(remove_node_p->GetRemoveNodeID() == remove_id);
+
+  test_printf("Testing delta chain traversal\n");
+
+  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChain>;
+  using TraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChain, SimpleTraverseHandlerType>;
+
+  SimpleTraverseHandlerType sth{};
+  TraverserType::Traverse(remove_node_p, &sth);
 
   return;
 } END_TEST

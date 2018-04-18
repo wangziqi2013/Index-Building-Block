@@ -562,7 +562,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   KeyType key_begin[0];
 };
 
-
+// * class TraverseHandlerBase - The base class of traverse handlers
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType>
 class TraverseHandlerBase {
@@ -596,9 +596,9 @@ class TraverseHandlerBase {
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
 
   // * GetNext() - Returns the next pointer
-  NodeBaseType *GetNext() { return next_p; }
+  inline NodeBaseType *GetNext() { return next_p; }
   // * Finished() - Returns true if the traverse terminates
-  bool Finished() { return finished; }
+  inline bool Finished() { return finished; }
   // * Init() - Initialize states
   void Init(NodeBaseType *node_p) { (void)node_p; }
  private:
@@ -723,11 +723,13 @@ class DeltaChainTraverser {
           HandleMergeRecursive<typename DeltaType::LeafMergeType>(
             handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p)),
                                        handler_p, node_p);
+            assert(handler_p->Finished());
           return;
         case NodeType::InnerMerge:
           HandleMergeRecursive<typename DeltaType::InnerMergeType>(
             handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p)),
                                         handler_p, node_p);
+            assert(handler_p->Finished());
           return;
         case NodeType::LeafRemove:
           handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
@@ -749,6 +751,11 @@ class DeltaChainTraverser {
 
     return;
   }
+};
+
+template <typename BaseNodeType, typename MappingTableType>
+class AppendHelper {
+
 };
 
 } // namespace bwtree

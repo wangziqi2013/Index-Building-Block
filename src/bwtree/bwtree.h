@@ -572,26 +572,51 @@ class TraverseHandlerType {
   using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
 
-  // Repeat this for all types appear below
-  void Handle...Type(NodeBaseType *node_p) {...}
-  // Returns the next pointer
+  // Handler functions. If not used in the derived class just leave them undefined
+  void HandleLeafBase(LeafBaseType *node_p) { Fail(); }
+  void HandleInnerBase(InnerBaseType *node_p) { Fail(); }
+
+  void HandleLeafInsert(DeltaType::LeafInsertType *node_p) { Fail(); }
+  void HandleInnerInsert(DeltaType::InnerInsertType *node_p) { Fail(); }
+
+  void HandleLeafDelete(DeltaType::LeafDeleteType *node_p) { Fail(); }
+  void HandleInnerDelete(DeltaType::InnerDeleteType *node_p) { Fail(); }
+
+  void HandleLeafISplit(DeltaType::LeafSplitType *node_p) { Fail(); }
+  void HandleInnerSplit(DeltaType::InnerSplitType *node_p) { Fail(); }
+
+  void HandleLeafMerge(DeltaType::LeafMergeType *node_p) { Fail(); }
+  void HandleInnerMerge(DeltaType::InnerMergeType *node_p) { Fail(); }
+
+  void HandleLeafRemove(DeltaType::LeafRemoveType *node_p) { Fail(); }
+  void HandleInnerRemove(DeltaType::InnerRemoveType *node_p) { Fail(); }
+
+  // * GetNext() - Returns the next pointer
   NodeBaseType *GetNext() = delete;
-  // Return true if the traverse terminates
+  // * Finished() - Returns true if the traverse terminates
   bool Finished() = delete;
+ private:
+  // * Fail() - Called if the handler is not defined
+  inline void Fail() { assert(false && "Unknown delta nodes"); }
+  bool finished;
 };
 
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType>
-class TraverseHandlerType : public 
-  TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
  public:
-  using NodeBaseType = NodeBase<KeyType>;
+  using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using NodeBaseType = BaseClassType::NodeBaseType;
+  using DeltaType = BaseClassType::DeltaType;
+  using LeafBaseType = BaseClassType::LeafBaseType;
+  using InnerBaseType = BaseClassType::InnerBaseType;
+
   // Repeat this for all types appear below
-  void Handle...Type(NodeBaseType *node_p) {...}
+  //void Handle...Type(NodeBaseType *node_p) {...}
   // Returns the next pointer
-  NodeBaseType *GetNext() {...}
+  //NodeBaseType *GetNext() {...}
   // Return true if the traverse terminates
-  bool Finished() {...}  
+  //bool Finished() {...}  
 };
 
 /*

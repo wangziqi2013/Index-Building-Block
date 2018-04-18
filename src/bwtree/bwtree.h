@@ -572,6 +572,10 @@ class TraverseHandlerBase {
   using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
 
+  // * TraverseHandlerBase() - Constructor
+  TraverseHandlerBase() :
+    finished{false}, next_p{nullptr} {}
+
   // Handler functions. If not used in the derived class just leave them undefined
   void HandleLeafBase(LeafBaseType *node_p) { Fail(); }
   void HandleInnerBase(InnerBaseType *node_p) { Fail(); }
@@ -596,7 +600,7 @@ class TraverseHandlerBase {
   // * Finished() - Returns true if the traverse terminates
   bool Finished() { return finished; }
   // * Init() - Initialize states
-  void Init(NodeBaseType *node_p) = delete;
+  void Init(NodeBaseType *node_p) { (void)node_p; }
  private:
   // * Fail() - Called if the handler is not defined
   inline void Fail() { assert(false && "Unknown delta nodes"); }
@@ -623,6 +627,8 @@ class TraverseHandlerBase {
     using DeltaType = typename BaseClassType::DeltaType;
     using LeafBaseType = typename BaseClassType::LeafBaseType;
     using InnerBaseType = typename BaseClassType::InnerBaseType;
+
+    TraverseHandlerType() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
     void HandleLeafBase(LeafBaseType *node_p) { }
     void HandleInnerBase(InnerBaseType *node_p) { }
@@ -696,11 +702,9 @@ class DeltaChainTraverser {
           break;
         case NodeType::LeafMerge:
           handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
-          assert(handler_p->Finished() == true);
           break;
         case NodeType::InnerMerge:
           handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
-          assert(handler_p->Finished() == true);
           break;
         case NodeType::LeafRemove:
           handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));

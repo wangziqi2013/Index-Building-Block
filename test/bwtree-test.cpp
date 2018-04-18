@@ -213,6 +213,9 @@ public:
 
 /*
  * DeltaNodeTest() - Tests whether delta node template works as expected
+ * 
+ * 1. Tests whether delta node attributes are accessed correctly
+ * 2. Tests whether the node traverser works especially for multiple merges
  */
 BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using KeyType = int;
@@ -299,11 +302,27 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   return;
 } END_TEST
 
+/*
+ * DeltaNodeTest() - Tests whether delta node can be appended
+ * 
+ * 1. Tests whether append works
+ */
+BEGIN_DEBUG_TEST(AppendTest) {
+  using KeyType = int;
+  using ValueType = std::string;
+  using BwTreeType = BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode>;
+  using AppendHelperType = AppendHelper<KeyType, ValueType, 
+    typename BwTreeType::MappingTableType, typename BwTreeType::DeltaChainType, DefaultBaseNode>;
+  (void)AppendHelperType;
+  return;
+} END_TEST
+
 int main() {
   MappingTableTest();
   BoundKeyTest();
   BaseNodeTest();
   DeltaNodeTest();
+  AppendTest();
 
   return 0;
 }

@@ -781,7 +781,7 @@ class AppendHelper {
   using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
   // This is required for using the low key to determine the delta chain
-  static_assert(offsetof(LeafBaseType, low_key) == offsetof(InnerBaseType, low_key),
+  static_assert(offsetof(LeafBaseType, low_key) != offsetof(InnerBaseType, low_key),
                 "Low key in InnerBaseType and LeafBaseType must have the same offset");
   static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key);
 
@@ -795,7 +795,7 @@ class AppendHelper {
       reinterpret_cast<char *>(pnode_p->GetLowKey()) - low_key_offset); 
   }
 
-  BaseNodeType *node_p;
+  NodeBaseType *node_p;
 };
 
 template <typename KeyType, typename ValueType, 

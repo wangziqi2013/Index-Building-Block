@@ -15,6 +15,18 @@ namespace index_building_block {
 namespace bwtree {
 
 /*
+ * Type Naming and Argument Passing Rule
+ * 
+ * 1. Complete types must end with "Type" suffix to indicate no template argument is required
+ * 2. Incomplete types must not end with "Type". Once they are instanciated with "using"
+ *    directive, the complete type must then be the original type name suffixed by "Type"
+ * 3. Types prefixed with "Default" cannot be directly used. They must be passed as template arguments
+ *    Other types can be directly referred to.
+ * 4. When passing types as template arguments, it is preferred that the type is passed as 
+ *    template instances rather than raw templates. This, however, is not strict.
+ */
+
+/*
  * BoundKey() - Represents low key and high key which can be infinities
  */
 template <typename KeyType>
@@ -805,19 +817,20 @@ template <typename _KeyType, typename _ValueType,
 class BwTree {
  public:
   static constexpr size_t MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
+  // Argument types
   using KeyType = _KeyType;
   using ValueType = _ValueType;
+  using DeltaChainType = _DeltaChainType;
+  // Derived types
   using NodeBaseType = NodeBase<KeyType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
-  using DeltaChainType = _DeltaChainType;
-  // Metadata variable type
+  // Metadata variable types
   using NodeIDType = typename MappingTableType::NodeIDType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;
   using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using BoundKeyType = typename NodeBaseType::BoundKeyType;
-
+  // Delta and base node types
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
-  // Node type definition
   using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
   using LeafInsertType = typename DeltaType::LeafInsertType;

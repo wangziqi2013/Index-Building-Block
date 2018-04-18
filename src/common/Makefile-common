@@ -7,7 +7,7 @@
 #
 
 CXX = g++
-CXXFLAGS = -Wall -Werror -Wunreachable-code -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)/test -I$(SRC_DIR)
+CXXFLAGS = -Wall -Werror -Wunreachable-code -Wno-invalid-offsetof -std=c++11 -I$(SRC_DIR)/common -I$(SRC_DIR)/test -I$(SRC_DIR)
 LDFLAGS = -pthread
 MAKE = make
 LD = ld

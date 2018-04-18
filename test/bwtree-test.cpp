@@ -313,7 +313,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using BwTreeType = BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode>;
   using AppendHelperType = AppendHelper<KeyType, ValueType, 
     typename BwTreeType::MappingTableType, typename BwTreeType::DeltaChainType, DefaultBaseNode>;
-    
+  
+  AppendHelperType ah{nullptr};
+  (void)ah;
+
   return;
 } END_TEST
 

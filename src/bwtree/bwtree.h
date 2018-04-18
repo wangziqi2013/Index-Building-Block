@@ -554,7 +554,9 @@ class DefaultBaseNode : public NodeBase<KeyType> {
 
     return node_p;
   }
-
+ public:
+  // This data member does not space but it has the same address as the low key
+  char low_key_addr[0];
  private:
   // * KeyBegin() - Return the first pointer for values
   inline ValueType *KeyBegin() { return key_begin; }
@@ -794,9 +796,9 @@ class AppendHelper {
   using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
 
   // This is required for using the low key to determine the delta chain
-  static_assert(offsetof(LeafBaseType, low_key) != offsetof(InnerBaseType, low_key),
+  static_assert(offsetof(LeafBaseType, low_key_addr) == offsetof(InnerBaseType, low_key_addr),
                 "Low key in InnerBaseType and LeafBaseType must have the same offset");
-  static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key);
+  static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key_addr);
 
   // * AppendHelper() - Constructor
   AppendHelper(NodeBaseType *pnode_p) : node_p{pnode_p} {}

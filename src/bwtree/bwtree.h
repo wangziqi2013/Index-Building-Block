@@ -562,7 +562,17 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   KeyType key_begin[0];
 };
 
-// * class TraverseHandlerBase - The base class of traverse handlers
+/* 
+ * class TraverseHandlerBase - The base class of traverse handlers
+ * 
+ * All traverse handlers must inherit from this class. They do not have to implement
+ * all methods (and most of them don't). For detailed template of derived handlers
+ * please refer to traverser class
+ * 
+ * 1. "finished" is set if the traverse should end
+ * 2. next_p is set to the next pointer the traverse must go if it has not finished
+ * 3. Init() is called at the beginning of the traverse, including recursive traverses
+ */
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType>
 class TraverseHandlerBase {
@@ -660,17 +670,16 @@ class TraverseHandlerBase {
  * 2. If merge nodes must be accessed recursively (e.g. node consolidation), then
  *    the traverser must perform this in the merge handler itself, and set finished
  *    flag to true
- * 3. If the 
  */
 template <typename KeyType, typename ValueType, typename NodeIDType, 
-          typename DeltaChainType,
+          typedef BaseNode, typename DeltaChainType,
           typename TraverseHandlerType>
 class DeltaChainTraverser {
  public:
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   using NodeBaseType = NodeBase<KeyType>;
-  using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
-  using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
+  using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
+  using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
 
   // * HandleMergeRecursive() - Handles recursive traversal of merge nodes
   template <typename MergeDeltaType>
@@ -753,9 +762,58 @@ class DeltaChainTraverser {
   }
 };
 
-template <typename BaseNodeType, typename MappingTableType>
+/*
+ * class AppendHelper - Helper class that acts as a proxy for appending deltas
+ * 
+ * 1. We decouple the appending of deltas from node base or mapping table class
+ *    to modularize the design, because this step is largely independent from
+ *    the design choices of the mapping table or the node base
+ * 2. This class will be optimized out by the compiler
+ */
+template <typename NodeBaseType, typename MappingTableType>
 class AppendHelper {
+ public:
+  // * AppendHelper() - Constructor
+  AppendHelper(NodeBaseType *pnode_p) : node_p{pnode_p} {}
+  bool AppendLeafInsert(NodeID node_id, )
+ private:
+  // * GetBase() - Returns a pointer to the base node of the delta chain
+  inline NodeBaseType *GetBase(NodeBaseType *pnode_p) { 
+    return reinterpret_cast<NodeBaseType *>(
+      reinterpret_cast<char *>(pnode_p->low_key_p) - offsetof(NodeBaseType, low_key)); 
+  }
 
+  BaseNodeType *node_p;
+};
+
+template <typename KeyType, typename ValueType, 
+          typename MappingTable, typename DeltaChain, typename BaseNode>
+class BwTree {
+ public:
+  static constexpr MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
+  using NodeBaseType = NodeBase<KeyType>;
+  using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
+  using DeltaChainType = DeltaChain;
+  // Metadata variable type
+  using NodeIDType = typename NodeBaseType::NodeIDType;
+  using NodeSizeType = typename NodeBaseType::NodeSizeType;
+  using NodeHeightType = typename NodeBaseType::NodeHeightType;
+  using BoundKeyType = typename NodeBaseType::BoundKeyType;
+
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
+  // Node type definition
+  using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
+  using InnerBaseType = BaseNode<KeyType, NodeIDType>;
+  using LeafInsertType = typename DeltaType::LeafInsertType;
+  using LeafDeleteType = typename DeltaType::LeafDeleteType;
+  using LeafSplitType = typename DeltaType::LeafSplitType;
+  using LeafMergeType = typename DeltaType::LeafMergeType;
+  using LeafRemoveType = typename DeltaType::LeafRemoveType;
+  using InnerInsertType = typename DeltaType::InnerInsertType;
+  using InnerDeleteType = typename DeltaType::InnerDeleteType;
+  using InnerSplitType = typename DeltaType::InnerSplitType;
+  using InnerMergeType = typename DeltaType::InnerMergeType;
+  using InnerRemoveType = typename DeltaType::InnerRemoveType;
 };
 
 } // namespace bwtree

@@ -562,6 +562,38 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   KeyType key_begin[0];
 };
 
+
+template <typename KeyType, typename ValueType, typename NodeIDType, 
+          typename DeltaChainType>
+class TraverseHandlerType {
+ public:
+  using NodeBaseType = NodeBase<KeyType>;
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
+  using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
+  using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
+
+  // Repeat this for all types appear below
+  void Handle...Type(NodeBaseType *node_p) {...}
+  // Returns the next pointer
+  NodeBaseType *GetNext() = delete;
+  // Return true if the traverse terminates
+  bool Finished() = delete;
+};
+
+template <typename KeyType, typename ValueType, typename NodeIDType, 
+          typename DeltaChainType>
+class TraverseHandlerType : public 
+  TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+ public:
+  using NodeBaseType = NodeBase<KeyType>;
+  // Repeat this for all types appear below
+  void Handle...Type(NodeBaseType *node_p) {...}
+  // Returns the next pointer
+  NodeBaseType *GetNext() {...}
+  // Return true if the traverse terminates
+  bool Finished() {...}  
+};
+
 /*
  * class DeltaChainTraverser - This class implements a state machine for abstracting 
  *                             away details of delta chain traversal. 
@@ -569,6 +601,26 @@ class DefaultBaseNode : public NodeBase<KeyType> {
  * The TraverseHandlerType is a template argument that defines states and functions
  * for handling deltas and base nodes. Details of interfacing with the 
  * call back type is presented below:
+ * 
+ * template <typename KeyType, typename ValueType, typename NodeIDType, 
+ *           typename DeltaChainType>
+ * class TraverseHandlerType : public 
+ *   TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+ *  public:
+ *   using NodeBaseType = NodeBase<KeyType>;
+ *   // Repeat this for all types appear below
+ *   void Handle...(NodeBaseType *node_p) {...}
+ *   // Returns the next pointer
+ *   NodeBaseType *GetNext() {...}
+ *   // Return true if the traverse terminates
+ *   bool Finished() {...}
+ * };
+ * 
+ * 1. Base nodes must be the terminating node because they do not have next pointer.
+ * 2. If merge nodes must be accessed recursively (e.g. node consolidation), then
+ *    the traverser must perform this in the merge handler itself, and set finished
+ *    flag to true
+ * 3. If the 
  */
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType,
@@ -580,8 +632,8 @@ class DeltaChainTraverser {
   using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
 
-  // * Begin() - Starts traversing the delta chain
-  static void Begin(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
+  // * Traverse() - Starts traversing the delta chain
+  static void Traverse(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
     // Initialization may also be based on the attributes of the virtual node.
     handler_p->Init(node_p);
     while(true) {
@@ -615,9 +667,11 @@ class DeltaChainTraverser {
           break;
         case NodeType::LeafMerge:
           handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
+          assert(handler_p->Finished() == true);
           break;
         case NodeType::InnerMerge:
           handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
+          assert(handler_p->Finished() == true);
           break;
         case NodeType::LeafRemove:
           handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));

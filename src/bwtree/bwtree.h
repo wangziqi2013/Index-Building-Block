@@ -592,31 +592,15 @@ class TraverseHandlerBase {
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
 
   // * GetNext() - Returns the next pointer
-  NodeBaseType *GetNext() = delete;
+  NodeBaseType *GetNext() { return next_p; }
   // * Finished() - Returns true if the traverse terminates
-  bool Finished() = delete;
+  bool Finished() { return finished; }
  private:
   // * Fail() - Called if the handler is not defined
   inline void Fail() { assert(false && "Unknown delta nodes"); }
+
   bool finished;
-};
-
-template <typename KeyType, typename ValueType, typename NodeIDType, 
-          typename DeltaChainType>
-class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
- public:
-  using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
-  using NodeBaseType = typename BaseClassType::NodeBaseType;
-  using DeltaType = typename BaseClassType::DeltaType;
-  using LeafBaseType = typename BaseClassType::LeafBaseType;
-  using InnerBaseType = typename BaseClassType::InnerBaseType;
-
-  // Repeat this for all types appear below
-  //void Handle...Type(NodeBaseType *node_p) {...}
-  // Returns the next pointer
-  //NodeBaseType *GetNext() {...}
-  // Return true if the traverse terminates
-  //bool Finished() {...}  
+  NodeBaseType *next_p;
 };
 
 /*
@@ -627,19 +611,34 @@ class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeI
  * for handling deltas and base nodes. Details of interfacing with the 
  * call back type is presented below:
  * 
- * template <typename KeyType, typename ValueType, typename NodeIDType, 
- *           typename DeltaChainType>
- * class TraverseHandlerType : public 
- *   TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
- *  public:
- *   using NodeBaseType = NodeBase<KeyType>;
- *   // Repeat this for all types appear below
- *   void Handle...(NodeBaseType *node_p) {...}
- *   // Returns the next pointer
- *   NodeBaseType *GetNext() {...}
- *   // Return true if the traverse terminates
- *   bool Finished() {...}
- * };
+  template <typename KeyType, typename ValueType, typename NodeIDType, 
+            typename DeltaChainType>
+  class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+  public:
+    using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
+    using NodeBaseType = typename BaseClassType::NodeBaseType;
+    using DeltaType = typename BaseClassType::DeltaType;
+    using LeafBaseType = typename BaseClassType::LeafBaseType;
+    using InnerBaseType = typename BaseClassType::InnerBaseType;
+
+    void HandleLeafBase(LeafBaseType *node_p) { }
+    void HandleInnerBase(InnerBaseType *node_p) { }
+
+    void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { }
+    void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { }
+
+    void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { }
+    void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { }
+
+    void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { }
+    void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { }
+
+    void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { }
+    void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { }
+
+    void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
+    void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
+  };
  * 
  * 1. Base nodes must be the terminating node because they do not have next pointer.
  * 2. If merge nodes must be accessed recursively (e.g. node consolidation), then

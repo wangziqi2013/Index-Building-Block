@@ -291,7 +291,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChain>;
   using TraverserType = \
-    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultBaseNode, DefaultDeltaChain, SimpleTraverseHandlerType>;
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChain, DefaultBaseNode, SimpleTraverseHandlerType>;
 
   SimpleTraverseHandlerType sth{};
   TraverserType::Traverse(merge_node_2_p, &sth);

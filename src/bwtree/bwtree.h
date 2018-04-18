@@ -672,7 +672,7 @@ class TraverseHandlerBase {
  *    flag to true
  */
 template <typename KeyType, typename ValueType, typename NodeIDType, 
-          typedef BaseNode, typename DeltaChainType,
+          typename DeltaChainType, typedef BaseNode, 
           typename TraverseHandlerType>
 class DeltaChainTraverser {
  public:
@@ -770,30 +770,41 @@ class DeltaChainTraverser {
  *    the design choices of the mapping table or the node base
  * 2. This class will be optimized out by the compiler
  */
-template <typename NodeBaseType, typename MappingTableType>
+template <typename KeyType, typename ValueType, 
+          typename MappingTableType, typename DeltaChainType, 
+          typename BaseNode>
 class AppendHelper {
  public:
+  using NodeIDType = typename MappingTableType::NodeIDType;
+  using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
+  using NodeBaseType = NodeBase<KeyType>;
+  using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
+  using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
+  // This is required for using the low key to determine the delta chain
+  static_assert(offsetof(LeafBaseType, low_key) == offsetof(InnerBaseType, low_key),
+                "Low key in InnerBaseType and LeafBaseType must have the same offset");
+  static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key);
+
   // * AppendHelper() - Constructor
   AppendHelper(NodeBaseType *pnode_p) : node_p{pnode_p} {}
-  bool AppendLeafInsert(NodeID node_id, )
+//  bool AppendLeafInsert(NodeID node_id, )
  private:
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline NodeBaseType *GetBase(NodeBaseType *pnode_p) { 
     return reinterpret_cast<NodeBaseType *>(
-      reinterpret_cast<char *>(pnode_p->low_key_p) - offsetof(NodeBaseType, low_key)); 
+      reinterpret_cast<char *>(pnode_p->GetLowKey()) - low_key_offset); 
   }
 
   BaseNodeType *node_p;
 };
 
 template <typename KeyType, typename ValueType, 
-          typename MappingTable, typename DeltaChain, typename BaseNode>
+          typename MappingTable, typename DeltaChainType, typename BaseNode>
 class BwTree {
  public:
   static constexpr MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
   using NodeBaseType = NodeBase<KeyType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
-  using DeltaChainType = DeltaChain;
   // Metadata variable type
   using NodeIDType = typename NodeBaseType::NodeIDType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;

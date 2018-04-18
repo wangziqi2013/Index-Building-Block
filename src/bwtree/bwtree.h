@@ -678,6 +678,8 @@ class DeltaChainTraverser {
                                    NodeBaseType *node_p) {
     if(recursive == true) {
       Traverse(static_cast<MergeDeltaType *>(node_p)->GetNext(), handler_p);
+      // Manually reset the finished flag here because we should recurse
+      handler_p->Finished() = false;
       Traverse(static_cast<MergeDeltaType *>(node_p)->GetMergeSibling(), handler_p);
     }
 

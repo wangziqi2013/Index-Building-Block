@@ -589,8 +589,8 @@ class TraverseHandlerBase {
   void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { Fail(); }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { Fail(); }
 
-  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { Fail(); }
-  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { Fail(); }
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { Fail(); return false; }
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { Fail(); return false; }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { Fail(); }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
@@ -642,8 +642,8 @@ class TraverseHandlerBase {
     void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { }
     void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { }
 
-    void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { }
-    void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { }
+    bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { }
+    bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { }
 
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
@@ -671,6 +671,18 @@ class DeltaChainTraverser {
   using NodeBaseType = NodeBase<KeyType>;
   using LeafBaseType = DefaultBaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = DefaultBaseNode<KeyType, NodeIDType, DeltaChainType>;
+
+  // * HandleMergeRecursive() - Handles recursive traversal of merge nodes
+  template <typename MergeDeltaType>
+  static void HandleMergeRecursive(bool recursive, TraverseHandlerType *handler_p, 
+                                   NodeBaseType *node_p) {
+    if(recursive == true) {
+      Traverse(static_cast<MergeDeltaType *>(node_p)->GetNext(), handler_p);
+      Traverse(static_cast<MergeDeltaType *>(node_p)->GetMergeSibling(), handler_p);
+    }
+
+    return;
+  }
 
   // * Traverse() - Starts traversing the delta chain
   static void Traverse(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
@@ -706,11 +718,15 @@ class DeltaChainTraverser {
           handler_p->HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
           break;
         case NodeType::LeafMerge:
-          handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
-          break;
+          HandleMergeRecursive<typename DeltaType::LeafMergeType>(
+            handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p)),
+                                       handler_p, node_p);
+          return;
         case NodeType::InnerMerge:
-          handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
-          break;
+          HandleMergeRecursive<typename DeltaType::InnerMergeType>(
+            handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p)),
+                                        handler_p, node_p);
+          return;
         case NodeType::LeafRemove:
           handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
           break;

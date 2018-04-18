@@ -203,8 +203,9 @@ public:
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { test_printf("LeafSplit\n"); GetNext() = node_p->GetNext(); }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { test_printf("InnerSplit\n"); GetNext() = node_p->GetNext(); }
 
-  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); GetNext() = node_p->GetNext(); }
-  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); GetNext() = node_p->GetNext(); }
+  // Special for merge because we recursively traverse it
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); return true; }
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); return true; }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { test_printf("LeafRemove\n"); GetNext() = node_p->GetNext(); }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { test_printf("InnerRemove\n"); GetNext() = node_p->GetNext(); }
@@ -256,6 +257,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   LeafDeleteType *delete_node_p = node_p->AllocateDelta<LeafDeleteType>(
     NodeType::LeafDelete, ++height, size - 1, insert_node_p->GetLowKey(), insert_node_p->GetHighKey(), insert_node_p, 
     delete_key, delete_value);
+  merge_sibling = delete_node_p;
 
   LeafSplitType *split_node_p = node_p->AllocateDelta<LeafSplitType>(
     NodeType::LeafSplit, ++height, size / 2, delete_node_p->GetLowKey(), delete_node_p->GetHighKey(), delete_node_p, 

@@ -780,6 +780,7 @@ class AppendHelper {
   using NodeBaseType = NodeBase<KeyType>;
   using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
+
   // This is required for using the low key to determine the delta chain
   static_assert(offsetof(LeafBaseType, low_key) != offsetof(InnerBaseType, low_key),
                 "Low key in InnerBaseType and LeafBaseType must have the same offset");
@@ -798,16 +799,19 @@ class AppendHelper {
   NodeBaseType *node_p;
 };
 
-template <typename KeyType, typename ValueType, 
-          template <typename, size_t> typename MappingTable, typename DeltaChainType, 
+template <typename _KeyType, typename _ValueType, 
+          template <typename, size_t> typename MappingTable, typename _DeltaChainType, 
           template <typename, typename, typename> typename BaseNode>
 class BwTree {
  public:
   static constexpr size_t MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
+  using KeyType = _KeyType;
+  using ValueType = _ValueType;
   using NodeBaseType = NodeBase<KeyType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
+  using DeltaChainType = _DeltaChainType;
   // Metadata variable type
-  using NodeIDType = typename NodeBaseType::NodeIDType;
+  using NodeIDType = typename MappingTableType::NodeIDType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;
   using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using BoundKeyType = typename NodeBaseType::BoundKeyType;

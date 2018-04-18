@@ -648,7 +648,12 @@ class TraverseHandlerBase {
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
 
+    // Omit if not needed
     void Init(NodeBaseType *node_p) { ... }
+    // * GetNext() - Interface for accessing next_p
+    NodeBaseType *&GetNext() { return BaseClassType::next_p; }
+    // * Finished() - Interface for accessing finished
+    bool &Finished() { return BaseClassType::finished; }
   };
  * 
  * 1. Base nodes must be the terminating node because they do not have next pointer.

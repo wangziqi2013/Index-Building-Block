@@ -186,23 +186,28 @@ public:
 
   SimpleTraverseHandler() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
-  void HandleLeafBase(LeafBaseType *node_p) { test_printf("LeafBase\n"); BaseClassType::finished = true; }
-  void HandleInnerBase(InnerBaseType *node_p) { test_printf("InnerBase\n"); BaseClassType::finished = true; }
+  // * GetNext() - Interface for accessing next_p
+  NodeBaseType *&GetNext() { return BaseClassType::next_p; }
+  // * Finished() - Interface for accessing finished
+  bool &Finished() { return BaseClassType::finished; }
 
-  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { test_printf("LeafInsert\n"); BaseClassType::next_p = node_p->GetNext(); }
-  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { test_printf("InnerInsert\n"); BaseClassType::next_p = node_p->GetNext(); }
+  void HandleLeafBase(LeafBaseType *node_p) { test_printf("LeafBase\n"); Finished() = true; }
+  void HandleInnerBase(InnerBaseType *node_p) { test_printf("InnerBase\n"); Finished() = true; }
 
-  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { test_printf("LeafDelete\n"); BaseClassType::next_p = node_p->GetNext(); }
-  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { test_printf("InnerDelete\n"); BaseClassType::next_p = node_p->GetNext(); }
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { test_printf("LeafInsert\n"); GetNext() = node_p->GetNext(); }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { test_printf("InnerInsert\n"); GetNext() = node_p->GetNext(); }
 
-  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { test_printf("LeafSplit\n"); BaseClassType::next_p = node_p->GetNext(); }
-  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { test_printf("InnerSplit\n"); BaseClassType::next_p = node_p->GetNext(); }
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { test_printf("LeafDelete\n"); GetNext() = node_p->GetNext(); }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { test_printf("InnerDelete\n"); GetNext() = node_p->GetNext(); }
 
-  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); BaseClassType::next_p = node_p->GetNext(); }
-  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); BaseClassType::next_p = node_p->GetNext(); }
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { test_printf("LeafSplit\n"); GetNext() = node_p->GetNext(); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { test_printf("InnerSplit\n"); GetNext() = node_p->GetNext(); }
 
-  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { test_printf("LeafRemove\n"); BaseClassType::next_p = node_p->GetNext(); }
-  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { test_printf("InnerRemove\n"); BaseClassType::next_p = node_p->GetNext(); }
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); GetNext() = node_p->GetNext(); }
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); GetNext() = node_p->GetNext(); }
+
+  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { test_printf("LeafRemove\n"); GetNext() = node_p->GetNext(); }
+  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { test_printf("InnerRemove\n"); GetNext() = node_p->GetNext(); }
 };
 
 /*

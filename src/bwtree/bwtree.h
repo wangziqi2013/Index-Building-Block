@@ -565,7 +565,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
 
 template <typename KeyType, typename ValueType, typename NodeIDType, 
           typename DeltaChainType>
-class TraverseHandlerType {
+class TraverseHandlerBase {
  public:
   using NodeBaseType = NodeBase<KeyType>;
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
@@ -576,20 +576,20 @@ class TraverseHandlerType {
   void HandleLeafBase(LeafBaseType *node_p) { Fail(); }
   void HandleInnerBase(InnerBaseType *node_p) { Fail(); }
 
-  void HandleLeafInsert(DeltaType::LeafInsertType *node_p) { Fail(); }
-  void HandleInnerInsert(DeltaType::InnerInsertType *node_p) { Fail(); }
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { Fail(); }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { Fail(); }
 
-  void HandleLeafDelete(DeltaType::LeafDeleteType *node_p) { Fail(); }
-  void HandleInnerDelete(DeltaType::InnerDeleteType *node_p) { Fail(); }
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { Fail(); }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { Fail(); }
 
-  void HandleLeafISplit(DeltaType::LeafSplitType *node_p) { Fail(); }
-  void HandleInnerSplit(DeltaType::InnerSplitType *node_p) { Fail(); }
+  void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { Fail(); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { Fail(); }
 
-  void HandleLeafMerge(DeltaType::LeafMergeType *node_p) { Fail(); }
-  void HandleInnerMerge(DeltaType::InnerMergeType *node_p) { Fail(); }
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { Fail(); }
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { Fail(); }
 
-  void HandleLeafRemove(DeltaType::LeafRemoveType *node_p) { Fail(); }
-  void HandleInnerRemove(DeltaType::InnerRemoveType *node_p) { Fail(); }
+  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { Fail(); }
+  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
 
   // * GetNext() - Returns the next pointer
   NodeBaseType *GetNext() = delete;
@@ -606,10 +606,10 @@ template <typename KeyType, typename ValueType, typename NodeIDType,
 class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
  public:
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
-  using NodeBaseType = BaseClassType::NodeBaseType;
-  using DeltaType = BaseClassType::DeltaType;
-  using LeafBaseType = BaseClassType::LeafBaseType;
-  using InnerBaseType = BaseClassType::InnerBaseType;
+  using NodeBaseType = typename BaseClassType::NodeBaseType;
+  using DeltaType = typename BaseClassType::DeltaType;
+  using LeafBaseType = typename BaseClassType::LeafBaseType;
+  using InnerBaseType = typename BaseClassType::InnerBaseType;
 
   // Repeat this for all types appear below
   //void Handle...Type(NodeBaseType *node_p) {...}

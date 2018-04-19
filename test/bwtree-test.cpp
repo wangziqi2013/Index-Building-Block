@@ -153,7 +153,7 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   always_assert(new_node_p->ValueAt(0) == size + 1);
   always_assert((new_node_p->KeyAt(new_size - 1)) == (size - 1) * 2);
   always_assert((new_node_p->ValueAt(new_size - 1)) == (size - 1) * 2 + 1);
-  always_assert(new_node_p->GetHighKey()->key == high_key);
+  always_assert(new_node_p->GetHighKey()->IsInf());
 
   int key = new_node_p->KeyAt(0);
   for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
@@ -335,8 +335,9 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(600, NodeIDType{2}, NodeSizeType{400}) == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafMerge(700, NodeIDType{3}, node_p) == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(600, NodeIDType{1}, NodeSizeType{400}) == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafMerge(700, NodeIDType{2}, node_p) == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafRemove(0) == nullptr));
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using TraverserType = \

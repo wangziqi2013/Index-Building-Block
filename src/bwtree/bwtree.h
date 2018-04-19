@@ -880,7 +880,6 @@ class AppendHelper {
 
   // * AppendLeafSplit() - Appends a leaf split delta
   inline LeafSplitType *AppendLeafSplit(const KeyType &key, NodeIDType node_id, NodeSizeType new_size) {
-    assert(node_p->KeyInNode(key));
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafSplitType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
@@ -895,7 +894,6 @@ class AppendHelper {
 
   // * AppendLeafMerge() - Appends a leaf merge delta
   inline LeafMergeType *AppendLeafMerge(const KeyType &key, NodeIDType sibling_id, NodeBaseType *sibling_p) {
-    assert(node_p->KeyInNode(key));
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafMergeType *delta_p = GetBase()->template AllocateDelta<LeafMergeType, NodeType, NodeHeightType>(
@@ -907,12 +905,11 @@ class AppendHelper {
 
   // * AppendLeafRemove() - Appends a leaf remove delta
   inline LeafRemoveType *AppendLeafRemove(NodeIDType node_id) {
-    assert(node_p->KeyInNode(key));
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafRemoveType *delta_p = GetBase()->template AllocateDelta<LeafRemoveType, NodeType, NodeHeightType>(
-      NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
-      node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
+      NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize(),
+      node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       node_id);
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }

@@ -197,10 +197,10 @@ class DefaultDeltaChainType {
   }
 
   // * AllocateDelta() - Allocate a delta record of a given type
-  template<typename DeltaNodeType, typename ...Args>
-  inline DeltaNodeType *AllocateDelta(Args &&...args) {
-    IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaNodeType)));
-    return new DeltaNodeType{args...};
+  template<typename AllocDeltaNodeType, typename ...Args>
+  inline AllocDeltaNodeType *AllocateDelta(Args &&...args) {
+    IF_DEBUG(mem_usage.fetch_add(sizeof(AllocDeltaNodeType)));
+    return new AllocDeltaNodeType{args...};
   }
 
  private:
@@ -429,9 +429,9 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
     delta_chain{} {}
 
   // * AllocateDelta() - Wrapping around the delta chain
-  template <typename DeltaNodeType, typename ...Args>
-  inline DeltaNodeType *AllocateDelta(Args &&...args) {
-    return delta_chain.AllocateDelta<DeltaNodeType>(args...);
+  template <typename AllocDeltaNodeType, typename ...Args>
+  inline AllocDeltaNodeType *AllocateDelta(Args &&...args) {
+    return delta_chain.AllocateDelta<AllocDeltaNodeType>(args...);
   }
 
   // This data member does not space but it has the same address as the low key
@@ -814,10 +814,21 @@ class AppendHelper {
   using NodeIDType = typename MappingTableType::NodeIDType;
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   using NodeBaseType = NodeBase<KeyType>;
+  using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
+  using LeafInsertType = typename DeltaType::LeafInsertType;
+  using LeafDeleteType = typename DeltaType::LeafDeleteType;
+  using LeafSplitType = typename DeltaType::LeafSplitType;
+  using LeafMergeType = typename DeltaType::LeafMergeType;
+  using LeafRemoveType = typename DeltaType::LeafRemoveType;
+  using InnerInsertType = typename DeltaType::InnerInsertType;
+  using InnerDeleteType = typename DeltaType::InnerDeleteType;
+  using InnerSplitType = typename DeltaType::InnerSplitType;
+  using InnerMergeType = typename DeltaType::InnerMergeType;
+  using InnerRemoveType = typename DeltaType::InnerRemoveType;
 
   // This is required for using the low key to determine the delta chain
-  static constexpr size_t low_key_offset = offsetof(ExtendedBaseType, low_key_addr);
+  static constexpr size_t LOW_KEY_OFFSET = offsetof(ExtendedBaseType, low_key_addr);
 
   // * AppendHelper() - Constructor
   AppendHelper(NodeIDType pnode_id, NodeBaseType *pnode_p, MappingTableType *ptable_p) : 
@@ -826,7 +837,7 @@ class AppendHelper {
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase() { 
     return reinterpret_cast<ExtendedBaseType *>(
-      reinterpret_cast<char *>(node_p->GetLowKey()) - low_key_offset); 
+      reinterpret_cast<char *>(node_p->GetLowKey()) - LOW_KEY_OFFSET); 
   }
 
   //template <typename DeltaNodeType>
@@ -834,11 +845,14 @@ class AppendHelper {
 
   //}
   
-  // * AppendLeafInsert() - Appends a leaf insert delta node
-  template <typename DeltaNodeType, typename ...Args>
-  inline DeltaNodeType *AppendDelta(Args &&...args) {
-    DeltaNodeType *delta_p = node_p->GetBase()->AllocateDelta<DeltaNodeType>(args...);
-    // Return the pointer if fails. Otherwise nullptr
+  inline LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
+    assert(node_p->KeyInNode(key));
+    // NOTE: For some strange reason the compiler could not decude the type of this
+    // template function call. We explicitly specify the height type
+    LeafInsertType *delta_p = GetBase()->template AllocateDelta<LeafInsertType, NodeType, NodeHeightType>(
+      node_p->GetType(), node_p->GetHeight() + 1, node_p->GetSize() + 1,
+      node_p->GetLowKey(), node_p->GetHighKey(), node_p,
+      key, value);
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 

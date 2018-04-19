@@ -311,7 +311,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using KeyType = int;
   using ValueType = std::string;
   using BwTreeType = BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode>;
-  using NodeSizeType = typename BwTree::NodeSizeType;
+  using NodeSizeType = typename BwTreeType::NodeSizeType;
   using NodeIDType = typename BwTreeType::NodeIDType;
   using DeltaChainType = typename BwTreeType::DeltaChainType;
   using MappingTableType = typename BwTreeType::MappingTableType;
@@ -333,8 +333,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
   always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(600, 2, NodeSizeType{400}) == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(700, "this is 700") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(600, NodeIDType{2}, NodeSizeType{400}) == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafMerge(700, NodeIDType{3}, node_p) == nullptr));
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using TraverserType = \

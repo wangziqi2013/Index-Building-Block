@@ -845,12 +845,13 @@ class AppendHelper {
 
   //}
   
+  // * AppendLeafInsert() - Appends a leaf insert delta
   inline LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
     assert(node_p->KeyInNode(key));
-    // NOTE: For some strange reason the compiler could not decude the type of this
+    // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafInsertType *delta_p = GetBase()->template AllocateDelta<LeafInsertType, NodeType, NodeHeightType>(
-      node_p->GetType(), node_p->GetHeight() + 1, node_p->GetSize() + 1,
+      NodeType::LeafInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value);
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;

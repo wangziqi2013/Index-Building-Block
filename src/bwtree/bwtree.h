@@ -408,6 +408,31 @@ class Delta {
   using InnerRemoveType = INNER_REMOVE_TYPE(KeyType, NodeIDType);
 };
 
+template <typename KeyType>
+class ExtendedBaseNode : public NodeBase<KeyType> {
+ public:
+  using BaseClassType = NodeBase<KeyType>;
+
+  // * ExtendedBaseNode() - Constructor
+  ExtendedBaseNode(NodeType ptype, 
+                   NodeHeightType pheight,
+                   NodeSizeType psize,
+                   const BoundKeyType &plow_key,
+                   const BoundKeyType &phigh_key) : 
+    BaseClassType{ptype, pheight, psize, &low_key, &high_key},
+    low_key{plow_key},
+    high_key{phigh_key},
+    delta_chain{} {}
+
+  // This data member does not space but it has the same address as the low key
+  char low_key_addr[0];
+ private:
+  // Instances of low and high keys
+  BoundKeyType low_key;
+  BoundKeyType high_key;
+  DeltaChainType delta_chain;
+};
+
 /*
  * class DefaultBaseNode - This class defines the way key and values are stored
  *                         in the base node
@@ -427,12 +452,13 @@ class Delta {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultBaseNode : public NodeBase<KeyType> {
+class DefaultBaseNode : public ExtendedBaseNode<KeyType> {
  public:
-  using BaseClassType = NodeBase<KeyType>;
-  using NodeSizeType = typename BaseClassType::NodeSizeType;
-  using NodeHeightType = typename BaseClassType::NodeHeightType;
-  using BoundKeyType = typename BaseClassType::BoundKeyType;
+  using BaseClassType = ExtendedBaseNode<KeyType>;
+  using BaseBaseClassType = typename BaseClassType::BaseClassType;
+  using NodeSizeType = typename BaseBaseClassType::NodeSizeType;
+  using NodeHeightType = typename BaseBaseClassType::NodeHeightType;
+  using BoundKeyType = typename BaseBaseClassType::BoundKeyType;
   // Whether only support unique keys
   static constexpr bool support_non_unique_key = false;
  private:
@@ -442,10 +468,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
                   NodeSizeType psize,
                   const BoundKeyType &plow_key,
                   const BoundKeyType &phigh_key) :
-    BaseClassType{ptype, pheight, psize, &low_key, &high_key},
-    low_key{plow_key},
-    high_key{phigh_key},
-    delta_chain{} {
+    BaseClassType{ptype, pheight, psize, plow_key, phigh_key} {
     return;
   } 
   
@@ -499,7 +522,7 @@ class DefaultBaseNode : public NodeBase<KeyType> {
   inline KeyType &KeyAt(int index) { return KeyBegin()[index]; }
   // * ValueAt() - Access value on a particular index
   inline ValueType &ValueAt(int index) {
-    assert(static_cast<NodeSizeType>(index) < BaseClassType::GetSize());
+    assert(static_cast<NodeSizeType>(index) < BaseBaseClassType::GetSize());
     return ValueBegin()[index];
   }
 
@@ -512,11 +535,11 @@ class DefaultBaseNode : public NodeBase<KeyType> {
    * I' exists, which means the key is >= all items, it returns end()
    */
   int Search(const KeyType &key) {
-    assert(BaseClassType::KeyInNode(key));
+    assert(BaseBaseClassType::KeyInNode(key));
     // Note that the first key do not need to be searched for both leaf and 
     // inner nodes
     int ret = (std::upper_bound(KeyBegin() + 1, KeyEnd(), key) - KeyBegin()) - 1;
-    assert(ret >= 0 && ret < static_cast<int>(BaseClassType::GetSize()));
+    assert(ret >= 0 && ret < static_cast<int>(BaseBaseClassType::GetSize()));
     return ret;
   }
 
@@ -540,15 +563,15 @@ class DefaultBaseNode : public NodeBase<KeyType> {
    *    key should be updated by the split delta
    */
   DefaultBaseNode *Split() {
-    NodeSizeType old_size = BaseClassType::GetSize();
+    NodeSizeType old_size = BaseBaseClassType::GetSize();
     assert(old_size > 1);
     // The index of the split key which is also the low key of the new node
     NodeSizeType pivot = old_size / 2;
     NodeSizeType new_size = old_size - pivot;
     // Note that low key for new node is always not inf
     DefaultBaseNode *node_p = \
-      Get(BaseClassType::GetType(), new_size, 
-          {KeyAt(static_cast<int>(pivot)), false}, *BaseClassType::GetHighKey());
+      Get(BaseBaseClassType::GetType(), new_size, 
+          {KeyAt(static_cast<int>(pivot)), false}, *BaseBaseClassType::GetHighKey());
     // Copy the upper half of the current node into the new node
     std::copy(KeyBegin() + pivot, KeyEnd(), node_p->KeyBegin());
     std::copy(ValueBegin() + pivot, ValueEnd(), node_p->ValueBegin());
@@ -556,22 +579,17 @@ class DefaultBaseNode : public NodeBase<KeyType> {
     return node_p;
   }
  public:
-  // This data member does not space but it has the same address as the low key
-  char low_key_addr[0];
+  
  private:
   // * KeyBegin() - Return the first pointer for values
   inline ValueType *KeyBegin() { return key_begin; }
   // * KeyEnd() - Return the first out-of-bound pointer for keys
-  inline KeyType *KeyEnd() { return key_begin + BaseClassType::GetSize(); }
+  inline KeyType *KeyEnd() { return key_begin + BaseBaseClassType::GetSize(); }
   // * ValueBegin() - Return the first pointer for values
   inline ValueType *ValueBegin() { return reinterpret_cast<ValueType *>(KeyEnd()); }
   // * ValueEnd() - Return the first out-of-bound pointer for values
-  inline ValueType *ValueEnd() { return ValueBegin() + BaseClassType::GetSize(); }
+  inline ValueType *ValueEnd() { return ValueBegin() + BaseBaseClassType::GetSize(); }
 
-  // Instances of low and high keys
-  BoundKeyType low_key;
-  BoundKeyType high_key;
-  DeltaChainType delta_chain;
   // This member does not take any storage, but let us obtain the address
   // of the memory address after all class members
   KeyType key_begin[0];
@@ -812,8 +830,12 @@ class AppendHelper {
       reinterpret_cast<char *>(node_p->GetLowKey()) - low_key_offset); 
   }
 
-  inline 
+  template <typename DeltaNodeType>
+  inline DestroyDelta() {
 
+  }
+  
+  // * AppendLeafInsert() - Appends a leaf insert delta node
   inline DeltaType::LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
     DeltaType::LeafInsertType *insert_p = \
       node_p->GetLeafBase()->AllocateDelta<DeltaType::LeafInsertType>(
@@ -822,6 +844,7 @@ class AppendHelper {
         key, value);
     
     bool ret = table_p->CAS(node_id, node_p, insert_p);
+    return ret == true ? insert_p : nullptr;
   }
 
  IF_DEBUG(public:)

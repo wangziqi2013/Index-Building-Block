@@ -870,7 +870,7 @@ class AppendHelper {
   }
 
   // * AppendLeafSplit() - Appends a leaf split delta
-  inline LeafInsertType *AppendLeafSplit(const KeyType &key, const NodeIDType node_id, NodeSizeType new_size) {
+  inline LeafInsertType *AppendLeafSplit(const KeyType &key, NodeIDType node_id, NodeSizeType new_size) {
     assert(node_p->KeyInNode(key));
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
@@ -878,6 +878,18 @@ class AppendHelper {
       NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
       node_p->GetLowKey(), BoundKeyType::Get(key), node_p,
       key, node_id);
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+  }
+
+  // * AppendLeafMerge() - Appends a leaf merge delta
+  inline LeafInsertType *AppendLeafMerge(const KeyType &key, NodeIDType sibling_id, NodeBaseType *sibling_p) {
+    assert(node_p->KeyInNode(key));
+    // NOTE: For some strange reasons the compiler could not deduce the type of this
+    // template function call. We explicitly specify the height type
+    LeafInsertType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
+      NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
+      node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
+      key, sibling_id, sibling_p);
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 

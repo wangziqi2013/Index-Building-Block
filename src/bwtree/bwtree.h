@@ -34,6 +34,9 @@ class BoundKey {
  public:
   KeyType key;
   bool inf;
+  // * BoundKey() - Constructor
+  BoundKey(const KeyType &pkey) : key{pkey} {} 
+  // * IsInf() - Whether the key is infinite
   inline bool IsInf() const { return inf; }
   // Operators for checking magnitude with a key
   // An inf key could not be compared with a key using key comparator. The caller
@@ -273,9 +276,9 @@ class NodeBase {
 #define LEAF_DELETE_TYPE(KeyType, ValueType) \
   DeltaNode<KeyType, KeyType, ValueType, char[0], char[0], char[0], char[0]>
 #define LEAF_SPLIT_TYPE(KeyType, NodeIDType) \
-  DeltaNode<KeyType, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+  DeltaNode<BoundKey<KeyType>, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
 #define INNER_SPLIT_TYPE(KeyType, NodeIDType) \
-  DeltaNode<KeyType, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+  DeltaNode<BoundKey<KeyType>, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
 #define LEAF_MERGE_TYPE(KeyType, NodeIDType) \
   DeltaNode<KeyType, KeyType, NodeIDType, NodeBase<KeyType> *, char[0], char[0], char[0]>
 #define INNER_MERGE_TYPE(KeyType, NodeIDType) \
@@ -367,8 +370,8 @@ class DeltaNode : public NodeBase<KeyType> {
   // delta attributes according to delta type
   inline T1 &GetInsertKey() { return t1; }
   inline T1 &GetDeleteKey() { return t1; }
-  inline T1 &GetSplitKey() { return t1; }
-  inline T1 &GetMergeKey() { return t1; }
+  inline T1 &GetSplitKey() { return t1.key; }
+  inline T1 &GetMergeKey() { return t1.key; }
   inline T1 &GetRemoveNodeID() { return t1; }
   
   inline T2 &GetInsertValue() { return t2; }

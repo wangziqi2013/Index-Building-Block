@@ -197,10 +197,10 @@ class DefaultDeltaChainType {
   }
 
   // * AllocateDelta() - Allocate a delta record of a given type
-  template<typename DeltaType, typename ...Args>
-  inline DeltaType *AllocateDelta(Args &&...args) {
-    IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaType)));
-    return new DeltaType{args...};
+  template<typename DeltaNodeType, typename ...Args>
+  inline DeltaNodeType *AllocateDelta(Args &&...args) {
+    IF_DEBUG(mem_usage.fetch_add(sizeof(DeltaNodeType)));
+    return new DeltaNodeType{args...};
   }
 
  private:
@@ -408,13 +408,17 @@ class Delta {
   using InnerRemoveType = INNER_REMOVE_TYPE(KeyType, NodeIDType);
 };
 
-template <typename KeyType>
-class ExtendedBaseNode : public NodeBase<KeyType> {
+// * class ExtendedNodeBase - Type irrelevant part of the base node
+template <typename KeyType, typename DeltaChainType>
+class ExtendedNodeBase : public NodeBase<KeyType> {
  public:
   using BaseClassType = NodeBase<KeyType>;
+  using NodeSizeType = typename BaseClassType::NodeSizeType;
+  using NodeHeightType = typename BaseClassType::NodeHeightType;
+  using BoundKeyType = typename BaseClassType::BoundKeyType;
 
-  // * ExtendedBaseNode() - Constructor
-  ExtendedBaseNode(NodeType ptype, 
+  // * ExtendedNodeBase() - Constructor
+  ExtendedNodeBase(NodeType ptype, 
                    NodeHeightType pheight,
                    NodeSizeType psize,
                    const BoundKeyType &plow_key,
@@ -423,6 +427,12 @@ class ExtendedBaseNode : public NodeBase<KeyType> {
     low_key{plow_key},
     high_key{phigh_key},
     delta_chain{} {}
+
+  // * AllocateDelta() - Wrapping around the delta chain
+  template <typename DeltaNodeType, typename ...Args>
+  inline DeltaNodeType *AllocateDelta(Args &&...args) {
+    return delta_chain.AllocateDelta<DeltaNodeType>(args...);
+  }
 
   // This data member does not space but it has the same address as the low key
   char low_key_addr[0];
@@ -452,9 +462,9 @@ class ExtendedBaseNode : public NodeBase<KeyType> {
 template <typename KeyType, 
           typename ValueType, 
           typename DeltaChainType>
-class DefaultBaseNode : public ExtendedBaseNode<KeyType> {
+class DefaultBaseNode : public ExtendedNodeBase<KeyType, DeltaChainType> {
  public:
-  using BaseClassType = ExtendedBaseNode<KeyType>;
+  using BaseClassType = ExtendedNodeBase<KeyType, DeltaChainType>;
   using BaseBaseClassType = typename BaseClassType::BaseClassType;
   using NodeSizeType = typename BaseBaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseBaseClassType::NodeHeightType;
@@ -510,12 +520,6 @@ class DefaultBaseNode : public ExtendedBaseNode<KeyType> {
     node_p->~DefaultBaseNode();
     delete[] reinterpret_cast<unsigned char *>(node_p);
     return;
-  }
-
-  // * AllocateDelta() - Wrapping around the delta chain
-  template <typename DeltaType, typename ...Args>
-  inline DeltaType *AllocateDelta(Args &&...args) {
-    return delta_chain.AllocateDelta<DeltaType>(args...);
   }
 
   // * KeyAt() - Access key on a particular index
@@ -811,13 +815,10 @@ class AppendHelper {
   using NodeIDType = typename MappingTableType::NodeIDType;
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   using NodeBaseType = NodeBase<KeyType>;
-  using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
-  using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
+  using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
 
   // This is required for using the low key to determine the delta chain
-  static_assert(offsetof(LeafBaseType, low_key_addr) == offsetof(InnerBaseType, low_key_addr),
-                "Low key in InnerBaseType and LeafBaseType must have the same offset");
-  static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key_addr);
+  static constexpr size_t low_key_offset = offsetof(ExtendedBaseType, low_key_addr);
 
   // * AppendHelper() - Constructor
   AppendHelper(NodeIDType pnode_id, NodeBaseType *pnode_p, MappingTableType *ptable_p) : 
@@ -825,31 +826,24 @@ class AppendHelper {
 
  private:
   // * GetBase() - Returns a pointer to the base node of the delta chain
-  inline NodeBaseType *GetBase() { 
-    return reinterpret_cast<NodeBaseType *>(
+  inline ExtendedBaseType *GetBase() { 
+    return reinterpret_cast<ExtendedBaseType *>(
       reinterpret_cast<char *>(node_p->GetLowKey()) - low_key_offset); 
   }
 
-  template <typename DeltaNodeType>
-  inline DestroyDelta() {
+  //template <typename DeltaNodeType>
+  //inline DestroyDelta() {
 
-  }
+  //}
   
   // * AppendLeafInsert() - Appends a leaf insert delta node
-  inline DeltaType::LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
-    DeltaType::LeafInsertType *insert_p = \
-      node_p->GetLeafBase()->AllocateDelta<DeltaType::LeafInsertType>(
-        NodeType::LeafInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1, 
-        node_p->GetLowKey(), node_p->GetHighKey(), node_p,
-        key, value);
-    
-    bool ret = table_p->CAS(node_id, node_p, insert_p);
-    return ret == true ? insert_p : nullptr;
+  template <typename DeltaNodeType, typename ...Args>
+  inline DeltaNodeType *AppendDelta(Args &&...args) {
+    DeltaNodeType *delta_p = node_p->GetBase()->AllocateDelta<DeltaNodeType>(args...);
+    // Return the pointer if fails. Otherwise nullptr
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 
- IF_DEBUG(public:)
-  inline LeafBaseType *GetLeafBase() { return static_cast<LeafBaseType *>(GetBase()); }
-  inline LeafBaseType *GetInnerBase() { return static_cast<InnerBaseType *>(GetBase()); }
  private:
   NodeIDType node_id;
   NodeBaseType *node_p;
@@ -868,6 +862,7 @@ class BwTree {
   using DeltaChainType = _DeltaChainType;
   // Derived types
   using NodeBaseType = NodeBase<KeyType>;
+  using ExtendedBaseType = ExtendedNodeBase<KeyType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
   // Metadata variable types
   using NodeIDType = typename MappingTableType::NodeIDType;

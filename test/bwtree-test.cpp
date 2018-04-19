@@ -311,10 +311,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using KeyType = int;
   using ValueType = std::string;
   using BwTreeType = BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode>;
-  using NodeIDType = BwTreeType::NodeIDType;
-  using MappingTableType = BwTreeType::MappingTableType;
-  using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, 
-    typename BwTreeType::DeltaChainType, DefaultBaseNode>;
+  using NodeIDType = typename BwTreeType::NodeIDType;
+  using DeltaChainType = typename BwTreeType::DeltaChainType;
+  using MappingTableType = typename BwTreeType::MappingTableType;
+  using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
   using LeafBaseType = typename BwTreeType::LeafBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
 
@@ -325,8 +325,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
   // Must be the first ID
   always_assert(node_id == MappingTableType::FIRST_NODE_ID);
 
-  AppendHelperType ah{node_p};
-  always_assert(ah.GetLeafBase()->GetType() == NodeType::LeafBase);
+  AppendHelperType ah{node_id, node_p, table_p};
+  always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
 
   return;
 } END_TEST

@@ -808,8 +808,7 @@ class DeltaChainTraverser {
  * 2. This class will be optimized out by the compiler
  */
 template <typename KeyType, typename ValueType, 
-          typename MappingTableType, typename DeltaChainType, 
-          template <typename, typename, typename> typename BaseNode>
+          typename MappingTableType, typename DeltaChainType>
 class AppendHelper {
  public:
   using NodeIDType = typename MappingTableType::NodeIDType;
@@ -824,7 +823,6 @@ class AppendHelper {
   AppendHelper(NodeIDType pnode_id, NodeBaseType *pnode_p, MappingTableType *ptable_p) : 
     node_id{pnode_id}, node_p{pnode_p}, table_p{ptable_p} {}
 
- private:
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase() { 
     return reinterpret_cast<ExtendedBaseType *>(
@@ -862,7 +860,7 @@ class BwTree {
   using DeltaChainType = _DeltaChainType;
   // Derived types
   using NodeBaseType = NodeBase<KeyType>;
-  using ExtendedBaseType = ExtendedNodeBase<KeyType>;
+  using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
   using MappingTableType = MappingTable<NodeBaseType, MAPPING_TABLE_SIZE>;
   // Metadata variable types
   using NodeIDType = typename MappingTableType::NodeIDType;

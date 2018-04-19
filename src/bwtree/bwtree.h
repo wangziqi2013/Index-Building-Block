@@ -96,6 +96,7 @@ class DefaultMappingTable {
   using NodeIDType = uint64_t;
   // Invalid node ID is defined as the largest possible unsigned value
   static constexpr NodeIDType INVALID_NODE_ID = static_cast<NodeIDType>(-1);
+  static constexpr NodeIDType FIRST_NODE_ID = 0;
 
  private:
   /*
@@ -105,7 +106,7 @@ class DefaultMappingTable {
    * or directly putting it as a memory, as the table can be potentially large
    */
   DefaultMappingTable() : 
-    next_slot{NodeIDType{0}} {
+    next_slot{FIRST_NODE_ID} {
     return;
   }
 
@@ -801,16 +802,35 @@ class AppendHelper {
   static constexpr size_t low_key_offset = offsetof(LeafBaseType, low_key_addr);
 
   // * AppendHelper() - Constructor
-  AppendHelper(NodeBaseType *pnode_p) : node_p{pnode_p} {}
-//  bool AppendLeafInsert(NodeID node_id, )
+  AppendHelper(NodeIDType pnode_id, NodeBaseType *pnode_p, MappingTableType *ptable_p) : 
+    node_id{pnode_id}, node_p{pnode_p}, table_p{ptable_p} {}
+
  private:
   // * GetBase() - Returns a pointer to the base node of the delta chain
-  inline NodeBaseType *GetBase(NodeBaseType *pnode_p) { 
+  inline NodeBaseType *GetBase() { 
     return reinterpret_cast<NodeBaseType *>(
-      reinterpret_cast<char *>(pnode_p->GetLowKey()) - low_key_offset); 
+      reinterpret_cast<char *>(node_p->GetLowKey()) - low_key_offset); 
   }
 
+  inline 
+
+  inline DeltaType::LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
+    DeltaType::LeafInsertType *insert_p = \
+      node_p->GetLeafBase()->AllocateDelta<DeltaType::LeafInsertType>(
+        NodeType::LeafInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1, 
+        node_p->GetLowKey(), node_p->GetHighKey(), node_p,
+        key, value);
+    
+    bool ret = table_p->CAS(node_id, node_p, insert_p);
+  }
+
+ IF_DEBUG(public:)
+  inline LeafBaseType *GetLeafBase() { return static_cast<LeafBaseType *>(GetBase()); }
+  inline LeafBaseType *GetInnerBase() { return static_cast<InnerBaseType *>(GetBase()); }
+ private:
+  NodeIDType node_id;
   NodeBaseType *node_p;
+  MappingTableType *table_p;
 };
 
 template <typename _KeyType, typename _ValueType, 

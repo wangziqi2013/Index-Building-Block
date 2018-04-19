@@ -857,6 +857,30 @@ class AppendHelper {
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 
+  // * AppendLeafDelete() - Appends a leaf delete delta
+  inline LeafInsertType *AppendLeafDelete(const KeyType &key, const ValueType &value) {
+    assert(node_p->KeyInNode(key));
+    // NOTE: For some strange reasons the compiler could not deduce the type of this
+    // template function call. We explicitly specify the height type
+    LeafInsertType *delta_p = GetBase()->template AllocateDelta<LeafDeleteType, NodeType, NodeHeightType>(
+      NodeType::LeafDelete, node_p->GetHeight() + 1, node_p->GetSize() - 1,
+      node_p->GetLowKey(), node_p->GetHighKey(), node_p,
+      key, value);
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+  }
+
+  // * AppendLeafSplit() - Appends a leaf split delta
+  inline LeafInsertType *AppendLeafSplit(const KeyType &key, const NodeIDType node_id, NodeSizeType new_size) {
+    assert(node_p->KeyInNode(key));
+    // NOTE: For some strange reasons the compiler could not deduce the type of this
+    // template function call. We explicitly specify the height type
+    LeafInsertType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
+      NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
+      node_p->GetLowKey(), BoundKeyType::Get(key), node_p,
+      key, node_id);
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+  }
+
  private:
   NodeIDType node_id;
   NodeBaseType *node_p;

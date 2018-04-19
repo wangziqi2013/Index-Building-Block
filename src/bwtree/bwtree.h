@@ -905,6 +905,18 @@ class AppendHelper {
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 
+  // * AppendLeafRemove() - Appends a leaf remove delta
+  inline LeafRemoveType *AppendLeafRemove(NodeIDType node_id) {
+    assert(node_p->KeyInNode(key));
+    // NOTE: For some strange reasons the compiler could not deduce the type of this
+    // template function call. We explicitly specify the height type
+    LeafRemoveType *delta_p = GetBase()->template AllocateDelta<LeafRemoveType, NodeType, NodeHeightType>(
+      NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
+      node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
+      node_id);
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+  }
+
  private:
   NodeIDType node_id;
   NodeBaseType *node_p;

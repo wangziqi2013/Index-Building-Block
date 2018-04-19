@@ -110,12 +110,13 @@ BEGIN_DEBUG_TEST(BoundKeyTest) {
 BEGIN_DEBUG_TEST(BaseNodeTest) {
   // Ignore delta chain type here
   using BaseNodeType = DefaultBaseNode<int, int, DefaultDeltaChainType>;
+  using BoundKeyType = BoundKey<int>;
   using NodeSizeType = typename BaseNodeType::NodeSizeType;
   constexpr NodeSizeType size = 256;
   constexpr int high_key = 1000;
   constexpr int low_key = 0;
 
-  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
+  BaseNodeType *node_p = BaseNodeType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   for(int i = 0;i < (int)size;i++) {
     node_p->KeyAt(i) = i * 2;
     node_p->ValueAt(i) = i * 2 + 1;
@@ -165,7 +166,7 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
 
   // Test illegal split (size = 1); Should fail assertion
   // Also illegal search would fail as the low key and high key are finite (0 and 1000 resp.)
-  node_p = BaseNodeType::Get(NodeType::LeafBase, 1, {low_key, false}, {high_key, false});
+  node_p = BaseNodeType::Get(NodeType::LeafBase, 1, low_key, high_key);
   always_assert(TestAssertionFail(node_p->Split()));
   always_assert(TestAssertionFail(node_p->Search(-1)));
   always_assert(TestAssertionFail(node_p->Search(high_key)));
@@ -220,6 +221,7 @@ public:
 BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using KeyType = int;
   using ValueType = std::string;
+  using BoundKeyType = BoundKey<KeyType>;
   using NodeIDType = uint64_t;
   using DeltaType = Delta<KeyType, ValueType, NodeIDType>;
   using LeafInsertType = typename DeltaType::LeafInsertType;
@@ -238,8 +240,8 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   using NodeHeightType = typename LeafBaseNodeType::NodeHeightType;
   NodeSizeType size = 256;
   NodeHeightType height = 0;
-  KeyType high_key = 1000;
-  KeyType low_key = 25;
+  //KeyType high_key = 1000;
+  //KeyType low_key = 25;
   KeyType insert_key = 100, delete_key = 200;
   std::string insert_value = "key = 100", delete_value = "key = 200";
   KeyType split_high_key = 500;
@@ -251,7 +253,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
 
   test_printf("Testing basic delta chain type completeness\n");
 
-  LeafBaseNodeType *node_p = LeafBaseNodeType::Get(NodeType::LeafBase, size, {low_key, true}, {high_key, true});
+  LeafBaseNodeType *node_p = LeafBaseNodeType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
 
   LeafInsertType *insert_node_p = node_p->AllocateDelta<LeafInsertType>(
     NodeType::LeafInsert, ++height, size + 1, node_p->GetLowKey(), node_p->GetHighKey(), node_p, 

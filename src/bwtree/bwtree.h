@@ -36,6 +36,7 @@ class BoundKey {
   bool inf;
   // * BoundKey() - Constructor
   BoundKey(const KeyType &pkey) : key{pkey} {} 
+  BoundKey(const KeyType &pkey, bool pinf) : key{pkey}, inf{pinf} {}
   // * IsInf() - Whether the key is infinite
   inline bool IsInf() const { return inf; }
   // Operators for checking magnitude with a key
@@ -241,7 +242,7 @@ class NodeBase {
   // * GetHighKey() - Returns high key
   inline BoundKeyType *GetHighKey() const { return high_key_p; }
   // * SetHighKey() - Updates the high key of the node
-  inline void SetHighKey(BoundKey *phigh_key_p) { high_key_p = phigh_key_p; }
+  inline void SetHighKey(BoundKeyType *phigh_key_p) { high_key_p = phigh_key_p; }
   // * GetLowKey() - Returns low key
   inline BoundKeyType *GetLowKey() const { return low_key_p; }
 
@@ -278,9 +279,9 @@ class NodeBase {
 #define LEAF_DELETE_TYPE(KeyType, ValueType) \
   DeltaNode<KeyType, KeyType, ValueType, char[0], char[0], char[0], char[0]>
 #define LEAF_SPLIT_TYPE(KeyType, NodeIDType) \
-  DeltaNode<BoundKey<KeyType>, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+  DeltaNode<KeyType, BoundKey<KeyType>, NodeIDType, char[0], char[0], char[0], char[0]>
 #define INNER_SPLIT_TYPE(KeyType, NodeIDType) \
-  DeltaNode<BoundKey<KeyType>, KeyType, NodeIDType, char[0], char[0], char[0], char[0]>
+  DeltaNode<KeyType, BoundKey<KeyType>, NodeIDType, char[0], char[0], char[0], char[0]>
 #define LEAF_MERGE_TYPE(KeyType, NodeIDType) \
   DeltaNode<KeyType, KeyType, NodeIDType, NodeBase<KeyType> *, char[0], char[0], char[0]>
 #define INNER_MERGE_TYPE(KeyType, NodeIDType) \
@@ -372,8 +373,8 @@ class DeltaNode : public NodeBase<KeyType> {
   // delta attributes according to delta type
   inline T1 &GetInsertKey() { return t1; }
   inline T1 &GetDeleteKey() { return t1; }
-  inline T1 &GetSplitKey() { return t1.key; }
-  inline T1 &GetMergeKey() { return t1.key; }
+  inline KeyType &GetSplitKey() { return t1.key; }
+  inline T1 &GetMergeKey() { return t1; }
   inline T1 &GetRemoveNodeID() { return t1; }
   inline void SetSplitHighKey() { BaseClassType::SetHighKey(&t1); }
   

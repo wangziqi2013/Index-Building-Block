@@ -240,6 +240,8 @@ class NodeBase {
   inline NodeType GetType() const { return type; }
   // * GetHighKey() - Returns high key
   inline BoundKeyType *GetHighKey() const { return high_key_p; }
+  // * SetHighKey() - Updates the high key of the node
+  inline void SetHighKey(BoundKey *phigh_key_p) { high_key_p = phigh_key_p; }
   // * GetLowKey() - Returns low key
   inline BoundKeyType *GetLowKey() const { return low_key_p; }
 
@@ -373,6 +375,7 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T1 &GetSplitKey() { return t1.key; }
   inline T1 &GetMergeKey() { return t1.key; }
   inline T1 &GetRemoveNodeID() { return t1; }
+  inline void SetSplitHighKey() { BaseClassType::SetHighKey(&t1); }
   
   inline T2 &GetInsertValue() { return t2; }
   inline T2 &GetDeleteValue() { return t2; }
@@ -881,8 +884,11 @@ class AppendHelper {
     // template function call. We explicitly specify the height type
     LeafSplitType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
       NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
-      node_p->GetLowKey(), BoundKeyType::Get(key), node_p,
+      node_p->GetLowKey(), nullptr, node_p,
       key, node_id);
+    // Special code here to set the high key of the delta chain to the split key
+    // which itself is a bound key
+    delta_p->SetSplitHighKey();
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 

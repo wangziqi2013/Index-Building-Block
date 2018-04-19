@@ -327,6 +327,20 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
   AppendHelperType ah{node_id, node_p, table_p};
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(100, "this is 100") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(200, "this is 200") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(400, "this is 400") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(500, "this is 500") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(600, "this is 600") == nullptr));
+  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(700, "this is 700") == nullptr));
+
+  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using TraverserType = \
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
+
+  SimpleTraverseHandlerType sth{};
+  TraverserType::Traverse(table_p->At(node_id), &sth);
 
   return;
 } END_TEST

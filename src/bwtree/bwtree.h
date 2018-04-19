@@ -879,13 +879,13 @@ class AppendHelper {
   }
 
   // * AppendLeafSplit() - Appends a leaf split delta
-  inline LeafSplitType *AppendLeafSplit(const KeyType &key, NodeIDType node_id, NodeSizeType new_size) {
+  inline LeafSplitType *AppendLeafSplit(const KeyType &key, NodeIDType sibling_id, NodeSizeType new_size) {
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafSplitType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
       NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
       node_p->GetLowKey(), nullptr, node_p,
-      key, node_id);
+      BoundKeyType::Get(key), sibling_id);
     // Special code here to set the high key of the delta chain to the split key
     // which itself is a bound key
     delta_p->SetSplitHighKey();
@@ -904,13 +904,13 @@ class AppendHelper {
   }
 
   // * AppendLeafRemove() - Appends a leaf remove delta
-  inline LeafRemoveType *AppendLeafRemove(NodeIDType node_id) {
+  inline LeafRemoveType *AppendLeafRemove(NodeIDType removed_id) {
     // NOTE: For some strange reasons the compiler could not deduce the type of this
     // template function call. We explicitly specify the height type
     LeafRemoveType *delta_p = GetBase()->template AllocateDelta<LeafRemoveType, NodeType, NodeHeightType>(
       NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize(),
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
-      node_id);
+      removed_id);
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 

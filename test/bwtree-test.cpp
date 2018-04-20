@@ -202,19 +202,31 @@ public:
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-    test_printf("LeafInsert"); test_out << node_p->GetInsertKey() << node_p->GetInsertValue() << node_p->GetSize() << "\n"; 
+    test_printf("LeafInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    test_printf("InnerInsert"); test_out << node_p->GetInsertKey() << node_p->GetInsertValue() << node_p->GetSize() << "\n"; 
+    test_printf("InnerInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
-  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { test_printf("LeafDelete\n"); GetNext() = node_p->GetNext(); }
-  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { test_printf("InnerDelete\n"); GetNext() = node_p->GetNext(); }
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
+    test_printf("LeafDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
+    test_printf("InnerDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
 
-  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { test_printf("LeafSplit\n"); GetNext() = node_p->GetNext(); }
-  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { test_printf("InnerSplit\n"); GetNext() = node_p->GetNext(); }
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
+    test_printf("LeafSplit"); test_out << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
+    test_printf("InnerSplit"); test_out << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
 
   // Special for merge because we recursively traverse it
   bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); return true; }

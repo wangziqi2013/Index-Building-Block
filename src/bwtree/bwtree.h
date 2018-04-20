@@ -944,6 +944,24 @@ class AppendHelper {
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
+  // * AppendInnerMerge() - Appends a inner merge delta
+  inline InnerMergeType *AppendInnerMerge(const KeyType &key, NodeIDType sibling_id, NodeBaseType *sibling_p) {
+    InnerMergeType *delta_p = GetBase()->template AllocateDelta<InnerMergeType, NodeType, NodeHeightType>(
+      NodeType::InnerMerge, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
+      node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
+      key, sibling_id, sibling_p);
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
+  }
+
+  // * AppendInnerRemove() - Appends a inner remove delta
+  inline InnerRemoveType *AppendInnerRemove(NodeIDType removed_id) {
+    InnerRemoveType *delta_p = GetBase()->template AllocateDelta<InnerRemoveType, NodeType, NodeHeightType>(
+      NodeType::InnerRemove, node_p->GetHeight() + 1, node_p->GetSize(),
+      node_p->GetLowKey(), node_p->GetHighKey(), node_p,
+      removed_id);
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
+  }
+
   // * GetNode() - Returns the node pointer
   NodeBaseType *GetNode() { return node_p; }
 

@@ -333,12 +333,12 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
   always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr);
   always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr);
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), leaf_node_p) == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafRemove(0) == nullptr));
+  always_assert(ah.AppendLeafInsert(300, "this is 300") == nullptr);
+  always_assert(ah.AppendLeafDelete(400, "this is 400") == nullptr);
+  always_assert(ah.AppendLeafDelete(500, "this is 500") == nullptr);
+  always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
+  always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), leaf_node_p) == nullptr);
+  always_assert(ah.AppendLeafRemove(0) == nullptr);
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using TraverserType = \
@@ -349,9 +349,9 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
   InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
-  AppendHelperType ah2{inner_node_id, leaf_node_p, table_p};
+  AppendHelperType ah2{inner_node_id, inner_node_p, table_p};
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
-  always_assert((AppendHelperType{inner_node_id, table_p->At(inner_node_id), table_p}.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr));
+  always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
 
   return;
 } END_TEST

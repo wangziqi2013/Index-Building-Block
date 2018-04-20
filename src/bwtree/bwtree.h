@@ -812,7 +812,11 @@ class DeltaChainTraverser {
  * 1. We decouple the appending of deltas from node base or mapping table class
  *    to modularize the design, because this step is largely independent from
  *    the design choices of the mapping table or the node base
- * 2. This class will be optimized out by the compiler
+ * 2. The appending functions returns nullptr if the CAS succeeds, in which case
+ *    the internal node_p is updated to reflect the updated view of the node
+ *    The internal node can be accessed using GetNode()
+ * 3. If CAS fails, the delta node is returned. The caller could either choose to
+ *    destroy it, or retry the CAS
  */
 template <typename KeyType, typename ValueType,
           typename MappingTableType, typename DeltaChainType>
@@ -863,8 +867,7 @@ class AppendHelper {
       NodeType::LeafInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendLeafDelete() - Appends a leaf delete delta
@@ -874,8 +877,7 @@ class AppendHelper {
       NodeType::LeafDelete, node_p->GetHeight() + 1, node_p->GetSize() - 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendLeafSplit() - Appends a leaf split delta
@@ -887,8 +889,7 @@ class AppendHelper {
     // Special code here to set the high key of the delta chain to the split key
     // which itself is a bound key
     delta_p->SetSplitHighKey();
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendLeafMerge() - Appends a leaf merge delta
@@ -897,8 +898,7 @@ class AppendHelper {
       NodeType::LeafMerge, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
       node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
       key, sibling_id, sibling_p);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendLeafRemove() - Appends a leaf remove delta
@@ -907,8 +907,7 @@ class AppendHelper {
       NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize(),
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       removed_id);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendInnerInsert() - Appends inner insert delta
@@ -919,8 +918,7 @@ class AppendHelper {
       NodeType::InnerInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value, next_key, next_value);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendInnerDelete() - Appends inner delete delta
@@ -931,8 +929,7 @@ class AppendHelper {
       NodeType::InnerInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value, next_key, next_value);
-    node_p = delta_p;
-    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * GetNode() - Returns the node pointer

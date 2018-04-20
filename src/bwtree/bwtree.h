@@ -927,9 +927,20 @@ class AppendHelper {
                                             const KeyType &prev_key, const NodeIDType &prev_id) {
     assert(node_p->KeyInNode(key));
     InnerDeleteType *delta_p = GetBase()->template AllocateDelta<InnerDeleteType, NodeType, NodeHeightType>(
-      NodeType::InnerDelete, node_p->GetHeight() + 1, node_p->GetSize() + 1,
+      NodeType::InnerDelete, node_p->GetHeight() + 1, node_p->GetSize() - 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       key, value, next_key, next_id, prev_key, prev_id);
+    return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
+  }
+
+  // * AppendInnerSplit() - Appends inner split delta
+  inline InnerSplitType *AppendInnerSplit(const KeyType &key, NodeIDType sibling_id, NodeSizeType new_size) {
+    assert(node_p->KeyInNode(key));
+    InnerSplitType *delta_p = GetBase()->template AllocateDelta<InnerSplitType, NodeType, NodeHeightType>(
+      NodeType::InnerSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
+      node_p->GetLowKey(), nullptr, node_p,
+      BoundKeyType::Get(key), sibling_id);
+    delta_p->SetSplitHighKey();
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 

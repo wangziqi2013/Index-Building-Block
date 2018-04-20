@@ -353,6 +353,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
   always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
   always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, 200, NodeIDType{201}, 300, NodeIDType{301}) == nullptr);
+  always_assert(ah2.AppendInnerSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
+
+  SimpleTraverseHandlerType sth2{};
+  TraverserType::Traverse(table_p->At(inner_node_id), &sth2);
 
   return;
 } END_TEST

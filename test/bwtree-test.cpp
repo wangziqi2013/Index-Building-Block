@@ -319,32 +319,39 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using MappingTableType = typename BwTreeType::MappingTableType;
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
   using LeafBaseType = typename BwTreeType::LeafBaseType;
+  using InnerBaseType = typename BwTreeType::InnerBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
 
   size_t size = 0;
-  LeafBaseType *node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
+  LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
-  NodeIDType node_id = table_p->AllocateNodeID(node_p);
+  NodeIDType leaf_node_id = table_p->AllocateNodeID(leaf_node_p);
   // Must be the first ID
-  always_assert(node_id == MappingTableType::FIRST_NODE_ID);
+  always_assert(leaf_node_id == MappingTableType::FIRST_NODE_ID);
 
-  AppendHelperType ah{node_id, node_p, table_p};
+  AppendHelperType ah{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(100, "this is 100") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(200, "this is 200") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafSplit(600, NodeIDType{1}, NodeSizeType{400}) == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafMerge(700, NodeIDType{2}, node_p) == nullptr));
-  always_assert((AppendHelperType{node_id, table_p->At(node_id), table_p}.AppendLeafRemove(0) == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(100, "this is 100") == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(200, "this is 200") == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), leaf_node_p) == nullptr));
+  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafRemove(0) == nullptr));
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using TraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
 
   SimpleTraverseHandlerType sth{};
-  TraverserType::Traverse(table_p->At(node_id), &sth);
+  TraverserType::Traverse(table_p->At(leaf_node_id), &sth);
+
+  InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
+  NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
+  AppendHelperType ah2{inner_node_id, leaf_node_p, table_p};
+  always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
+  //always_assert((AppendHelperType{inner_node_id, table_p->At(inner_node_id), table_p}.AppendInnerInsert(100, "this is 100", 200, "this is next") == nullptr));
 
   return;
 } END_TEST

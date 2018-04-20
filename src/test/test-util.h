@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <thread>
+#include <iostream>
 
 // This defines test printing. Note that this is not affected by the flag
 // i.e. It always prints even under debug mode
@@ -22,6 +23,13 @@
       fprintf(stderr, "%-24s: " fmt, __FUNCTION__, ##__VA_ARGS__); \
       fflush(stderr);                                       \
     } while(0);
+
+// * class TestPrint - Wraps over std::cerr
+class TestPrint {
+ public:
+  template <typename T>
+  inline TestPrint &operator<<(const T &var) { std::cerr << var; return *this; }
+} test_out;
 
 // If called this function prints the current function name
 // as the name of the test case - this always prints in any mode

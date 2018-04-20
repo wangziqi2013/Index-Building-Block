@@ -923,6 +923,21 @@ class AppendHelper {
     return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
   }
 
+  // * AppendInnerDelete() - Appends inner delete delta
+  inline InnerInsertType *AppendInnerDelete(const KeyType &key, const NodeIDType &value, 
+                                            const KeyType &next_key, const NodeIDType &next_value) {
+    assert(node_p->KeyInNode(key));
+    InnerInsertType *delta_p = GetBase()->template AllocateDelta<InnerInsertType, NodeType, NodeHeightType>(
+      NodeType::InnerInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
+      node_p->GetLowKey(), node_p->GetHighKey(), node_p,
+      key, value, next_key, next_value);
+    node_p = delta_p;
+    return table_p->CAS(node_id, node_p, delta_p) ? nullptr : delta_p;
+  }
+
+  // * GetNode() - Returns the node pointer
+  NodeBaseType *GetNode() { return node_p; }
+
  private:
   NodeIDType node_id;
   NodeBaseType *node_p;

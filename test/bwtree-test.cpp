@@ -331,8 +331,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
   AppendHelperType ah{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(100, "this is 100") == nullptr));
-  always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(200, "this is 200") == nullptr));
+  always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr);
+  always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr);
   always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafInsert(300, "this is 300") == nullptr));
   always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(400, "this is 400") == nullptr));
   always_assert((AppendHelperType{leaf_node_id, table_p->At(leaf_node_id), table_p}.AppendLeafDelete(500, "this is 500") == nullptr));

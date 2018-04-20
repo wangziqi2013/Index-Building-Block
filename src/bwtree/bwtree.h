@@ -201,11 +201,15 @@ class DefaultDeltaChainType {
   }
 
   // * AllocateDelta() - Allocate a delta record of a given type
-  template<typename AllocDeltaNodeType, typename ...Args>
+  template <typename AllocDeltaNodeType, typename ...Args>
   inline AllocDeltaNodeType *AllocateDelta(Args &&...args) {
     IF_DEBUG(mem_usage.fetch_add(sizeof(AllocDeltaNodeType)));
     return new AllocDeltaNodeType{args...};
   }
+
+  // * DestroyDelta() - Destroy a delta record
+  template <typename DeltaNodeType>
+  inline void DestroyDelta() { delete DeltaNodeType; }
 
  private:
   IF_DEBUG(std::atomic<size_t> mem_usage);
@@ -853,10 +857,8 @@ class AppendHelper {
       reinterpret_cast<char *>(node_p->GetLowKey()) - LOW_KEY_OFFSET); 
   }
 
-  //template <typename DeltaNodeType>
-  //inline DestroyDelta() {
-
-  //}
+  template <typename DeltaNodeType>
+  inline DestroyDelta(DeltaNodeType *delta_p) { GetBase()->delta_chain.Destroy(delta_p); }
   
   // * AppendLeafInsert() - Appends a leaf insert delta
   inline LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {
@@ -1004,7 +1006,7 @@ class BwTree {
   using InnerSplitType = typename DeltaType::InnerSplitType;
   using InnerMergeType = typename DeltaType::InnerMergeType;
   using InnerRemoveType = typename DeltaType::InnerRemoveType;
-  // AppendHelper
+  // AppendHelper that allows delta to be added
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
 };
 

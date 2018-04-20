@@ -209,7 +209,7 @@ class DefaultDeltaChainType {
 
   // * DestroyDelta() - Destroy a delta record
   template <typename DeltaNodeType>
-  inline void DestroyDelta() { delete DeltaNodeType; }
+  inline void DestroyDelta(DeltaNodeType *delta_p) { delete delta_p; }
 
  private:
   IF_DEBUG(std::atomic<size_t> mem_usage);
@@ -427,6 +427,14 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
   using NodeSizeType = typename BaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseClassType::BoundKeyType;
+
+  // This is the offset of the low key from the beginning of the object
+  static constexpr size_t LOW_KEY_OFFSET = offsetof(ExtendedNodeBase, low_key_addr);
+  // * GetBase() - Returns the address of the base node
+  inline ExtendedNodeBase *GetBase() { 
+    return reinterpret_cast<ExtendedNodeBase *>(
+      reinterpret_cast<char *>(BaseClassType::GetLowKey()) - LOW_KEY_OFFSET); 
+  }
 
   // * ExtendedNodeBase() - Constructor
   ExtendedNodeBase(NodeType ptype, 
@@ -853,12 +861,12 @@ class AppendHelper {
 
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase() { 
-    return reinterpret_cast<ExtendedBaseType *>(
-      reinterpret_cast<char *>(node_p->GetLowKey()) - LOW_KEY_OFFSET); 
+    return node_p->GetBase();
   }
-
+  
+  // * DestroyDelta() - Calls the base delta chain to destroy delta record
   template <typename DeltaNodeType>
-  inline DestroyDelta(DeltaNodeType *delta_p) { GetBase()->delta_chain.Destroy(delta_p); }
+  inline void DestroyDelta(DeltaNodeType *delta_p) { GetBase()->delta_chain.DestroyDelta(delta_p); }
   
   // * AppendLeafInsert() - Appends a leaf insert delta
   inline LeafInsertType *AppendLeafInsert(const KeyType &key, const ValueType &value) {

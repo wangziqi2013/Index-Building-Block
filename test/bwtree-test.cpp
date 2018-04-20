@@ -352,6 +352,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   AppendHelperType ah2{inner_node_id, inner_node_p, table_p};
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
   always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
+  always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, 200, NodeIDType{201}, 300, NodeIDType{301}) == nullptr);
 
   return;
 } END_TEST

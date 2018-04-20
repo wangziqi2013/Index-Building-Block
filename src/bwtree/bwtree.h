@@ -814,7 +814,7 @@ class DeltaChainTraverser {
  *    the design choices of the mapping table or the node base
  * 2. This class will be optimized out by the compiler
  */
-template <typename KeyType, typename ValueType, 
+template <typename KeyType, typename ValueType,
           typename MappingTableType, typename DeltaChainType>
 class AppendHelper {
  public:
@@ -912,8 +912,8 @@ class AppendHelper {
   }
 
   // * AppendInnerInsert() - Appends inner insert delta
-  inline InnerInsertType *AppendInnerInsert(const KeyType &key, const ValueType &value, 
-                                            const KeyType &next_key, const ValueType &next_value) {
+  inline InnerInsertType *AppendInnerInsert(const KeyType &key, const NodeIDType &value, 
+                                            const KeyType &next_key, const NodeIDType &next_value) {
     assert(node_p->KeyInNode(key));
     InnerInsertType *delta_p = GetBase()->template AllocateDelta<InnerInsertType, NodeType, NodeHeightType>(
       NodeType::InnerInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
@@ -962,6 +962,8 @@ class BwTree {
   using InnerSplitType = typename DeltaType::InnerSplitType;
   using InnerMergeType = typename DeltaType::InnerMergeType;
   using InnerRemoveType = typename DeltaType::InnerRemoveType;
+  // AppendHelper
+  using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
 };
 
 } // namespace bwtree

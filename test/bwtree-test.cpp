@@ -192,11 +192,23 @@ public:
   // * Finished() - Interface for accessing finished
   bool &Finished() { return BaseClassType::finished; }
 
-  void HandleLeafBase(LeafBaseType *node_p) { test_printf("LeafBase\n"); Finished() = true; }
-  void HandleInnerBase(InnerBaseType *node_p) { test_printf("InnerBase\n"); Finished() = true; }
+  void HandleLeafBase(LeafBaseType *node_p) { 
+    test_printf("LeafBase"); test_out << node_p->GetSize() << "\n";
+    Finished() = true; 
+  }
+  void HandleInnerBase(InnerBaseType *node_p) { 
+    test_printf("InnerBase"); test_out << node_p->GetSize() << "\n";
+    Finished() = true; 
+  }
 
-  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { test_printf("LeafInsert\n"); GetNext() = node_p->GetNext(); }
-  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { test_printf("InnerInsert\n"); GetNext() = node_p->GetNext(); }
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
+    test_printf("LeafInsert"); test_out << node_p->GetInsertKey() << node_p->GetInsertValue() << node_p->GetSize() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
+    test_printf("InnerInsert"); test_out << node_p->GetInsertKey() << node_p->GetInsertValue() << node_p->GetSize() << "\n"; 
+    GetNext() = node_p->GetNext(); 
+  }
 
   void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { test_printf("LeafDelete\n"); GetNext() = node_p->GetNext(); }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { test_printf("InnerDelete\n"); GetNext() = node_p->GetNext(); }

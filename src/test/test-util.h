@@ -24,11 +24,17 @@
       fflush(stderr);                                       \
     } while(0);
 
-// * class TestPrint - Wraps over std::cerr
+/* 
+ * class TestPrint - Wraps over std::cerr
+ * 
+ * We need this class because parameterized keys and values cannot be directly
+ * printed using printf and format string. A template with overloaded methods
+ * is needed. A space is also printed before the element
+ */
 class TestPrint {
  public:
   template <typename T>
-  inline TestPrint &operator<<(const T &var) { std::cerr << var; return *this; }
+  inline TestPrint &operator<<(const T &var) { std::cerr << " " << var; return *this; }
 } test_out;
 
 // If called this function prints the current function name

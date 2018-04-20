@@ -317,7 +317,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using NodeIDType = typename BwTreeType::NodeIDType;
   using DeltaChainType = typename BwTreeType::DeltaChainType;
   using MappingTableType = typename BwTreeType::MappingTableType;
-  using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
+  using AppendHelperType = typename BwTreeType::AppendHelperType;
   using LeafBaseType = typename BwTreeType::LeafBaseType;
   using InnerBaseType = typename BwTreeType::InnerBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
@@ -351,7 +351,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
   AppendHelperType ah2{inner_node_id, leaf_node_p, table_p};
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
-  //always_assert((AppendHelperType{inner_node_id, table_p->At(inner_node_id), table_p}.AppendInnerInsert(100, "this is 100", 200, "this is next") == nullptr));
+  always_assert((AppendHelperType{inner_node_id, table_p->At(inner_node_id), table_p}.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr));
 
   return;
 } END_TEST

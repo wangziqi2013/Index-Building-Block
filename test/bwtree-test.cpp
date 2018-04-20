@@ -206,7 +206,8 @@ public:
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    test_printf("InnerInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() << "\n"; 
+    test_printf("InnerInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() \
+      << node_p->GetNextKey() << node_p->GetNextNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
@@ -215,7 +216,8 @@ public:
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-    test_printf("InnerDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() << "\n"; 
+    test_printf("InnerDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() \
+      << node_p->GetNextKey() << node_p->GetNextNodeID() << node_p->GetPrevKey() << node_p->GetPrevNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
@@ -229,11 +231,23 @@ public:
   }
 
   // Special for merge because we recursively traverse it
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { test_printf("LeafMerge\n"); return true; }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { test_printf("InnerMerge\n"); return true; }
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
+    test_printf("LeafMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
+    return true; 
+  }
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
+    test_printf("InnerMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
+    return true; 
+  }
 
-  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { test_printf("LeafRemove\n"); GetNext() = node_p->GetNext(); }
-  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { test_printf("InnerRemove\n"); GetNext() = node_p->GetNext(); }
+  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
+    test_printf("LeafRemove"); test_out << node_p->GetSize() << node_p->GetRemoveNodeID() << "\n";
+    GetNext() = node_p->GetNext(); 
+  }
+  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
+    test_printf("InnerRemove"); test_out << node_p->GetSize() << node_p->GetRemoveNodeID() << "\n";
+    GetNext() = node_p->GetNext(); 
+  }
 };
 
 /*
@@ -362,7 +376,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah.AppendLeafDelete(500, "this is 500") == nullptr);
   always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), leaf_node_p) == nullptr);
-  always_assert(ah.AppendLeafRemove(0) == nullptr);
+  always_assert(ah.AppendLeafRemove(123) == nullptr);
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using TraverserType = \
@@ -379,7 +393,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, 200, NodeIDType{201}, 300, NodeIDType{301}) == nullptr);
   always_assert(ah2.AppendInnerSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   always_assert(ah2.AppendInnerMerge(700, table_p->AllocateNodeID(nullptr), inner_node_p) == nullptr);
-  always_assert(ah2.AppendInnerRemove(0) == nullptr);
+  always_assert(ah2.AppendInnerRemove(123) == nullptr);
 
   SimpleTraverseHandlerType sth2{};
   TraverserType::Traverse(table_p->At(inner_node_id), &sth2);

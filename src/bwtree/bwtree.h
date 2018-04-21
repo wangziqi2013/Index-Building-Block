@@ -215,6 +215,8 @@ class DefaultDeltaChainType {
   IF_DEBUG(std::atomic<size_t> mem_usage);
 };
 
+template <typename, typename> class ExtendedNodeBase;
+
 /*
  * class NodeBase - Base class of base node and delta node types
  * 
@@ -249,6 +251,10 @@ class NodeBase {
   inline void SetHighKey(BoundKeyType *phigh_key_p) { high_key_p = phigh_key_p; }
   // * GetLowKey() - Returns low key
   inline BoundKeyType *GetLowKey() const { return low_key_p; }
+
+  // * GetBase() - Returns the address of the base node
+  template <typename DeltaChainType>
+  inline ExtendedNodeBase<KeyType, DeltaChainType> *GetBase();
 
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
@@ -430,11 +436,6 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
 
   // This is the offset of the low key from the beginning of the object
   static constexpr size_t LOW_KEY_OFFSET = offsetof(ExtendedNodeBase, low_key_addr);
-  // * GetBase() - Returns the address of the base node
-  inline ExtendedNodeBase *GetBase() { 
-    return reinterpret_cast<ExtendedNodeBase *>(
-      reinterpret_cast<char *>(BaseClassType::GetLowKey()) - LOW_KEY_OFFSET); 
-  }
 
   // * ExtendedNodeBase() - Constructor
   ExtendedNodeBase(NodeType ptype, 

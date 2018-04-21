@@ -665,8 +665,8 @@ class TraverseHandlerBase {
   void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { Fail(); }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { Fail(); }
 
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> child_list[2]) { Fail(); return false; }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> child_list[2]) { Fail(); return false; }
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { Fail(); return false; }
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { Fail(); return false; }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { Fail(); }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
@@ -718,8 +718,8 @@ class TraverseHandlerBase {
     void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { }
     void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { }
 
-    bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> child_list[2]) { }
-    bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> child_list[2]) { }
+    bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { }
+    bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { }
 
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
@@ -750,7 +750,7 @@ class DeltaChainTraverser {
   // * HandleMergeRecursive() - Handles recursive traversal of merge nodes
   template <typename MergeDeltaType>
   static void HandleMergeRecursive(bool recursive, TraverseHandlerType *handler_p, 
-                                   NodeBaseType *node_p, NodeBase<KeyType> child_list[2]) {
+                                   NodeBaseType *child_list[2]) {
     if(recursive == true) {
       Traverse(child_list[0], handler_p);
       // Manually reset the finished flag here because we should recurse
@@ -795,18 +795,18 @@ class DeltaChainTraverser {
           handler_p->HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
           break;
         case NodeType::LeafMerge: {
-          NodeBase<KeyType> child_list[2];
+          NodeBaseType *child_list[2];
           HandleMergeRecursive<typename DeltaType::LeafMergeType>(
             handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p), child_list),
-                                       handler_p, node_p, child_list);
+                                       handler_p, child_list);
             assert(handler_p->Finished());
           return;
         }
         case NodeType::InnerMerge: {
-          NodeBase<KeyType> child_list[2];
+          NodeBaseType *child_list[2];
           HandleMergeRecursive<typename DeltaType::InnerMergeType>(
             handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p), child_list),
-                                        handler_p, node_p, child_list);
+                                        handler_p, child_list);
             assert(handler_p->Finished());
           return;
         }
@@ -1058,12 +1058,16 @@ class DeltaChainFreeHelper :
   }
 
   // Special for merge because we recursively traverse it
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
+    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
+    // TODO: CHANGE THE ORDER THAT THE MERGE IS PROCESSED WITH ITS CHILDS
     return true; 
   }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
     GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
+    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
+    // TODO: CHANGE THE ORDER THAT THE MERGE IS PROCESSED WITH ITS CHILDS
     return true; 
   }
 

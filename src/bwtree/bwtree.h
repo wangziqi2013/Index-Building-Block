@@ -750,20 +750,6 @@ class DeltaChainTraverser {
   using LeafBaseType = BaseNode<KeyType, ValueType, DeltaChainType>;
   using InnerBaseType = BaseNode<KeyType, NodeIDType, DeltaChainType>;
 
-  // * HandleMergeRecursive() - Handles recursive traversal of merge nodes
-  template <typename MergeDeltaType>
-  static void HandleMergeRecursive(bool recursive, TraverseHandlerType *handler_p, 
-                                   NodeBaseType *child_list[2]) {
-    if(recursive == true) {
-      Traverse(child_list[0], handler_p);
-      // Manually reset the finished flag here because we should recurse
-      handler_p->Finished() = false;
-      Traverse(child_list[1], handler_p);
-    }
-
-    return;
-  }
-
   // * Traverse() - Starts traversing the delta chain
   static void Traverse(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
     // Initialization may also be based on the attributes of the virtual node.
@@ -797,22 +783,14 @@ class DeltaChainTraverser {
         case NodeType::InnerSplit:
           handler_p->HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
           break;
-        case NodeType::LeafMerge: {
-          NodeBaseType *child_list[2];
-          HandleMergeRecursive<typename DeltaType::LeafMergeType>(
-            handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p), child_list),
-                                       handler_p, child_list);
-            assert(handler_p->Finished());
+        case NodeType::LeafMerge: 
+          handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p), child_list);
+          assert(handler_p->Finished());
           return;
-        }
         case NodeType::InnerMerge: {
-          NodeBaseType *child_list[2];
-          HandleMergeRecursive<typename DeltaType::InnerMergeType>(
-            handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p), child_list),
-                                        handler_p, child_list);
-            assert(handler_p->Finished());
+          handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p), child_list);
+          assert(handler_p->Finished());
           return;
-        }
         case NodeType::LeafRemove:
           handler_p->HandleLeafRemove(static_cast<typename DeltaType::LeafRemoveType *>(node_p));
           break;

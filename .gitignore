@@ -38,3 +38,7 @@ lib
 
 # Shortcuts of test case executables
 *-bin
+# Log file
+*.log
+# assembly
+*.asm

@@ -457,6 +457,12 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
     return delta_chain.AllocateDelta<AllocDeltaNodeType>(args...);
   }
 
+  // * DestroyDelta() - Wrapping around the delta chain
+  template <typename AllocDeltaNodeType>
+  inline void DestroyDelta(NodeBase<KeyType> *node_p) {
+    return delta_chain.DestroyDelta<AllocDeltaNodeType>(node_p);
+  }
+
   // This data member does not space but it has the same address as the low key
   char low_key_addr[0];
  private:
@@ -864,9 +870,7 @@ class AppendHelper {
     node_id{pnode_id}, node_p{pnode_p}, table_p{ptable_p} {}
 
   // * GetBase() - Returns a pointer to the base node of the delta chain
-  inline ExtendedBaseType *GetBase() { 
-    return node_p->template GetBase<DeltaChainType>();
-  }
+  inline ExtendedBaseType *GetBase() { return node_p->template GetBase<DeltaChainType>(); }
   
   // * DestroyDelta() - Calls the base delta chain to destroy delta record
   template <typename DeltaNodeType>
@@ -1023,49 +1027,49 @@ class DeltaChainFreeHelper :
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::LeafInsertType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafInsertType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::InnerInsertType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerInsertType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::LeafDeleteType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafDeleteType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::InnerDeleteType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerDeleteType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::LeafSplitType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafSplitType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::InnerSplitType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerSplitType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   // Special for merge because we recursively traverse it
   bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
     return true; 
   }
   bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
     return true; 
   }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::LeafRemoveType>(node_p); 
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafRemoveType>(node_p); 
     // TODO: RECYCLE NODE ID HERE
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
-    node_p->GetBase()->DestroyDelta<typename DeltaType::InnerRemoveType>(node_p); 
+    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerRemoveType>(node_p); 
     // TODO: RECYCLE NODE ID HERE
     GetNext() = node_p->GetNext(); 
   }
@@ -1104,8 +1108,9 @@ class BwTree {
   using InnerSplitType = typename DeltaType::InnerSplitType;
   using InnerMergeType = typename DeltaType::InnerMergeType;
   using InnerRemoveType = typename DeltaType::InnerRemoveType;
-  // AppendHelper that allows delta to be added
+  // Helper types
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
+  using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
 };
 
 } // namespace bwtree

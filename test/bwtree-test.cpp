@@ -359,8 +359,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using LeafBaseType = typename BwTreeType::LeafBaseType;
   using InnerBaseType = typename BwTreeType::InnerBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
+  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
 
-  size_t size = 0;
+  size_t size = 0, size_merge_sibling = 5;
+  NodeIDType remove_id = 500;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
   NodeIDType leaf_node_id = table_p->AllocateNodeID(leaf_node_p);
@@ -375,15 +377,19 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah.AppendLeafDelete(400, "this is 400") == nullptr);
   always_assert(ah.AppendLeafDelete(500, "this is 500") == nullptr);
   always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
-  always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), leaf_node_p) == nullptr);
-  always_assert(ah.AppendLeafRemove(123) == nullptr);
+  always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
+    LeafBaseType::Get(NodeType::LeafBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
+  always_assert(ah.AppendLeafRemove(remove_id) == nullptr);
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
-  using TraverserType = \
+  using PrintTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
+  using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
 
   SimpleTraverseHandlerType sth{};
-  TraverserType::Traverse(table_p->At(leaf_node_id), &sth);
+  PrintTraverserType::Traverse(table_p->At(leaf_node_id), &sth);
+  DeltaChainFreeHelperType dcfh{};
+  FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
 
   InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
@@ -392,11 +398,14 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
   always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, 200, NodeIDType{201}, 300, NodeIDType{301}) == nullptr);
   always_assert(ah2.AppendInnerSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
-  always_assert(ah2.AppendInnerMerge(700, table_p->AllocateNodeID(nullptr), inner_node_p) == nullptr);
-  always_assert(ah2.AppendInnerRemove(123) == nullptr);
+  always_assert(ah2.AppendInnerMerge(700, table_p->AllocateNodeID(nullptr), 
+    InnerBaseType::Get(NodeType::InnerBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
+  always_assert(ah2.AppendInnerRemove(remove_id) == nullptr);
 
   SimpleTraverseHandlerType sth2{};
-  TraverserType::Traverse(table_p->At(inner_node_id), &sth2);
+  PrintTraverserType::Traverse(table_p->At(inner_node_id), &sth2);
+  DeltaChainFreeHelperType dcfh2{};
+  FreeTraverserType::Traverse(table_p->At(inner_node_id), &dcfh2);
 
   return;
 } END_TEST

@@ -665,8 +665,8 @@ class TraverseHandlerBase {
   void HandleLeafISplit(typename DeltaType::LeafSplitType *node_p) { Fail(); }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { Fail(); }
 
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { Fail(); return false; }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { Fail(); return false; }
+  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { Fail(); return false; }
+  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { Fail(); return false; }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { Fail(); }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { Fail(); }
@@ -695,7 +695,7 @@ class TraverseHandlerBase {
  * call back type is presented below:
  * 
   template <typename KeyType, typename ValueType, typename NodeIDType, 
-            typename DeltaChainType>
+            typename DeltaChainType, template <typename, typename, typename> typename BaseNode>
   class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
   public:
     using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
@@ -703,6 +703,9 @@ class TraverseHandlerBase {
     using DeltaType = typename BaseClassType::DeltaType;
     using LeafBaseType = typename BaseClassType::LeafBaseType;
     using InnerBaseType = typename BaseClassType::InnerBaseType;
+    // Note: Change the class name
+    using DeltaChainTraverserType = \                                               |------  Change It ---------| 
+      DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, >>>>>TraverseHandlerType<<<<< >
 
     TraverseHandlerType() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
@@ -718,8 +721,8 @@ class TraverseHandlerBase {
     void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { }
     void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { }
 
-    bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { }
-    bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { }
+    void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { }
+    void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { }
 
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
@@ -1012,9 +1015,8 @@ class DeltaChainFreeHelper :
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
-  // Use itself to instanciate a traversal type
   using DeltaChainTraverserType = \
-    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
+    DeltaChainTraverserType<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
 
   DeltaChainFreeHelper() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
@@ -1062,13 +1064,13 @@ class DeltaChainFreeHelper :
   }
 
   // Special for merge because we recursively traverse it
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
     return false; 
   }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p);

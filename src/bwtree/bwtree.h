@@ -1063,16 +1063,16 @@ class DeltaChainFreeHelper :
 
   // Special for merge because we recursively traverse it
   bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
-    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
-    // TODO: CHANGE THE ORDER THAT THE MERGE IS PROCESSED WITH ITS CHILDS
-    return true; 
+    return false; 
   }
   bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
-    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
-    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
-    // TODO: CHANGE THE ORDER THAT THE MERGE IS PROCESSED WITH ITS CHILDS
-    return true; 
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p);
+    return false; 
   }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 

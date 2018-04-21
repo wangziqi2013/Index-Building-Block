@@ -784,11 +784,11 @@ class DeltaChainTraverser {
           handler_p->HandleInnerSplit(static_cast<typename DeltaType::InnerSplitType *>(node_p));
           break;
         case NodeType::LeafMerge: 
-          handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p), child_list);
+          handler_p->HandleLeafMerge(static_cast<typename DeltaType::LeafMergeType *>(node_p));
           assert(handler_p->Finished());
           return;
-        case NodeType::InnerMerge: {
-          handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p), child_list);
+        case NodeType::InnerMerge:
+          handler_p->HandleInnerMerge(static_cast<typename DeltaType::InnerMergeType *>(node_p));
           assert(handler_p->Finished());
           return;
         case NodeType::LeafRemove:
@@ -994,7 +994,7 @@ class DeltaChainFreeHelper :
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
   using DeltaChainTraverserType = \
-    DeltaChainTraverserType<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
 
   DeltaChainFreeHelper() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
@@ -1046,13 +1046,11 @@ class DeltaChainFreeHelper :
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
-    return false; 
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p);
-    return false; 
   }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 

@@ -175,8 +175,8 @@ BEGIN_DEBUG_TEST(BaseNodeTest) {
   return;
 } END_TEST
 
-template <typename KeyType, typename ValueType, typename NodeIDType, 
-          typename DeltaChainType>
+template <typename KeyType, typename ValueType, typename NodeIDType, typename DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode>
 class SimpleTraverseHandler : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
 public:
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
@@ -184,6 +184,8 @@ public:
   using DeltaType = typename BaseClassType::DeltaType;
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
+  using DeltaChainTraverserType = \
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, SimpleTraverseHandler>;
 
   SimpleTraverseHandler() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
@@ -235,13 +237,11 @@ public:
     test_printf("LeafMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
-    return true; 
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     test_printf("InnerMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
-    return true; 
   }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
@@ -336,7 +336,7 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
 
   test_printf("Testing delta chain traversal\n");
 
-  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChainType>;
+  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DefaultDeltaChainType, DefaultBaseNode>;
   using TraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DefaultDeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
 
@@ -363,7 +363,6 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using LeafBaseType = typename BwTreeType::LeafBaseType;
   using InnerBaseType = typename BwTreeType::InnerBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
-  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
 
   size_t size = 0, size_merge_sibling = 5;
   NodeIDType remove_id = 500;
@@ -385,7 +384,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
     LeafBaseType::Get(NodeType::LeafBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
   always_assert(ah.AppendLeafRemove(remove_id) == nullptr);
 
-  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode>;
+  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
   using PrintTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, SimpleTraverseHandlerType>;
   using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;

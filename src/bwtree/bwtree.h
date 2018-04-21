@@ -150,7 +150,7 @@ class DefaultMappingTable {
    */
   inline void ReleaseNodeID(NodeIDType node_id) {
     assert(node_id < TABLE_SIZE);
-    (void)node_id; 
+    mapping_table[slot] = nullptr;
     return;
   }
 
@@ -997,7 +997,10 @@ class DeltaChainFreeHelper :
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
 
-  DeltaChainFreeHelper() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
+  // * DeltaChainFreeHelper() - Constructor
+  DeltaChainFreeHelper(MappingTableType *ptable_p) : 
+    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
+    table_p{ptable_p} {}
 
   // * GetNext() - Interface for accessing next_p
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
@@ -1056,16 +1059,16 @@ class DeltaChainFreeHelper :
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
     GetNext() = node_p->GetNext(); 
+    table_p->ReleaseNodeID(node_p->GetRemoveNodeID());
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafRemoveType>(node_p); 
-    // TODO: RECYCLE NODE ID HERE
-    
   }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
     GetNext() = node_p->GetNext(); 
+    table_p->ReleaseNodeID(node_p->GetRemoveNodeID());
     GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerRemoveType>(node_p); 
-    // TODO: RECYCLE NODE ID HERE
-    
   }
+
+  MappingTableType *table_p;
 };
 
 template <typename _KeyType, typename _ValueType, 

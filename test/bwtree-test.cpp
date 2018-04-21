@@ -369,12 +369,14 @@ BEGIN_DEBUG_TEST(AppendTest) {
   using BoundKeyType = typename BwTreeType::BoundKeyType;
 
   size_t size = 0, size_merge_sibling = 5;
-  NodeIDType remove_id = 500;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
   NodeIDType leaf_node_id = table_p->AllocateNodeID(leaf_node_p);
+  NodeIDType remove_id;
   // Must be the first ID
   always_assert(leaf_node_id == MappingTableType::FIRST_NODE_ID);
+  // Allocate a node ID for testing remove node free
+  remove_id = table_p->AllocateNodeID(leaf_node_p);
 
   AppendHelperType ah{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
@@ -387,6 +389,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
     LeafBaseType::Get(NodeType::LeafBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
   always_assert(ah.AppendLeafRemove(remove_id) == nullptr);
+  
 
   using SimpleTraverseHandlerType = SimpleTraverseHandler<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode>;
   using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
@@ -396,11 +399,15 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
   SimpleTraverseHandlerType sth{};
   PrintTraverserType::Traverse(table_p->At(leaf_node_id), &sth);
-  DeltaChainFreeHelperType dcfh{};
+  DeltaChainFreeHelperType dcfh{table_p};
+  always_assert(table_p->At(remove_id) != nullptr);
   FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
+  always_assert(table_p->At(remove_id) == nullptr);
 
   InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
+
+  remove_id = table_p->AllocateNodeID(inner_node_p);
   AppendHelperType ah2{inner_node_id, inner_node_p, table_p};
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
   always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
@@ -412,8 +419,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
   SimpleTraverseHandlerType sth2{};
   PrintTraverserType::Traverse(table_p->At(inner_node_id), &sth2);
-  DeltaChainFreeHelperType dcfh2{};
+  DeltaChainFreeHelperType dcfh2{table_p};
+  always_assert(table_p->At(remove_id) != nullptr);
   FreeTraverserType::Traverse(table_p->At(inner_node_id), &dcfh2);
+  always_assert(table_p->At(remove_id) == nullptr);
 
   return;
 } END_TEST

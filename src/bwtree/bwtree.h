@@ -150,7 +150,7 @@ class DefaultMappingTable {
    */
   inline void ReleaseNodeID(NodeIDType node_id) {
     assert(node_id < TABLE_SIZE);
-    mapping_table[slot] = nullptr;
+    mapping_table[node_id] = nullptr;
     return;
   }
 

@@ -231,14 +231,16 @@ public:
   }
 
   // Special for merge because we recursively traverse it
-  bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
     test_printf("LeafMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
-    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     return true; 
   }
-  bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p, NodeBase<KeyType> *child_list[2]) { 
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     test_printf("InnerMerge"); test_out << node_p->GetSize() << node_p->GetMergeKey() << node_p->GetMergeSibling() << "\n"; 
-    child_list[0] = node_p->GetNext(); child_list[1] = node_p->GetMergeSibling();
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     return true; 
   }
 

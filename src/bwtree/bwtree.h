@@ -389,6 +389,8 @@ class DeltaNode : public NodeBase<KeyType> {
   inline KeyType &GetSplitKey() { return t1.key; }
   inline T1 &GetMergeKey() { return t1; }
   inline T1 &GetRemoveNodeID() { return t1; }
+  // For split deltas, the high key points to a field inside the split delta
+  // So we must set the high key after the delta has been constructed
   inline void SetSplitHighKey() { BaseClassType::SetHighKey(&t1); }
   
   inline T2 &GetInsertValue() { return t2; }

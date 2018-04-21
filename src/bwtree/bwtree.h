@@ -254,7 +254,10 @@ class NodeBase {
 
   // * GetBase() - Returns the address of the base node
   template <typename DeltaChainType>
-  inline ExtendedNodeBase<KeyType, DeltaChainType> *GetBase();
+  inline ExtendedNodeBase<KeyType, DeltaChainType> *GetBase() {
+    return reinterpret_cast<ExtendedNodeBase<KeyType, DeltaChainType> *>(
+      reinterpret_cast<char *>(GetLowKey()) - ExtendedNodeBase<KeyType, DeltaChainType>::LOW_KEY_OFFSET); 
+  }
 
   // * KeyLargerThanNode() - Return whether a given key is larger than
   //                         all keys in the node
@@ -862,7 +865,7 @@ class AppendHelper {
 
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase() { 
-    return node_p->GetBase();
+    return node_p->template GetBase<DeltaChainType>();
   }
   
   // * DestroyDelta() - Calls the base delta chain to destroy delta record

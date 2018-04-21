@@ -1000,7 +1000,8 @@ class AppendHelper {
  *    immediately
  */
 template <typename KeyType, typename ValueType,
-          typename MappingTableType, typename DeltaChainType>
+          typename MappingTableType, typename DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode>
 class DeltaChainFreeHelper : 
   public TraverseHandlerBase<KeyType, ValueType, typename MappingTableType::NodeIDType, DeltaChainType> {
  public:
@@ -1011,6 +1012,9 @@ class DeltaChainFreeHelper :
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using ExtendedBaseType = ExtendedNodeBase<KeyType, DeltaChainType>;
+  // Use itself to instanciate a traversal type
+  using DeltaChainTraverserType = \
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DeltaChainFreeHelper>;
 
   DeltaChainFreeHelper() : TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
 
@@ -1118,7 +1122,7 @@ class BwTree {
   using InnerRemoveType = typename DeltaType::InnerRemoveType;
   // Helper types
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
-  using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
+  using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
 };
 
 } // namespace bwtree

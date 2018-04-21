@@ -459,7 +459,7 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
 
   // * DestroyDelta() - Wrapping around the delta chain
   template <typename AllocDeltaNodeType>
-  inline void DestroyDelta(NodeBase<KeyType> *node_p) {
+  inline void DestroyDelta(AllocDeltaNodeType *node_p) {
     return delta_chain.DestroyDelta<AllocDeltaNodeType>(node_p);
   }
 
@@ -1022,54 +1022,54 @@ class DeltaChainFreeHelper :
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 
-    LeafBaseType::Destroy(node_p);
+    InnerBaseType::Destroy(node_p);
     Finished() = true; 
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafInsertType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafInsertType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerInsertType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerInsertType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafDeleteType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafDeleteType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerDeleteType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerDeleteType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafSplitType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafSplitType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerSplitType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerSplitType>(node_p);
     GetNext() = node_p->GetNext(); 
   }
 
   // Special for merge because we recursively traverse it
   bool HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
     return true; 
   }
   bool HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p); 
     return true; 
   }
 
   void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::LeafRemoveType>(node_p); 
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafRemoveType>(node_p); 
     // TODO: RECYCLE NODE ID HERE
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
-    node_p->GetBase()->template DestroyDelta<typename DeltaType::InnerRemoveType>(node_p); 
+    GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerRemoveType>(node_p); 
     // TODO: RECYCLE NODE ID HERE
     GetNext() = node_p->GetNext(); 
   }

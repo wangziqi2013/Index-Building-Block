@@ -411,10 +411,10 @@ BEGIN_DEBUG_TEST(AppendTest) {
 } END_TEST
 
 int main() {
-  MappingTableTest();
-  BoundKeyTest();
-  BaseNodeTest();
-  DeltaNodeTest();
+  //MappingTableTest();
+  //BoundKeyTest();
+  //BaseNodeTest();
+  //DeltaNodeTest();
   AppendTest();
 
   return 0;

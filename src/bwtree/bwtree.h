@@ -694,6 +694,7 @@ class TraverseHandlerBase {
  * for handling deltas and base nodes. Details of interfacing with the 
  * call back type is presented below:
  * 
+  // Template arguments can be adjusted according to the needs, but the following are required
   template <typename KeyType, typename ValueType, typename NodeIDType, 
             typename DeltaChainType, template <typename, typename, typename> typename BaseNode>
   class TraverseHandlerType : public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {

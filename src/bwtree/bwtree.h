@@ -37,6 +37,7 @@ class BoundKey {
   // * BoundKey() - Constructor
   BoundKey(const KeyType &pkey) : key{pkey} {} 
   BoundKey(const KeyType &pkey, bool pinf) : key{pkey}, inf{pinf} {}
+  BoundKey(bool pinf) : inf{pinf} {}
   // * IsInf() - Whether the key is infinite
   inline bool IsInf() const { return inf; }
   // Operators for checking magnitude with a key
@@ -1088,6 +1089,7 @@ class DefaultConsolidator :
  public:
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using NodeBaseType = typename BaseClassType::NodeBaseType;
+  using BoundKeyType = BoundKey<KeyType>;
   using DeltaType = typename BaseClassType::DeltaType;
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
@@ -1104,7 +1106,7 @@ class DefaultConsolidator :
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
   // * SortKeyList() - Sorts a given list of keys
-  inline void SortKeyList() { std::sort(inserted_list, inserted_list + num, KeyPtrLess<KeyType>{}); }
+  inline void SortInsertedList() { std::sort(inserted_list, inserted_list + num, KeyPtrLess<KeyType>{}); }
   // * IsInList() - Whether the key is in the inserted set
   bool IsInList(const KeyType &key, KeyType *key_list_p, NodeSizeType num) {
     for(NodeHeightType i = 0;i < num;i++) { if(key == key_list_p[i]) { return true; } }
@@ -1130,11 +1132,11 @@ class DefaultConsolidator :
   }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
-
+    SortInsertedList();
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 
-
+    SortInsertedList();
     Finished() = true; 
   }
 
@@ -1161,7 +1163,12 @@ class DefaultConsolidator :
 
   // Special for merge because we recursively traverse it
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
+    // Save this such that we do not need to compare
+    NodeHeightType saved_deleted_num = deleted_num;
+    BoundKeyType saved_high_key = high_key;
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    deleted_num = saved_deleted_num;
+    high_key = saved_high_key;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
 
   }
@@ -1176,6 +1183,9 @@ class DefaultConsolidator :
   KeyType *deleted_list[HEIGHT_THRESHOLD];
   NodeHeightType inserted_num;
   NodeHeightType deleted_num;
+  // The current high key on the branch
+  // Initialized to the high key of the node, and 
+  BoundKeyType current_high_key;
 };
 
 template <typename _KeyType, typename _ValueType, 

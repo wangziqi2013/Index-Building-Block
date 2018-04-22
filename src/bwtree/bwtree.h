@@ -691,8 +691,6 @@ class TraverseHandlerBase {
   inline NodeBaseType *GetNext() { return next_p; }
   // * Finished() - Returns true if the traverse terminates
   inline bool Finished() { return finished; }
-  // * Init() - Initialize states
-  void Init(NodeBaseType *node_p) { (void)node_p; }
  private:
   // * Fail() - Called if the handler is not defined
   inline void Fail() { assert(false && "Unknown delta nodes"); }
@@ -744,8 +742,6 @@ class TraverseHandlerBase {
     void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { }
     void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { }
 
-    // Omit if not needed
-    void Init(NodeBaseType *node_p) { ... }
     // * GetNext() - Interface for accessing next_p
     NodeBaseType *&GetNext() { return BaseClassType::next_p; }
     // * Finished() - Interface for accessing finished
@@ -769,8 +765,6 @@ class DeltaChainTraverser {
 
   // * Traverse() - Starts traversing the delta chain
   static void Traverse(NodeBaseType *node_p, TraverseHandlerType *handler_p) {
-    // Initialization may also be based on the attributes of the virtual node.
-    handler_p->Init(node_p);
     while(true) {
       NodeType type = node_p->GetType();
       switch(type) {
@@ -1107,7 +1101,7 @@ class DefaultConsolidator :
   bool &Finished() { return BaseClassType::finished; }
 
   // * SortKeyList() - Sorts a given list of keys
-  void SortKeyList() { std::sort(key_list_p, key_list_p + num, KeyPrtLess{}); }
+  inline void SortKeyList() { std::sort(key_list_p, key_list_p + num, KeyPtrLess<KeyType>{}); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
 

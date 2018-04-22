@@ -424,6 +424,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
   FreeTraverserType::Traverse(table_p->At(inner_node_id), &dcfh2);
   always_assert(table_p->At(remove_id) == nullptr);
 
+  MappingTableType::Destroy(table_p);
+
   return;
 } END_TEST
 

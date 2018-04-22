@@ -889,7 +889,7 @@ class AppendHelper {
   // * AppendLeafSplit() - Appends a leaf split delta
   inline LeafSplitType *AppendLeafSplit(const KeyType &key, NodeIDType sibling_id, NodeSizeType new_size) {
     LeafSplitType *delta_p = GetBase()->template AllocateDelta<LeafSplitType, NodeType, NodeHeightType>(
-      NodeType::LeafSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
+      NodeType::LeafSplit, node_p->GetHeight(), node_p->GetSize() - new_size,
       node_p->GetLowKey(), nullptr, node_p,
       BoundKeyType::Get(key), sibling_id);
     // Special code here to set the high key of the delta chain to the split key
@@ -901,7 +901,7 @@ class AppendHelper {
   // * AppendLeafMerge() - Appends a leaf merge delta
   inline LeafMergeType *AppendLeafMerge(const KeyType &key, NodeIDType sibling_id, NodeBaseType *sibling_p) {
     LeafMergeType *delta_p = GetBase()->template AllocateDelta<LeafMergeType, NodeType, NodeHeightType>(
-      NodeType::LeafMerge, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
+      NodeType::LeafMerge, node_p->GetHeight() + sibling_p->GetHeight(), node_p->GetSize() + sibling_p->GetSize(),
       node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
       key, sibling_id, sibling_p);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
@@ -910,7 +910,7 @@ class AppendHelper {
   // * AppendLeafRemove() - Appends a leaf remove delta
   inline LeafRemoveType *AppendLeafRemove(NodeIDType removed_id) {
     LeafRemoveType *delta_p = GetBase()->template AllocateDelta<LeafRemoveType, NodeType, NodeHeightType>(
-      NodeType::LeafRemove, node_p->GetHeight() + 1, node_p->GetSize(),
+      NodeType::LeafRemove, node_p->GetHeight(), node_p->GetSize(),
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       removed_id);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
@@ -943,7 +943,7 @@ class AppendHelper {
   inline InnerSplitType *AppendInnerSplit(const KeyType &key, NodeIDType sibling_id, NodeSizeType new_size) {
     assert(node_p->KeyInNode(key));
     InnerSplitType *delta_p = GetBase()->template AllocateDelta<InnerSplitType, NodeType, NodeHeightType>(
-      NodeType::InnerSplit, node_p->GetHeight() + 1, node_p->GetSize() - new_size,
+      NodeType::InnerSplit, node_p->GetHeight(), node_p->GetSize() - new_size,
       node_p->GetLowKey(), nullptr, node_p,
       BoundKeyType::Get(key), sibling_id);
     delta_p->SetSplitHighKey();
@@ -953,7 +953,7 @@ class AppendHelper {
   // * AppendInnerMerge() - Appends a inner merge delta
   inline InnerMergeType *AppendInnerMerge(const KeyType &key, NodeIDType sibling_id, NodeBaseType *sibling_p) {
     InnerMergeType *delta_p = GetBase()->template AllocateDelta<InnerMergeType, NodeType, NodeHeightType>(
-      NodeType::InnerMerge, node_p->GetHeight() + 1, node_p->GetSize() + sibling_p->GetSize(),
+      NodeType::InnerMerge, node_p->GetHeight() + sibling_p->GetHeight(), node_p->GetSize() + sibling_p->GetSize(),
       node_p->GetLowKey(), sibling_p->GetHighKey(), node_p,
       key, sibling_id, sibling_p);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
@@ -962,7 +962,7 @@ class AppendHelper {
   // * AppendInnerRemove() - Appends a inner remove delta
   inline InnerRemoveType *AppendInnerRemove(NodeIDType removed_id) {
     InnerRemoveType *delta_p = GetBase()->template AllocateDelta<InnerRemoveType, NodeType, NodeHeightType>(
-      NodeType::InnerRemove, node_p->GetHeight() + 1, node_p->GetSize(),
+      NodeType::InnerRemove, node_p->GetHeight(), node_p->GetSize(),
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
       removed_id);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;

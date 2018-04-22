@@ -1057,11 +1057,13 @@ class DeltaChainFreeHelper :
   // Special for merge because we recursively traverse it
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::LeafMergeType>(node_p);
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
     GetBase(node_p)->template DestroyDelta<typename DeltaType::InnerMergeType>(node_p);
   }
@@ -1105,10 +1107,10 @@ class DefaultConsolidator :
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
-  // * SortKeyList() - Sorts a given list of keys
-  inline void SortInsertedList() { std::sort(inserted_list, inserted_list + num, KeyPtrLess<KeyType>{}); }
+  // * SortInsertedList() - Sorts a given list of keys
+  inline void SortInsertedList() { std::sort(inserted_list, inserted_list + inserted_num, KeyPtrLess<KeyType>{}); }
   // * IsInList() - Whether the key is in the inserted set
-  bool IsInList(const KeyType &key, KeyType *key_list_p, NodeSizeType num) {
+  bool IsInList(const KeyType &key, KeyType *key_list_p, NodeHeightType num) {
     for(NodeHeightType i = 0;i < num;i++) { if(key == key_list_p[i]) { return true; } }
     return false;
   }
@@ -1165,15 +1167,21 @@ class DefaultConsolidator :
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
     // Save this such that we do not need to compare
     NodeHeightType saved_deleted_num = deleted_num;
-    BoundKeyType saved_high_key = high_key;
+    BoundKeyType saved_high_key = current_high_key;
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     deleted_num = saved_deleted_num;
-    high_key = saved_high_key;
+    current_high_key = saved_high_key;
+    Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
 
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
+    NodeHeightType saved_deleted_num = deleted_num;
+    BoundKeyType saved_high_key = current_high_key;
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    deleted_num = saved_deleted_num;
+    current_high_key = saved_high_key;
+    Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
 
   }

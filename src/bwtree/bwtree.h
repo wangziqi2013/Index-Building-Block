@@ -1081,7 +1081,8 @@ class DeltaChainFreeHelper :
 
 template <typename KeyType, typename ValueType,
           typename NodeIDType, typename DeltaChainType, 
-          template <typename, typename, typename> typename BaseNode>
+          template <typename, typename, typename> typename BaseNode,
+          size_t HEIGHT_THRESHOLD>
 class DefaultConsolidator : 
   public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
  public:
@@ -1096,12 +1097,26 @@ class DefaultConsolidator :
 
   // * DefaultConsolidator() - Constructor
   DefaultConsolidator() : 
-    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
+    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
+    inserted_num{NodeHeightType{0}},
+    deleted_num{NodeHeightType{0}} {}
+
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
-
   // * SortKeyList() - Sorts a given list of keys
-  inline void SortKeyList() { std::sort(key_list_p, key_list_p + num, KeyPtrLess<KeyType>{}); }
+  inline void SortKeyList() { std::sort(inserted_list, inserted_list + num, KeyPtrLess<KeyType>{}); }
+  // * IsInList() - Whether the key is in the inserted set
+  bool IsInList(const KeyType &key, KeyType *key_list_p, NodeSizeType num) {
+    for(NodeHeightType i = 0;i < num;i++) { if(key == key_list_p[i]) { return true; } }
+    return false;
+  }
+  // * IsInserted() - Whether the key is in the inserted set
+  inline bool IsInserted(const KeyType &key) { return IsInList(key, inserted_list, inserted_num); }
+  // * IsDeleted() - Whether the key is in the deleted set
+  inline bool IsDeleted(const KeyType &key) { return IsInList(key, deleted_list, deleted_num); }
+  void Insert() {
+
+  }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
 
@@ -1145,15 +1160,11 @@ class DefaultConsolidator :
 
   }
 
-  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
-
-  }
-  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
-
-  }
-
-  KeyType *key_list_p;
-  NodeHeightType num;
+  // A list of pointers to keys within deltas
+  KeyType *inserted_list[HEIGHT_THRESHOLD];
+  KeyType *deleted_list[HEIGHT_THRESHOLD];
+  NodeHeightType inserted_num;
+  NodeHeightType deleted_num;
 };
 
 template <typename _KeyType, typename _ValueType, 

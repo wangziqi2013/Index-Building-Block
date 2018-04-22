@@ -1114,8 +1114,19 @@ class DefaultConsolidator :
   inline bool IsInserted(const KeyType &key) { return IsInList(key, inserted_list, inserted_num); }
   // * IsDeleted() - Whether the key is in the deleted set
   inline bool IsDeleted(const KeyType &key) { return IsInList(key, deleted_list, deleted_num); }
-  void Insert() {
-
+  // * Insert() - Adds a key into the inserted list
+  void Insert(KeyType *key_p) {
+    if(IsDeleted(*key_p) == false) {
+      inserted_list[inserted_num] = key_p;
+      inserted_num++;
+    }
+  }
+  // * Delete() - Adds a key into the deleted list
+  void Delete(KeyType *key_p) {
+    if(IsInserted(*key_p) == false) {
+      deleted_list[deleted_num] = key_p;
+      deleted_num++;
+    }
   }
 
   void HandleLeafBase(LeafBaseType *node_p) { 

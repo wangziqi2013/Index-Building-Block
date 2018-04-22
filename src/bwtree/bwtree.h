@@ -64,10 +64,10 @@ class BoundKey {
 template <typename KeyType>
 class KeyPtrLess {
  public:
-  inline operator()(const KeyType *p1, const KeyType *p2) const {
+  inline bool operator()(const KeyType *p1, const KeyType *p2) const {
     return *p1 < *p2;
   }
-}
+};
 
 /*
   * enum class NodeType - Defines the enum of node type

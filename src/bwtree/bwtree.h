@@ -407,6 +407,15 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T5 &GetPrevKey() { return t5; }
   inline T6 &GetPrevNodeID() { return t6; }
 
+  // * operator< - Compares keys of deltas
+  inline bool operator<(const DeltaNode &node) {
+    assert((GetType() == NodeType::InnerInsert || GetType() == NodeType::InnerDelete || 
+            GetType() == LeafInsert || GetType() == LeafDelete) && 
+           (node.GetType() == NodeType::InnerInsert || node.GetType() == NodeType::InnerDelete || 
+            node.GetType() == LeafInsert || node.GetType() == LeafDelete))
+    return t1 < node.t1;
+  }
+
  private:
   BaseClassType *next_node_p;
   // Delta node elements

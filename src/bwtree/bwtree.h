@@ -406,14 +406,10 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T4 &GetNextNodeID() { return t4; }
   inline T5 &GetPrevKey() { return t5; }
   inline T6 &GetPrevNodeID() { return t6; }
-
-  // * operator< - Compares keys of deltas
-  inline bool operator<(const DeltaNode &node) {
-    assert((GetType() == NodeType::InnerInsert || GetType() == NodeType::InnerDelete || 
-            GetType() == LeafInsert || GetType() == LeafDelete) && 
-           (node.GetType() == NodeType::InnerInsert || node.GetType() == NodeType::InnerDelete || 
-            node.GetType() == LeafInsert || node.GetType() == LeafDelete))
-    return t1 < node.t1;
+  
+  // * GetBaseFromT1() - Returns the base address given T1's address
+  DeltaNode *GetBaseFromT1(T1 *p) {
+    return reinterpret_cast<DeltaNode *>(reinterpret_cast<char *>(p) - offsetof(DeltaNode, t1));
   }
 
  private:

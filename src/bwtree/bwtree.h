@@ -1096,6 +1096,7 @@ class DefaultConsolidator :
   using DeltaType = typename BaseClassType::DeltaType;
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
+  using NodeHeightType = typename NodeBase<KeyType>::NodeHeightType;
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
 
@@ -1104,6 +1105,9 @@ class DefaultConsolidator :
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
+
+  // * SortKeyList() - Sorts a given list of keys
+  void SortKeyList() { std::sort(key_list_p, key_list_p + num, KeyPrtLess{}); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
 
@@ -1153,6 +1157,9 @@ class DefaultConsolidator :
   void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
 
   }
+
+  KeyType *key_list_p;
+  NodeHeightType num;
 };
 
 template <typename _KeyType, typename _ValueType, 

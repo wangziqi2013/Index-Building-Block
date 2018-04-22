@@ -60,6 +60,15 @@ class BoundKey {
   inline static BoundKey Get(const KeyType &key) { return BoundKey{key, false}; }
 };
 
+// * class KeyPtrLess() - Compares two key pointers
+template <typename KeyType>
+class KeyPtrLess {
+ public:
+  inline operator()(const KeyType *p1, const KeyType *p2) const {
+    return *p1 < *p2;
+  }
+}
+
 /*
   * enum class NodeType - Defines the enum of node type
   */
@@ -1091,9 +1100,8 @@ class DefaultConsolidator :
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
 
   // * DefaultConsolidator() - Constructor
-  DefaultConsolidator(MappingTableType *ptable_p) : 
-    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{}
-
+  DefaultConsolidator() : 
+    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{} {}
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
 

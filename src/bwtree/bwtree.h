@@ -1004,9 +1004,7 @@ class DeltaChainFreeHelper :
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
     table_p{ptable_p} {}
 
-  // * GetNext() - Interface for accessing next_p
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
-  // * Finished() - Interface for accessing finished
   bool &Finished() { return BaseClassType::finished; }
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase(NodeBaseType *node_p) { return node_p->template GetBase<DeltaChainType>(); }
@@ -1071,6 +1069,77 @@ class DeltaChainFreeHelper :
   }
 
   MappingTableType *table_p;
+};
+
+template <typename KeyType, typename ValueType,
+          typename NodeIDType, typename DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode>
+class DefaultConsolidator : 
+  public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+ public:
+  using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using NodeBaseType = typename BaseClassType::NodeBaseType;
+  using DeltaType = typename BaseClassType::DeltaType;
+  using LeafBaseType = typename BaseClassType::LeafBaseType;
+  using InnerBaseType = typename BaseClassType::InnerBaseType;
+  using DeltaChainTraverserType = \
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
+
+  // * DefaultConsolidator() - Constructor
+  DefaultConsolidator(MappingTableType *ptable_p) : 
+    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{}
+
+  NodeBaseType *&GetNext() { return BaseClassType::next_p; }
+  bool &Finished() { return BaseClassType::finished; }
+
+  void HandleLeafBase(LeafBaseType *node_p) { 
+
+    Finished() = true; 
+  }
+  void HandleInnerBase(InnerBaseType *node_p) { 
+
+    Finished() = true; 
+  }
+
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
+
+  }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
+
+  }
+
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
+
+  }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
+
+  }
+
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
+
+  }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
+
+  }
+
+  // Special for merge because we recursively traverse it
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
+
+  }
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
+    DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
+    DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
+
+  }
+
+  void HandleLeafRemove(typename DeltaType::LeafRemoveType *node_p) { 
+
+  }
+  void HandleInnerRemove(typename DeltaType::InnerRemoveType *node_p) { 
+
+  }
 };
 
 template <typename _KeyType, typename _ValueType, 

@@ -1259,7 +1259,7 @@ class DefaultConsolidator :
         }
       } else {
         // Only test and try to insert non-deleted keys
-        if(!IsDeleted(it.GetKey())) {
+        if(IsDeleted(it.GetKey())) {
           it.Next();
           continue;
         }

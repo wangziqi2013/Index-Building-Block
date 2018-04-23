@@ -1207,7 +1207,7 @@ class DefaultConsolidator :
   // * IsTopStopped() * IsBaseStopped() - Whether the insert list or the base node has been exhausted
   inline bool IsTopStopped() { return IsInsertListEmpty() || !IsTopInBound(); }
   template <typename IteratorType>
-  inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(node_p, index); }
+  inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(it); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
@@ -1219,7 +1219,7 @@ class DefaultConsolidator :
 
     // The iterator wrappes an index with the node pointer
     LeafNodeIteratorType it{node_p};
-    LwafNodeIteratorType it_target{static_cast<LeafBaseType *>(new_node_p)};
+    LeafNodeIteratorType it_target{static_cast<LeafBaseType *>(new_node_p)};
     while(1) {
       bool insert_list_stop = IsTopStopped();
       bool old_base_stop = IsBaseStopped(it);
@@ -1250,7 +1250,7 @@ class DefaultConsolidator :
         }
       }
     }
-    
+
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 

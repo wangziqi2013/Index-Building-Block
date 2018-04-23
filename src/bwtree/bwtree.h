@@ -1171,8 +1171,13 @@ class DefaultConsolidator :
     return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
   }
   // * Append() - Append a key/value or key/node id pair to the new node
-  template <typename PayloadType>
-  inline void Append()
+  template <typename BaseNodeType>
+  inline void Append(const KeyType &key, const typename BaseNodeType::ValueType &value) {
+    assert(current_index < old_node_p->GetSize());
+    static_cast<BaseNodeType *>(new_node_p)->KeyAt(current_index) = key;
+    static_cast<BaseNodeType *>(new_node_p)->ValueAt(current_index) = value;
+    current_index++;
+  }
 
   // * InsertPop() - Pop an element from the insert list
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }

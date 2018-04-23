@@ -432,7 +432,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
 } END_TEST
 
 BEGIN_DEBUG_TEST(ConsolidationTest) {
-  //using NodeSizeType = typename BwTreeType::NodeSizeType;
+  using NodeSizeType = typename BwTreeType::NodeSizeType;
   using NodeIDType = typename BwTreeType::NodeIDType;
   using DeltaChainType = typename BwTreeType::DeltaChainType;
   using MappingTableType = typename BwTreeType::MappingTableType;
@@ -463,6 +463,10 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   using ConsolidationTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
   ConsolidatorType ct{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
+  LeafBaseType *new_node_p = ct.GetNewLeafBase();
+  for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
+    test_out << "Index" << i << new_node_p->KeyAt(i) << new_node_p->ValueAt(i) << "\n";
+  }
 
   using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
   using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
@@ -480,6 +484,7 @@ int main() {
   //BaseNodeTest();
   //DeltaNodeTest();
   AppendTest();
+  ConsolidationTest();
 
   return 0;
 }

@@ -1115,6 +1115,7 @@ class BaseNodeIterator {
   BaseNodeType *node_p;
 };
 
+// * class DefaultConsolidator - Implements consolidation algorithm
 template <typename KeyType, typename ValueType,
           typename NodeIDType, typename DeltaChainType, 
           template <typename, typename, typename> typename BaseNode,
@@ -1291,6 +1292,11 @@ class DefaultConsolidator :
 
   }
 
+  // * GetNewLeafBase() * GetNewInnerBase() - Returns the node after consolidation
+  LeafBaseType *GetNewLeafBase() { return static_cast<LeafBaseType *>(new_node_p); }
+  InnerBaseType *GetNewInnerBase() { return static_cast<InnerBaseType *>(new_node_p); }
+
+ private:
   // A list of pointers to keys within deltas
   KeyType *inserted_list[HEIGHT_THRESHOLD];
   KeyType *deleted_list[HEIGHT_THRESHOLD];
@@ -1309,11 +1315,17 @@ class DefaultConsolidator :
 };
 
 template <typename _KeyType, typename _ValueType, 
-          template <typename, size_t> typename MappingTable, typename _DeltaChainType, 
-          template <typename, typename, typename> typename BaseNode>
+          template <typename, size_t> typename MappingTable, 
+          typename _DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode,
+          template <typename, typename, typename, typename, template <typename, typename, typename> typename, size_t> typename Consolidator>
 class BwTree {
  public:
   static constexpr size_t MAPPING_TABLE_SIZE = 1204 * 1024 * 16;
+  static constexpr size_t LEAF_HEIGHT_THREADHOLD = 24;
+  static constexpr size_t INNER_HEIGHT_THRESHOLD = 2;
+  static constexpr size_t HEIGHT_THREADHOLD = \
+    LEAF_HEIGHT_THREADHOLD > INNER_HEIGHT_THRESHOLD ? LEAF_HEIGHT_THREADHOLD : INNER_HEIGHT_THRESHOLD;
   // Argument types
   using KeyType = _KeyType;
   using ValueType = _ValueType;
@@ -1344,6 +1356,7 @@ class BwTree {
   // Helper types
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
   using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
+  using ConsolidatorType = Consolidator<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, HEIGHT_THREADHOLD>;
 };
 
 } // namespace bwtree

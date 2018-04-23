@@ -448,11 +448,17 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
 
   AppendHelperType ah{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
-  always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr);
-  always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr);
-  always_assert(ah.AppendLeafInsert(300, "this is 300") == nullptr);
-  always_assert(ah.AppendLeafDelete(100, "this is 400") == nullptr);
-  always_assert(ah.AppendLeafDelete(200, "this is 500") == nullptr);  
+  always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr); // 100
+  always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr); // 100 200
+  always_assert(ah.AppendLeafInsert(300, "this is 300") == nullptr); // 100 200 300
+
+  always_assert(ah.AppendLeafDelete(100, "this is 400") == nullptr); // 200 300
+  always_assert(ah.AppendLeafDelete(200, "this is 500") == nullptr); // 300
+
+  always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr); // 200 300
+  always_assert(ah.AppendLeafInsert(400, "this is 400") == nullptr); // 200 300 400
+  always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr); // 100 200 300 400
+  always_assert(ah.AppendLeafInsert(600, "this is 600") == nullptr); // 100 200 300 400 600
 
   //always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   //always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 

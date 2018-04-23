@@ -66,7 +66,7 @@ template <typename KeyType>
 class KeyPtrGreater {
  public:
   inline bool operator()(const KeyType *p1, const KeyType *p2) const {
-    return *p1 < *p2;
+    return *p1 > *p2;
   }
 };
 
@@ -1175,7 +1175,7 @@ class DefaultConsolidator :
   inline bool IsDeleted(const KeyType &key) { return IsInList(key, deleted_list, deleted_num); }
   // * Insert() - Adds a key into the inserted list
   void Insert(KeyType *key_p) {
-    if(IsDeleted(*key_p) == false) {
+    if(IsDeleted(*key_p) == false && IsInserted(*key_p) == false) {
       assert(inserted_num < HEIGHT_THRESHOLD);
       inserted_list[inserted_num] = key_p;
       inserted_num++;
@@ -1183,7 +1183,7 @@ class DefaultConsolidator :
   }
   // * Delete() - Adds a key into the deleted list
   void Delete(KeyType *key_p) {
-    if(IsInserted(*key_p) == false) {
+    if(IsInserted(*key_p) == false && IsDeleted(*key_p) == false) {
       assert(deleted_num < HEIGHT_THRESHOLD);
       deleted_list[deleted_num] = key_p;
       deleted_num++;
@@ -1249,6 +1249,7 @@ class DefaultConsolidator :
         dbg_printf("Flush insert stack\n");
         // Copy insert list
         while(!IsTopStopped()) {
+          dbg_printf("  key = %d\n", TopKey());
           it_target.Append(TopKey(), TopValue());
           InsertPop();
         }

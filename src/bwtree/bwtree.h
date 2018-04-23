@@ -1166,37 +1166,27 @@ class DefaultConsolidator :
   // * InsertPop() - Pop an element from the insert list
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
   // * IsTopInBound() - Whether the key on the top is still less than the current high key
-  inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p) }
+  inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
+
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 
     SortInsertedList();
+
     Finished() = true; 
   }
 
-  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-    Insert(&node_p->GetInsertKey());
-  }
-  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    Insert(&node_p->GetInsertKey());
-  }
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { Insert(&node_p->GetInsertKey()); }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { Insert(&node_p->GetInsertKey()); }
 
-  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
-    Delete(&node_p->GetDeleteKey());
-  }
-  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-    Delete(&node_p->GetDeleteKey());
-  }
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { Delete(&node_p->GetDeleteKey()); }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { Delete(&node_p->GetDeleteKey()); }
 
-  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-    current_high_key_p = &node_p->GetSplitKey();
-  }
-  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
-    current_high_key_p = &node_p->GetSplitKey();
-  }
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { current_high_key_p = &node_p->GetSplitKey(); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { current_high_key_p = &node_p->GetSplitKey(); }
 
   // Special for merge because we recursively traverse it
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 

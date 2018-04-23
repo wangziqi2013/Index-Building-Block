@@ -354,6 +354,14 @@ using KeyType = int;
 using ValueType = std::string;
 using BwTreeType = \
   BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode, DefaultConsolidator>;
+using NodeSizeType = typename BwTreeType::NodeSizeType;
+using NodeIDType = typename BwTreeType::NodeIDType;
+using DeltaChainType = typename BwTreeType::DeltaChainType;
+using MappingTableType = typename BwTreeType::MappingTableType;
+using AppendHelperType = typename BwTreeType::AppendHelperType;
+using LeafBaseType = typename BwTreeType::LeafBaseType;
+using InnerBaseType = typename BwTreeType::InnerBaseType;
+using BoundKeyType = typename BwTreeType::BoundKeyType;
 
 /*
  * DeltaNodeTest() - Tests whether delta node can be appended
@@ -361,15 +369,6 @@ using BwTreeType = \
  * 1. Tests whether append works
  */
 BEGIN_DEBUG_TEST(AppendTest) {
-  using NodeSizeType = typename BwTreeType::NodeSizeType;
-  using NodeIDType = typename BwTreeType::NodeIDType;
-  using DeltaChainType = typename BwTreeType::DeltaChainType;
-  using MappingTableType = typename BwTreeType::MappingTableType;
-  using AppendHelperType = typename BwTreeType::AppendHelperType;
-  using LeafBaseType = typename BwTreeType::LeafBaseType;
-  using InnerBaseType = typename BwTreeType::InnerBaseType;
-  using BoundKeyType = typename BwTreeType::BoundKeyType;
-
   size_t size = 0, size_merge_sibling = 5;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
@@ -431,22 +430,12 @@ BEGIN_DEBUG_TEST(AppendTest) {
   return;
 } END_TEST
 
-using LeafBaseType = typename BwTreeType::LeafBaseType;
 // * PrintLeafNode() - Prints out the leaf node
 void PrintLeafNode(LeafBaseType *node_p) {
   for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
 }
 
 BEGIN_DEBUG_TEST(ConsolidationTest) {
-  using NodeSizeType = typename BwTreeType::NodeSizeType;
-  using NodeIDType = typename BwTreeType::NodeIDType;
-  using DeltaChainType = typename BwTreeType::DeltaChainType;
-  using MappingTableType = typename BwTreeType::MappingTableType;
-  using AppendHelperType = typename BwTreeType::AppendHelperType;
-  using LeafBaseType = typename BwTreeType::LeafBaseType;
-  //using InnerBaseType = typename BwTreeType::InnerBaseType;
-  using BoundKeyType = typename BwTreeType::BoundKeyType;
-
   size_t size = 0;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
@@ -508,10 +497,10 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
 } END_TEST
 
 int main() {
-  //MappingTableTest();
-  //BoundKeyTest();
-  //BaseNodeTest();
-  //DeltaNodeTest();
+  MappingTableTest();
+  BoundKeyTest();
+  BaseNodeTest();
+  DeltaNodeTest();
   AppendTest();
   ConsolidationTest();
 

@@ -1227,9 +1227,8 @@ class DefaultConsolidator :
     if(!new_leaf_node_it.Inited()) {
       new_leaf_node_it = LeafNodeIteratorType{static_cast<LeafBaseType *>(
         LeafBaseType::Get(NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey()))};
+      dbg_printf("Creating new node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
     }
-
-    dbg_printf("New node size: %lu\n", (uint64_t)old_node_p->GetSize());
 
     // The iterator wrappes an index with the node pointer
     LeafNodeIteratorType it{node_p};
@@ -1242,9 +1241,12 @@ class DefaultConsolidator :
         break;
       } else if(insert_list_stop) {
         dbg_printf("Flush old base\n");
-        // Copy old base
+        // Copy old base items, only if they are not deleted by deltas
         while(!IsBaseStopped(it)) {
-          new_leaf_node_it.Append(it.GetKey(), it.GetValue());
+          if(!IsDeleted(it.GetKey())) {
+            new_leaf_node_it.Append(it.GetKey(), it.GetValue());
+          }
+
           it.Next();
         }
       } else if(old_base_stop) {
@@ -1256,6 +1258,12 @@ class DefaultConsolidator :
           InsertPop();
         }
       } else {
+        // Only test and try to insert non-deleted keys
+        if(!IsDeleted(it.GetKey())) {
+          it.Next();
+          continue;
+        }
+
         assert(it.GetKey() != TopKey());
         // Two-way merge
         if(it.GetKey() > TopKey()) {

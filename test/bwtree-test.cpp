@@ -431,6 +431,12 @@ BEGIN_DEBUG_TEST(AppendTest) {
   return;
 } END_TEST
 
+using LeafBaseType = typename BwTreeType::LeafBaseType;
+// * PrintLeafNode() - Prints out the leaf node
+void PrintLeafNode(LeafBaseType *node_p) {
+  for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
+}
+
 BEGIN_DEBUG_TEST(ConsolidationTest) {
   using NodeSizeType = typename BwTreeType::NodeSizeType;
   using NodeIDType = typename BwTreeType::NodeIDType;
@@ -471,9 +477,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   ConsolidatorType ct{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
   LeafBaseType *new_node_p = ct.GetNewLeafBase();
-  for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
-    test_out << "Index" << i << new_node_p->KeyAt(i) << new_node_p->ValueAt(i) << "\n";
-  }
+  PrintLeafNode(new_node_p);
 
   // Split it for later use
   LeafBaseType *merge_sibling_p = new_node_p->Split(); // 300 400 600
@@ -496,9 +500,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);
   new_node_p = ct2.GetNewLeafBase();
-  for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
-    test_out << "Index" << i << new_node_p->KeyAt(i) << new_node_p->ValueAt(i) << "\n";
-  }
+  PrintLeafNode(new_node_p);
 
   MappingTableType::Destroy(table_p);
 

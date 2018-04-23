@@ -487,8 +487,6 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
 
   // Free the delta chain
   FreeDeltaChain(table_p, table_p->At(leaf_node_id));
-  // Free the consolidated node
-  FreeDeltaChain(table_p, new_node_p);
 
   leaf_node_id = table_p->AllocateNodeID(new_node_p);
   leaf_node_p = new_node_p; // 100 200 300 400 600 [-Inf, +Inf)
@@ -506,6 +504,8 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
 
   // Free the delta chain with merge and split
   FreeDeltaChain(table_p, table_p->At(leaf_node_id));
+  // Free the consolidated node
+  FreeDeltaChain(table_p, new_node_p);
 
   MappingTableType::Destroy(table_p);
 

@@ -514,11 +514,14 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
  *    and the caller is responsible for checking consistency between 
  *    feature supports
  */
-template <typename KeyType, 
-          typename ValueType, 
-          typename DeltaChainType>
+template <typename _KeyType, 
+          typename _ValueType, 
+          typename _DeltaChainType>
 class DefaultBaseNode : public ExtendedNodeBase<KeyType, DeltaChainType> {
  public:
+  using KeyType = _KeyType;
+  using ValueType = _ValueType;
+  using DeltaChainType = _DeltaChainType;
   using BaseClassType = ExtendedNodeBase<KeyType, DeltaChainType>;
   using BaseBaseClassType = typename BaseClassType::BaseClassType;
   using NodeSizeType = typename BaseBaseClassType::NodeSizeType;
@@ -1104,18 +1107,20 @@ class DefaultConsolidator :
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using NodeHeightType = typename NodeBase<KeyType>::NodeHeightType;
+  using NodeSizeType = typename NodeBase<KeyType>::NodeSizeType;
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
   using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
 
   // * DefaultConsolidator() - Constructor
-  DefaultConsolidator(NodeBaseType *old_node_p) : 
+  DefaultConsolidator(NodeBaseType *pold_node_p) : 
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
     inserted_num{NodeHeightType{0}},
     deleted_num{NodeHeightType{0}},
     current_high_key_p{nullptr},
-    size{old_node_p->GetSize()},
-    current_base_index{NodeSizeType{0}} {}
+    old_node_p{pold_node_p},
+    new_node_p{nullptr},
+    current_index{NodeSizeType{0}} {}
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
@@ -1165,6 +1170,10 @@ class DefaultConsolidator :
     assert(IsInsertListEmpty() == false); 
     return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
   }
+  // * Append() - Append a key/value or key/node id pair to the new node
+  template <typename PayloadType>
+  inline void Append()
+
   // * InsertPop() - Pop an element from the insert list
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
   // * IsTopInBound() - Whether the key on the top is still less than the current high key
@@ -1172,7 +1181,13 @@ class DefaultConsolidator :
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
-    NodeSizeType base_size = node_p->GetSize();
+    if(new_node_p == nullptr) {
+      assert(current_index == 0);
+      new_node_p = LeafBaseType::Get(
+        NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), old_node_p->GetHighKey());
+    }
+
+    NodeSizeType base_size = old_node_p->GetSize();
     while(1) {
 
     }
@@ -1225,10 +1240,12 @@ class DefaultConsolidator :
   // If nullptr then did not see a split node yet (can be +Inf),
   // in which case all elements are processed
   KeyType *current_high_key_p;
-  // The size before and after consolidation
-  NodeSizeType size;
+  // The node before consolidation
+  NodeBaseType *old_node_p;
+  // The node after consolidation
+  NodeBaseType *new_node_p;
   // Current write index on the base node
-  NodeSizeType current_base_index;
+  NodeSizeType current_index;
 };
 
 template <typename _KeyType, typename _ValueType, 

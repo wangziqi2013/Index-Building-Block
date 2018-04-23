@@ -493,8 +493,10 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   AppendHelperType ah2{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah2.AppendLeafInsert(-40, "this is -40") == nullptr);
   always_assert(ah2.AppendLeafInsert(-30, "this is -30") == nullptr);
-  always_assert(ah2.AppendLeafInsert(-50, "this is -50") == nullptr); // -50 -40 -30 100 200 300 400 600
-  always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 4) == nullptr); // -50 -40 -30 100 [-Inf, 200)
+  always_assert(ah2.AppendLeafInsert(-50, "this is -50") == nullptr);
+  // This tests whether delta nodes below a split can be processed
+  always_assert(ah2.AppendLeafInsert(250, "this is 250") == nullptr); // -50 -40 -30 100 200 250 300 400 600
+  always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 5) == nullptr); // -50 -40 -30 100 [-Inf, 200)
   always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600
 
   ConsolidatorType ct2{table_p->At(leaf_node_id)};

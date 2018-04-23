@@ -350,15 +350,17 @@ BEGIN_DEBUG_TEST(DeltaNodeTest) {
   return;
 } END_TEST
 
+using KeyType = int;
+using ValueType = std::string;
+using BwTreeType = \
+  BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode, DefaultConsolidator>;
+
 /*
  * DeltaNodeTest() - Tests whether delta node can be appended
  * 
  * 1. Tests whether append works
  */
 BEGIN_DEBUG_TEST(AppendTest) {
-  using KeyType = int;
-  using ValueType = std::string;
-  using BwTreeType = BwTree<KeyType, ValueType, DefaultMappingTable, DefaultDeltaChainType, DefaultBaseNode>;
   using NodeSizeType = typename BwTreeType::NodeSizeType;
   using NodeIDType = typename BwTreeType::NodeIDType;
   using DeltaChainType = typename BwTreeType::DeltaChainType;
@@ -423,6 +425,49 @@ BEGIN_DEBUG_TEST(AppendTest) {
   always_assert(table_p->At(remove_id) != nullptr);
   FreeTraverserType::Traverse(table_p->At(inner_node_id), &dcfh2);
   always_assert(table_p->At(remove_id) == nullptr);
+
+  MappingTableType::Destroy(table_p);
+
+  return;
+} END_TEST
+
+BEGIN_DEBUG_TEST(ConsolidationTest) {
+  using NodeSizeType = typename BwTreeType::NodeSizeType;
+  using NodeIDType = typename BwTreeType::NodeIDType;
+  using DeltaChainType = typename BwTreeType::DeltaChainType;
+  using MappingTableType = typename BwTreeType::MappingTableType;
+  using AppendHelperType = typename BwTreeType::AppendHelperType;
+  using LeafBaseType = typename BwTreeType::LeafBaseType;
+  using InnerBaseType = typename BwTreeType::InnerBaseType;
+  using BoundKeyType = typename BwTreeType::BoundKeyType;
+/*
+  size_t size = 0;
+  LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
+  MappingTableType *table_p = MappingTableType::Get();
+  NodeIDType leaf_node_id = table_p->AllocateNodeID(leaf_node_p);
+
+  AppendHelperType ah{leaf_node_id, leaf_node_p, table_p};
+  always_assert(ah.GetBase()->GetType() == NodeType::LeafBase);
+  always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr);
+  always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr);
+  always_assert(ah.AppendLeafInsert(300, "this is 300") == nullptr);
+  always_assert(ah.AppendLeafDelete(100, "this is 400") == nullptr);
+  always_assert(ah.AppendLeafDelete(200, "this is 500") == nullptr);
+  */
+
+  //always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
+  //always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
+  //  LeafBaseType::Get(NodeType::LeafBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
+  //always_assert(ah.AppendLeafRemove(remove_id) == nullptr);
+  
+  using ConsolidatorType = typename BwTreeType::ConsolidatorType;
+  using ConsolidationTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
+  ConsolidatorType ct{table_p->At(leaf_node_id)}
+
+  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
+  using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
+  DeltaChainFreeHelperType dcfh{table_p};
+  FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
 
   MappingTableType::Destroy(table_p);
 

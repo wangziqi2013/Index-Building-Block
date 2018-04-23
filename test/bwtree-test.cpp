@@ -469,7 +469,16 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   PrintLeafNode(new_node_p);
 
   // Split it for later use
-  LeafBaseType *merge_sibling_p = new_node_p->Split(); // 300 400 600
+  LeafBaseType *merge_sibling_p = new_node_p->Split(); // Base Node: 300 400 600 [300, +Inf)
+  NodeIDType merge_sibling_id = table_p->AllocateNodeID(merge_sibling_p);
+  AppendHelperType ah3{merge_sibling_id, merge_sibling_p, table_p};
+  always_assert(ah3.AppendLeafInsert(700, "this is 700") == nullptr);
+  always_assert(ah3.AppendLeafInsert(800, "this is 800") == nullptr); // 300 400 600 700 800
+  always_assert(ah3.AppendLeafSplit(700, NodeIDType{999}, 2) == nullptr); // 300 400 600 [300, 700)
+  always_assert(ah3.AppendLeafDelete(400, "this is 400") == nullptr); // 300 600
+  always_assert(ah3.AppendLeafDelete(300, "this is 300") == nullptr); // 600
+
+  merge_sibling_p = static_cast<LeafBaseType *>(table_p->At(merge_sibling_id));
 
   // Free the delta chain
   using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
@@ -478,13 +487,13 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
 
   leaf_node_id = table_p->AllocateNodeID(new_node_p);
-  leaf_node_p = new_node_p;
+  leaf_node_p = new_node_p; // 100 200 300 400 600 [-Inf, +Inf)
   AppendHelperType ah2{leaf_node_id, leaf_node_p, table_p};
   always_assert(ah2.AppendLeafInsert(-40, "this is -40") == nullptr);
   always_assert(ah2.AppendLeafInsert(-30, "this is -30") == nullptr);
   always_assert(ah2.AppendLeafInsert(-50, "this is -50") == nullptr); // -50 -40 -30 100 200 300 400 600
-  always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 4) == nullptr); // -50 -40 -30 100
-  always_assert(ah2.AppendInnerMerge(700, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 300 400 600
+  always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 4) == nullptr); // -50 -40 -30 100 [-Inf, 200)
+  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 300
 
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);
@@ -497,10 +506,10 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
 } END_TEST
 
 int main() {
-  MappingTableTest();
-  BoundKeyTest();
-  BaseNodeTest();
-  DeltaNodeTest();
+  //MappingTableTest();
+  //BoundKeyTest();
+  //BaseNodeTest();
+  //DeltaNodeTest();
   AppendTest();
   ConsolidationTest();
 

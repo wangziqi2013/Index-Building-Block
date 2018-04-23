@@ -644,7 +644,7 @@ class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType> {
   
  private:
   // * KeyBegin() - Return the first pointer for values
-  inline ValueType *KeyBegin() { return key_begin; }
+  inline KeyType *KeyBegin() { return key_begin; }
   // * KeyEnd() - Return the first out-of-bound pointer for keys
   inline KeyType *KeyEnd() { return key_begin + BaseBaseClassType::GetSize(); }
   // * ValueBegin() - Return the first pointer for values
@@ -1111,8 +1111,9 @@ class BaseNodeIterator {
   inline void Next() { assert(index < node_p->GetSize()); index++; }
   // * Append() - Appends a key and value to the current position and advance
   inline void Append(const KeyType &key, const ValueType &value) { GetKey() = key; GetValue() = value; Next(); }
-  NodeSizeType index;
+  
   BaseNodeType *node_p;
+  NodeSizeType index;
 };
 
 // * class DefaultConsolidator - Implements consolidation algorithm
@@ -1128,8 +1129,8 @@ class DefaultConsolidator :
   using DeltaType = typename BaseClassType::DeltaType;
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
-  using NodeHeightType = typename NodeBase<KeyType>::NodeHeightType;
-  using NodeSizeType = typename NodeBase<KeyType>::NodeSizeType;
+  using NodeHeightType = typename NodeBaseType::NodeHeightType;
+  using NodeSizeType = typename NodeBaseType::NodeSizeType;
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
   using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
@@ -1158,8 +1159,8 @@ class DefaultConsolidator :
    */
   inline void SortInsertedList() { std::sort(inserted_list, inserted_list + inserted_num, KeyPtrGreaterType{}); }
   // * IsInList() - Whether the key is in the inserted set
-  bool IsInList(const KeyType &key, KeyType *key_list_p, NodeHeightType num) {
-    for(NodeHeightType i = 0;i < num;i++) { if(key == key_list_p[i]) { return true; } }
+  bool IsInList(const KeyType &key, KeyType **key_list_p, NodeHeightType num) {
+    for(NodeHeightType i = 0;i < num;i++) { if(key == *key_list_p[i]) { return true; } }
     return false;
   }
   // * IsInserted() - Whether the key is in the inserted set

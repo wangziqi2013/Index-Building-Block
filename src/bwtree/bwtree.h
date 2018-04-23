@@ -517,7 +517,7 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
 template <typename _KeyType, 
           typename _ValueType, 
           typename _DeltaChainType>
-class DefaultBaseNode : public ExtendedNodeBase<KeyType, DeltaChainType> {
+class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType> {
  public:
   using KeyType = _KeyType;
   using ValueType = _ValueType;
@@ -1106,7 +1106,7 @@ class BaseNodeIterator {
 
   inline bool IsEnd() { return index == node_p->GetSize(); }
   inline KeyType &GetKey() { assert(!IsEnd()); return node_p->KeyAt(index); }
-  inline ValueType &GetValue { assert(!IsEnd()); return node_p->ValueAt(index); }
+  inline ValueType &GetValue() { assert(!IsEnd()); return node_p->ValueAt(index); }
   inline void Next() { index++; }
   NodeSizeType index;
   BaseNodeType *node_p;
@@ -1129,6 +1129,9 @@ class DefaultConsolidator :
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
   using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
+
+  using LeafNodeIteratorType = BaseNodeIterator<LeafBaseType>;
+  using InnerNodeIteratorType = BaseNodeIterator<InnerBaseType>;
 
   // * DefaultConsolidator() - Constructor
   DefaultConsolidator(NodeBaseType *pold_node_p) : 

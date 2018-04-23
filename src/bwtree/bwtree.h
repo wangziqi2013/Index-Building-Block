@@ -1207,17 +1207,21 @@ class DefaultConsolidator :
   // * Insert() - Adds a key into the inserted list
   void Insert(KeyType *key_p) {
     if(IsDeleted(*key_p) == false && IsInserted(*key_p) == false) {
-      assert(inserted_num < HEIGHT_THRESHOLD);
-      inserted_list[inserted_num] = key_p;
-      inserted_num++;
+      if(current_high_key_p == nullptr || *key_p < *current_high_key_p) {
+        assert(inserted_num < HEIGHT_THRESHOLD);
+        inserted_list[inserted_num] = key_p;
+        inserted_num++;
+      }
     }
   }
   // * Delete() - Adds a key into the deleted list
   void Delete(KeyType *key_p) {
     if(IsInserted(*key_p) == false && IsDeleted(*key_p) == false) {
-      assert(deleted_num < HEIGHT_THRESHOLD);
-      deleted_list[deleted_num] = key_p;
-      deleted_num++;
+      if(current_high_key_p == nullptr || *key_p < *current_high_key_p) {
+        assert(deleted_num < HEIGHT_THRESHOLD);
+        deleted_list[deleted_num] = key_p;
+        deleted_num++;
+      }
     }
   }
   // * InInsertedListEmpty() - Returns true if it is empty

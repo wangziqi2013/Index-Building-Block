@@ -1094,6 +1094,17 @@ class DeltaChainFreeHelper :
   MappingTableType *table_p;
 };
 
+// * class BaseNodeIterator - Provides a set of interfaces for iterating on base nodes
+template <typename BaseNodeType>
+class BaseNodeIterator {
+  public:
+   using NodeSizeType = typename BaseNodeType::NodeSizeType;
+   // * BaseNodeIterator() - Constructor
+   BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p} {}
+   NodeSizeType index;
+   BaseNodeType *node_p;
+};
+
 template <typename KeyType, typename ValueType,
           typename NodeIDType, typename DeltaChainType, 
           template <typename, typename, typename> typename BaseNode,
@@ -1184,8 +1195,16 @@ class DefaultConsolidator :
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
   // * IsTopInBound() - Whether the key on the top is still less than the current high key
   inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p); }
-  inline bool IsBaseInBound(LeafBaseType *node_p, NodeSizeType index) { 
+  inline bool IsBaseInBound(LeafBaseType *node_p, NodeSizeType index) {
+    assert(index < node_p->GetSize()); 
     return current_high_key_p == nullptr || (node_p->KeyAt(index) < *current_high_key_p);
+  }
+
+  // * IsTopStopped() * IsBaseStopped() - Whether the insert list or the base node has been exhausted
+  inline bool IsTopStopped() { return IsInsertListEmpty() || !IsTopInBound(); }
+  inline bool IsBaseStopped(LeafBaseType *node_p, NodeSizeType index) {  
+    assert(index <= node_p->GetSize());
+    return index == node_p->GetSize(); || !IsBaseInBound(node_p, index);
   }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
@@ -1196,20 +1215,26 @@ class DefaultConsolidator :
         NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey());
     }
 
-    NodeSizeType old_base_size = node_p->GetSize();
     NodeSizeType old_base_index = 0;
     while(1) {
       // Stop if the insert list is empty, or if the top element is not in the current node's bound
-      bool insert_list_stop = IsInsertListEmpty() || !IsTopInBound();
-      bool old_base_stop = ((old_base_index == old_base_size) || 
-                            (current_high_key_p != nullptr &&
-                             node_p->KeyAt(old_base_index) >= *current_high_key_p));
-      if(insert_list_stop && old_base_stop) { break; }
-      if(insert_list_stop) {
+      bool insert_list_stop = IsTopStopped();
+      bool old_base_stop = IsBaseStopped(node_p, old_base_index);
+      if(insert_list_stop && old_base_stop) {
+        break;
+      } else if(insert_list_stop) {
         // Copy old base
+        while(!IsBaseStopped(node_p, old_base_index)) {
+          Append<LeafBaseType>(TopKey(), TopValue());
+          InsertPop();
+        }
       } else if(old_base_stop) {
         // Copy insert list
+        while(!IsTopStopped()) {
+          Append<LeafBaseType>(node_p->KeyAt(old_base_index), node_p->ValueAt(old_base_index));
+        }
       } else {
+        assert(node_p->KeyAt())
         // Two-way merge
       }
     }

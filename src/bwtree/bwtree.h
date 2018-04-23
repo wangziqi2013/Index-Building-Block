@@ -422,7 +422,6 @@ class DeltaNode : public NodeBase<KeyType> {
   static constexpr size_t T1_T2_OFFSET = T2_OFFSET - T1_OFFSET;
 
   // * GetT2FromT1() - Returns the T2 address given T1's address
-  template <typename DeltaNodeType>
   static T2 *GetT2FromT1(T1 *p) { 
     return reinterpret_cast<T2 *>(reinterpret_cast<char *>(p) + T1_T2_OFFSET);
   }
@@ -1154,8 +1153,20 @@ class DefaultConsolidator :
   // * InInsertedListEmpty() - Returns true if it is empty
   inline KeyType IsInsertListEmpty() const { return inserted_num == 0; }
   // * InsertTop() - Returns the key at the top of the inserted list (we maintain it as a stack)
-  inline TopKey &TopKey() { assert(IsInsertListEmpty() == false); return inserted_list[inserted_num - 1]; }
-  inline NodeBaseType *TopDelta() { assert(IsInsertListEmpty() == false); return  }
+  inline KeyType &TopKey() { assert(IsInsertListEmpty() == false); return *inserted_list[inserted_num - 1]; }
+  // * TopValue() - Returns the value on the top
+  inline ValueType &TopValue() { 
+    assert(IsInsertListEmpty() == false); 
+    return *DeltaType::LeafInsertType::GetT2FromT1(inserted_list[inserted_num - 1]); 
+  }
+  inline NodeIDType &TopNodeID() { 
+    assert(IsInsertListEmpty() == false); 
+    return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
+  }
+  // * InsertPop() - Pop an element from the insert list
+  inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
+  // * IsTopInBound() - Whether the key on the top is still less than the current high key
+  inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p) }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();

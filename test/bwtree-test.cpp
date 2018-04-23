@@ -362,6 +362,7 @@ using AppendHelperType = typename BwTreeType::AppendHelperType;
 using LeafBaseType = typename BwTreeType::LeafBaseType;
 using InnerBaseType = typename BwTreeType::InnerBaseType;
 using BoundKeyType = typename BwTreeType::BoundKeyType;
+using NodeBaseType = typename BwTreeType::NodeBaseType;
 
 /*
  * DeltaNodeTest() - Tests whether delta node can be appended
@@ -436,6 +437,15 @@ void PrintLeafNode(LeafBaseType *node_p) {
   for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
 }
 
+// * FreeDeltaChain() - Frees a delta chain using the traverser interface
+void FreeDeltaChain(MappingTableType *table_p, NodeBaseType *node_p) {
+  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
+  using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
+  DeltaChainFreeHelperType dcfh{table_p};
+  FreeTraverserType::Traverse(node_p, &dcfh);
+  return;
+}
+
 BEGIN_DEBUG_TEST(ConsolidationTest) {
   size_t size = 0;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
@@ -455,12 +465,6 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   always_assert(ah.AppendLeafInsert(400, "this is 400") == nullptr); // 200 300 400
   always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr); // 100 200 300 400
   always_assert(ah.AppendLeafInsert(600, "this is 600") == nullptr); // 100 200 300 400 600
-  //always_assert(ah.AppendLeafSplit(300, table_p->AllocateNodeID(nullptr), NodeSizeType{3}) == nullptr); // 100 200
-
-  //always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
-  //always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
-  //  LeafBaseType::Get(NodeType::LeafBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);
-  //always_assert(ah.AppendLeafRemove(remove_id) == nullptr);
   
   using ConsolidatorType = typename BwTreeType::ConsolidatorType;
   using ConsolidationTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
@@ -482,10 +486,9 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   merge_sibling_p = static_cast<LeafBaseType *>(table_p->At(merge_sibling_id));
 
   // Free the delta chain
-  using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
-  using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
-  DeltaChainFreeHelperType dcfh{table_p};
-  FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
+  FreeDeltaChain(table_p, table_p->At(leaf_node_id));
+  // Free the consolidated node
+  FreeDeltaChain(table_p, new_node_p);
 
   leaf_node_id = table_p->AllocateNodeID(new_node_p);
   leaf_node_p = new_node_p; // 100 200 300 400 600 [-Inf, +Inf)
@@ -500,6 +503,9 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);
   new_node_p = ct2.GetNewLeafBase();
   PrintLeafNode(new_node_p);
+
+  // Free the delta chain with merge and split
+  FreeDeltaChain(table_p, table_p->At(leaf_node_id));
 
   MappingTableType::Destroy(table_p);
 

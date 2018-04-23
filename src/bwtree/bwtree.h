@@ -1166,6 +1166,7 @@ class DefaultConsolidator :
     assert(IsInsertListEmpty() == false); 
     return *DeltaType::LeafInsertType::GetT2FromT1(inserted_list[inserted_num - 1]); 
   }
+  // * TopNodeID() - Returns the NodeID on the top
   inline NodeIDType &TopNodeID() { 
     assert(IsInsertListEmpty() == false); 
     return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
@@ -1183,18 +1184,34 @@ class DefaultConsolidator :
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
   // * IsTopInBound() - Whether the key on the top is still less than the current high key
   inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p); }
+  inline bool IsBaseInBound(LeafBaseType *node_p, NodeSizeType index) { 
+    return current_high_key_p == nullptr || (node_p->KeyAt(index) < *current_high_key_p);
+  }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
     if(new_node_p == nullptr) {
       assert(current_index == 0);
       new_node_p = LeafBaseType::Get(
-        NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), old_node_p->GetHighKey());
+        NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey());
     }
 
-    NodeSizeType base_size = old_node_p->GetSize();
+    NodeSizeType old_base_size = node_p->GetSize();
+    NodeSizeType old_base_index = 0;
     while(1) {
-
+      // Stop if the insert list is empty, or if the top element is not in the current node's bound
+      bool insert_list_stop = IsInsertListEmpty() || !IsTopInBound();
+      bool old_base_stop = ((old_base_index == old_base_size) || 
+                            (current_high_key_p != nullptr &&
+                             node_p->KeyAt(old_base_index) >= *current_high_key_p));
+      if(insert_list_stop && old_base_stop) { break; }
+      if(insert_list_stop) {
+        // Copy old base
+      } else if(old_base_stop) {
+        // Copy insert list
+      } else {
+        // Two-way merge
+      }
     }
     Finished() = true; 
   }

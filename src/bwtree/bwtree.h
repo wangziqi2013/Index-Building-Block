@@ -1097,12 +1097,19 @@ class DeltaChainFreeHelper :
 // * class BaseNodeIterator - Provides a set of interfaces for iterating on base nodes
 template <typename BaseNodeType>
 class BaseNodeIterator {
-  public:
-   using NodeSizeType = typename BaseNodeType::NodeSizeType;
-   // * BaseNodeIterator() - Constructor
-   BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p} {}
-   NodeSizeType index;
-   BaseNodeType *node_p;
+ public:
+  using NodeSizeType = typename BaseNodeType::NodeSizeType;
+  using KeyType = typename BaseNodeType::KeyType;
+  using ValueType = typename BaseNodeType::ValueType;
+  // * BaseNodeIterator() - Constructor
+  BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p} {}
+
+  inline bool IsEnd() { return index == node_p->GetSize(); }
+  inline KeyType &GetKey() { assert(!IsEnd()); return node_p->KeyAt(index); }
+  inline ValueType &GetValue { assert(!IsEnd()); return node_p->ValueAt(index); }
+  inline void Next() { index++; }
+  NodeSizeType index;
+  BaseNodeType *node_p;
 };
 
 template <typename KeyType, typename ValueType,

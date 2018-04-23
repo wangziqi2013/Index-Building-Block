@@ -1129,7 +1129,32 @@ class BaseNodeIterator {
   NodeSizeType index;
 };
 
-// * class DefaultConsolidator - Implements consolidation algorithm
+/* 
+ * class DefaultConsolidator - Implements consolidation algorithm
+ * 
+ * The consolidation algorithm uses two lists: inserted list and deleted list
+ * The routine traverses down the delta chain in the normal order. For insert
+ * deltas, the keys are first tested against the deleted list to see if it is 
+ * already deleted. If not, then it is added into the inserted list after testing
+ * for duplication. For delete deltas, they are tested against the inserted list,
+ * and then added to the deleted list after a duplicated key test if both tests 
+ * return negative.
+ * 
+ * On the base level, the inserted list is first sorted, from largest to smallest.
+ * Then a two-way merge is performed to derive the new node. Each data item in the
+ * base node is also tested against the deleted list.
+ * 
+ * Split nodes change the current high key of the virtual node. The updated high
+ * key should be recorded. When traversing the base node and the delta chain, 
+ * keys larger than the current high key will be ignored, as they belong to 
+ * the split sibling.
+ * 
+ * Merge nodes are processed recursively. Contexts should be saved and restored 
+ * before and after the recursion. For example, the current high key will be 
+ * saved and restored before and after both siblings are traversed. As an optimization,
+ * the deleted list could also be restored, as we know the two siblings will not share
+ * any deleted item.
+ */
 template <typename KeyType, typename ValueType,
           typename NodeIDType, typename DeltaChainType, 
           template <typename, typename, typename> typename BaseNode,

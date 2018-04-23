@@ -565,6 +565,12 @@ class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType> {
       static_cast<DefaultBaseNode *>(
         new (p) DefaultBaseNode{ptype, NodeHeightType{0}, psize, plow_key, phigh_key});
     
+    // Call constructor on each key and value element using placement new
+    for(NodeSizeType i = 0;i < psize;i++) {
+      new (&node_p->KeyAt(i)) KeyType{};
+      new (&node_p->ValueAt(i)) ValueType{};
+    }
+    
     return node_p;
   }
 
@@ -1212,12 +1218,15 @@ class DefaultConsolidator :
   inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(it); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
+    dbg_printf("Handle leaf base\n");
     SortInsertedList();
     if(new_node_p == nullptr) {
       assert(current_index == 0);
       new_node_p = LeafBaseType::Get(
         NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey());
     }
+
+    dbg_printf("New node size: %lu\n", (uint64_t)old_node_p->GetSize());
 
     // The iterator wrappes an index with the node pointer
     LeafNodeIteratorType it{node_p};
@@ -1226,15 +1235,18 @@ class DefaultConsolidator :
       bool insert_list_stop = IsTopStopped();
       bool old_base_stop = IsBaseStopped(it);
       if(insert_list_stop && old_base_stop) {
+        dbg_printf("Both stop\n");
         // Both are finished
         break;
       } else if(insert_list_stop) {
+        dbg_printf("Flush old base\n");
         // Copy old base
         while(!IsBaseStopped(it)) {
           it_target.Append(it.GetKey(), it.GetValue());
           it.Next();
         }
       } else if(old_base_stop) {
+        dbg_printf("Flush insert stack\n");
         // Copy insert list
         while(!IsTopStopped()) {
           it_target.Append(TopKey(), TopValue());
@@ -1261,14 +1273,14 @@ class DefaultConsolidator :
     Finished() = true; 
   }
 
-  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { Insert(&node_p->GetInsertKey()); }
-  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { Insert(&node_p->GetInsertKey()); }
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { GetNext() = node_p->GetNext(); dbg_printf("Handle leaf insert\n"); Insert(&node_p->GetInsertKey()); }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { GetNext() = node_p->GetNext(); Insert(&node_p->GetInsertKey()); }
 
-  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { Delete(&node_p->GetDeleteKey()); }
-  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { Delete(&node_p->GetDeleteKey()); }
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { GetNext() = node_p->GetNext(); dbg_printf("Handle leaf delete\n"); Delete(&node_p->GetDeleteKey()); }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { GetNext() = node_p->GetNext(); Delete(&node_p->GetDeleteKey()); }
 
-  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { current_high_key_p = &node_p->GetSplitKey(); }
-  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { current_high_key_p = &node_p->GetSplitKey(); }
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { GetNext() = node_p->GetNext(); current_high_key_p = &node_p->GetSplitKey(); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { GetNext() = node_p->GetNext(); current_high_key_p = &node_p->GetSplitKey(); }
 
   // Special for merge because we recursively traverse it
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 

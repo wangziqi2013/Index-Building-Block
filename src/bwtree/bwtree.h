@@ -1107,7 +1107,10 @@ class BaseNodeIterator {
   inline bool IsEnd() { return index == node_p->GetSize(); }
   inline KeyType &GetKey() { assert(!IsEnd()); return node_p->KeyAt(index); }
   inline ValueType &GetValue() { assert(!IsEnd()); return node_p->ValueAt(index); }
-  inline void Next() { assert(index <= node_p->GetSize()); index++; }
+  // * Next() - Advance to the next key
+  inline void Next() { assert(index < node_p->GetSize()); index++; }
+  // * Append() - Appends a key and value to the current position and advance
+  inline void Append(const KeyType &key, const ValueType &value) { GetKey() = key; GetValue() = value; Next(); }
   NodeSizeType index;
   BaseNodeType *node_p;
 };
@@ -1226,19 +1229,28 @@ class DefaultConsolidator :
       } else if(insert_list_stop) {
         // Copy old base
         while(!IsBaseStopped(it)) {
-          Append<LeafBaseType>(it.GetKey(), it.GetValue());
+          it_target.Append(it.GetKey(), it.GetValue());
           it.Next();
         }
       } else if(old_base_stop) {
         // Copy insert list
         while(!IsTopStopped()) {
-          Append<LeafBaseType>(TopKey(), TopValue());
+          it_target.Append(TopKey(), TopValue());
+          InsertPop();
         }
       } else {
-        //assert(node_p->KeyAt());
+        assert(it.GetKey() != TopKey());
         // Two-way merge
+        if(it.GetKey() > TopKey()) {
+          it_target.Append(TopKey(), TopValue());
+          InsertPop();
+        } else {
+          it_target.Append(it.GetKey(), it.GetValue());
+          it.Next();
+        }
       }
     }
+    
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 

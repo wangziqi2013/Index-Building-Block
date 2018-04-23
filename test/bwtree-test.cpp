@@ -432,15 +432,15 @@ BEGIN_DEBUG_TEST(AppendTest) {
 } END_TEST
 
 BEGIN_DEBUG_TEST(ConsolidationTest) {
-  using NodeSizeType = typename BwTreeType::NodeSizeType;
+  //using NodeSizeType = typename BwTreeType::NodeSizeType;
   using NodeIDType = typename BwTreeType::NodeIDType;
   using DeltaChainType = typename BwTreeType::DeltaChainType;
   using MappingTableType = typename BwTreeType::MappingTableType;
   using AppendHelperType = typename BwTreeType::AppendHelperType;
   using LeafBaseType = typename BwTreeType::LeafBaseType;
-  using InnerBaseType = typename BwTreeType::InnerBaseType;
+  //using InnerBaseType = typename BwTreeType::InnerBaseType;
   using BoundKeyType = typename BwTreeType::BoundKeyType;
-/*
+
   size_t size = 0;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
@@ -452,8 +452,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   always_assert(ah.AppendLeafInsert(200, "this is 200") == nullptr);
   always_assert(ah.AppendLeafInsert(300, "this is 300") == nullptr);
   always_assert(ah.AppendLeafDelete(100, "this is 400") == nullptr);
-  always_assert(ah.AppendLeafDelete(200, "this is 500") == nullptr);
-  */
+  always_assert(ah.AppendLeafDelete(200, "this is 500") == nullptr);  
 
   //always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   //always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
@@ -462,7 +461,8 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   
   using ConsolidatorType = typename BwTreeType::ConsolidatorType;
   using ConsolidationTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
-  ConsolidatorType ct{table_p->At(leaf_node_id)}
+  ConsolidatorType ct{table_p->At(leaf_node_id)};
+  ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
 
   using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
   using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;

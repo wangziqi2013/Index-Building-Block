@@ -432,6 +432,7 @@ BEGIN_DEBUG_TEST(AppendTest) {
 
 // * PrintLeafNode() - Prints out the leaf node
 void PrintLeafNode(LeafBaseType *node_p) {
+  test_printf("Range: [%s, %s)\n", node_p->GetLowKey()->ToString().c_str(), node_p->GetHighKey()->ToString().c_str());
   for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
 }
 
@@ -493,7 +494,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   always_assert(ah2.AppendLeafInsert(-30, "this is -30") == nullptr);
   always_assert(ah2.AppendLeafInsert(-50, "this is -50") == nullptr); // -50 -40 -30 100 200 300 400 600
   always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 4) == nullptr); // -50 -40 -30 100 [-Inf, 200)
-  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 300
+  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600
 
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);

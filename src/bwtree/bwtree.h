@@ -59,6 +59,8 @@ class BoundKey {
   inline static BoundKey GetInf() { return BoundKey{KeyType{}, true}; }
   // * Get() - Returns a key
   inline static BoundKey Get(const KeyType &key) { return BoundKey{key, false}; }
+  // * ToString() - For Testing purposes. Note that the key type must be compatible with std::to_string
+  inline std::string ToString() const { return IsInf() ? "Inf" : std::to_string(key); }
 };
 
 // * class KeyPtrGreater() - Compares two key pointers

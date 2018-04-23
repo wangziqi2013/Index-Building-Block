@@ -1109,11 +1109,13 @@ class DefaultConsolidator :
   using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
 
   // * DefaultConsolidator() - Constructor
-  DefaultConsolidator() : 
+  DefaultConsolidator(NodeBaseType *old_node_p) : 
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
     inserted_num{NodeHeightType{0}},
     deleted_num{NodeHeightType{0}},
-    current_high_key_p{nullptr} {}
+    current_high_key_p{nullptr},
+    size{old_node_p->GetSize()},
+    current_base_index{NodeSizeType{0}} {}
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
@@ -1170,7 +1172,10 @@ class DefaultConsolidator :
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
+    NodeSizeType base_size = node_p->GetSize();
+    while(1) {
 
+    }
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 
@@ -1220,6 +1225,10 @@ class DefaultConsolidator :
   // If nullptr then did not see a split node yet (can be +Inf),
   // in which case all elements are processed
   KeyType *current_high_key_p;
+  // The size before and after consolidation
+  NodeSizeType size;
+  // Current write index on the base node
+  NodeSizeType current_base_index;
 };
 
 template <typename _KeyType, typename _ValueType, 

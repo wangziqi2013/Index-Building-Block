@@ -459,6 +459,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   always_assert(ah.AppendLeafInsert(400, "this is 400") == nullptr); // 200 300 400
   always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr); // 100 200 300 400
   always_assert(ah.AppendLeafInsert(600, "this is 600") == nullptr); // 100 200 300 400 600
+  //always_assert(ah.AppendLeafSplit(300, table_p->AllocateNodeID(nullptr), NodeSizeType{3}) == nullptr); // 100 200
 
   //always_assert(ah.AppendLeafSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   //always_assert(ah.AppendLeafMerge(700, table_p->AllocateNodeID(nullptr), 
@@ -474,10 +475,30 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
     test_out << "Index" << i << new_node_p->KeyAt(i) << new_node_p->ValueAt(i) << "\n";
   }
 
+  // Split it for later use
+  LeafBaseType *merge_sibling_p = new_node_p->Split();
+
+  // Free the delta chain
   using DeltaChainFreeHelperType = typename BwTreeType::DeltaChainFreeHelperType;
   using FreeTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, DeltaChainFreeHelperType>;
   DeltaChainFreeHelperType dcfh{table_p};
   FreeTraverserType::Traverse(table_p->At(leaf_node_id), &dcfh);
+
+  leaf_node_id = table_p->AllocateNodeID(new_node_p);
+  leaf_node_p = new_node_p;
+  AppendHelperType ah2{leaf_node_id, leaf_node_p, table_p};
+  always_assert(ah2.AppendLeafInsert(-40, "this is -40") == nullptr);
+  always_assert(ah2.AppendLeafInsert(-30, "this is -30") == nullptr);
+  always_assert(ah2.AppendLeafInsert(-50, "this is -50") == nullptr); // -50 -40 -30 100 200
+  always_assert(ah2.AppendLeafSplit(-30, NodeIDType{999}, 3) == nullptr); // -50 -40
+  always_assert(ah2.AppendInnerMerge(700, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 300 400 600
+
+  ConsolidatorType ct2{table_p->At(leaf_node_id)};
+  ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);
+  new_node_p = ct2.GetNewLeafBase();
+  for(NodeSizeType i = 0;i < new_node_p->GetSize();i++) {
+    test_out << "Index" << i << new_node_p->KeyAt(i) << new_node_p->ValueAt(i) << "\n";
+  }
 
   MappingTableType::Destroy(table_p);
 

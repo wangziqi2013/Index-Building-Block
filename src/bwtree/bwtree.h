@@ -61,9 +61,9 @@ class BoundKey {
   inline static BoundKey Get(const KeyType &key) { return BoundKey{key, false}; }
 };
 
-// * class KeyPtrLess() - Compares two key pointers
+// * class KeyPtrGreater() - Compares two key pointers
 template <typename KeyType>
-class KeyPtrLess {
+class KeyPtrGreater {
  public:
   inline bool operator()(const KeyType *p1, const KeyType *p2) const {
     return *p1 < *p2;
@@ -417,11 +417,15 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T5 &GetPrevKey() { return t5; }
   inline T6 &GetPrevNodeID() { return t6; }
   
-  // * GetBaseFromT1() - Returns the base address given T1's address
-  DeltaNode *GetBaseFromT1(T1 *p) {
-    return reinterpret_cast<DeltaNode *>(reinterpret_cast<char *>(p) - offsetof(DeltaNode, t1));
-  }
+  static constexpr size_t T1_OFFSET = offsetof(DeltaNode, t1);
+  static constexpr size_t T2_OFFSET = offsetof(DeltaNode, t2);
+  static constexpr size_t T1_T2_OFFSET = T2_OFFSET - T1_OFFSET;
 
+  // * GetT2FromT1() - Returns the T2 address given T1's address
+  template <typename DeltaNodeType>
+  static T2 *GetT2FromT1(T1 *p) { 
+    return reinterpret_cast<T2 *>(reinterpret_cast<char *>(p) + T1_T2_OFFSET);
+  }
  private:
   BaseClassType *next_node_p;
   // Delta node elements
@@ -443,6 +447,12 @@ class Delta {
   using InnerSplitType = INNER_SPLIT_TYPE(KeyType, NodeIDType);
   using InnerMergeType = INNER_MERGE_TYPE(KeyType, NodeIDType);
   using InnerRemoveType = INNER_REMOVE_TYPE(KeyType, NodeIDType);
+
+  // Make sure we can always obtain T2 from T1's address
+  static_assert(LeafInsertType::T1_T2_OFFSET == LeafDeleteType::T1_T2_OFFSET, 
+                "Inconsistent layout of KeyType and ValueType between leaf insert and delete");
+  static_assert(InnerInsertType::T1_T2_OFFSET == InnerDeleteType::T1_T2_OFFSET, 
+                "Inconsistent layout of KeyType and NodeIDType between inner insert and delete");
 };
 
 // * class ExtendedNodeBase - Type irrelevant part of the base node
@@ -1091,24 +1101,31 @@ class DefaultConsolidator :
  public:
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using NodeBaseType = typename BaseClassType::NodeBaseType;
-  using BoundKeyType = BoundKey<KeyType>;
   using DeltaType = typename BaseClassType::DeltaType;
   using LeafBaseType = typename BaseClassType::LeafBaseType;
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using NodeHeightType = typename NodeBase<KeyType>::NodeHeightType;
   using DeltaChainTraverserType = \
     DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
+  using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
 
   // * DefaultConsolidator() - Constructor
   DefaultConsolidator() : 
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
     inserted_num{NodeHeightType{0}},
-    deleted_num{NodeHeightType{0}} {}
+    deleted_num{NodeHeightType{0}},
+    current_high_key_p{nullptr} {}
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
-  // * SortInsertedList() - Sorts a given list of keys
-  inline void SortInsertedList() { std::sort(inserted_list, inserted_list + inserted_num, KeyPtrLess<KeyType>{}); }
+  /* 
+   * SortInsertedList() - Sorts a given list of keys
+   * 
+   * 1. Keys are sorted from larger to smaller
+   * 2. The reason for reversed ordering is that we could use the inserted list as a stack
+   *    during the merge, without having to adjust the starting point
+   */
+  inline void SortInsertedList() { std::sort(inserted_list, inserted_list + inserted_num, KeyPtrGreaterType{}); }
   // * IsInList() - Whether the key is in the inserted set
   bool IsInList(const KeyType &key, KeyType *key_list_p, NodeHeightType num) {
     for(NodeHeightType i = 0;i < num;i++) { if(key == key_list_p[i]) { return true; } }
@@ -1121,6 +1138,7 @@ class DefaultConsolidator :
   // * Insert() - Adds a key into the inserted list
   void Insert(KeyType *key_p) {
     if(IsDeleted(*key_p) == false) {
+      assert(inserted_num < HEIGHT_THRESHOLD);
       inserted_list[inserted_num] = key_p;
       inserted_num++;
     }
@@ -1128,10 +1146,16 @@ class DefaultConsolidator :
   // * Delete() - Adds a key into the deleted list
   void Delete(KeyType *key_p) {
     if(IsInserted(*key_p) == false) {
+      assert(deleted_num < HEIGHT_THRESHOLD);
       deleted_list[deleted_num] = key_p;
       deleted_num++;
     }
   }
+  // * InInsertedListEmpty() - Returns true if it is empty
+  inline KeyType IsInsertListEmpty() const { return inserted_num == 0; }
+  // * InsertTop() - Returns the key at the top of the inserted list (we maintain it as a stack)
+  inline TopKey &TopKey() { assert(IsInsertListEmpty() == false); return inserted_list[inserted_num - 1]; }
+  inline NodeBaseType *TopDelta() { assert(IsInsertListEmpty() == false); return  }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
@@ -1143,44 +1167,44 @@ class DefaultConsolidator :
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-
+    Insert(&node_p->GetInsertKey());
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-
+    Insert(&node_p->GetInsertKey());
   }
 
   void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
-
+    Delete(&node_p->GetDeleteKey());
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-
+    Delete(&node_p->GetDeleteKey());
   }
 
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-
+    current_high_key_p = &node_p->GetSplitKey();
   }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
-
+    current_high_key_p = &node_p->GetSplitKey();
   }
 
   // Special for merge because we recursively traverse it
   void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
     // Save this such that we do not need to compare
     NodeHeightType saved_deleted_num = deleted_num;
-    BoundKeyType saved_high_key = current_high_key;
+    KeyType *saved_high_key_p = current_high_key_p;
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     deleted_num = saved_deleted_num;
-    current_high_key = saved_high_key;
+    current_high_key_p = saved_high_key_p;
     Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
 
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     NodeHeightType saved_deleted_num = deleted_num;
-    BoundKeyType saved_high_key = current_high_key;
+    KeyType *saved_high_key_p = current_high_key_p;
     DeltaChainTraverserType::Traverse(node_p->GetNext(), this);
     deleted_num = saved_deleted_num;
-    current_high_key = saved_high_key;
+    current_high_key_p = saved_high_key_p;
     Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
 
@@ -1192,8 +1216,9 @@ class DefaultConsolidator :
   NodeHeightType inserted_num;
   NodeHeightType deleted_num;
   // The current high key on the branch
-  // Initialized to the high key of the node, and 
-  BoundKeyType current_high_key;
+  // If nullptr then did not see a split node yet (can be +Inf),
+  // in which case all elements are processed
+  KeyType *current_high_key_p;
 };
 
 template <typename _KeyType, typename _ValueType, 

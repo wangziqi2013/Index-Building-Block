@@ -1102,12 +1102,12 @@ class BaseNodeIterator {
   using KeyType = typename BaseNodeType::KeyType;
   using ValueType = typename BaseNodeType::ValueType;
   // * BaseNodeIterator() - Constructor
-  BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p} {}
+  BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p}, index{0} {}
 
   inline bool IsEnd() { return index == node_p->GetSize(); }
   inline KeyType &GetKey() { assert(!IsEnd()); return node_p->KeyAt(index); }
   inline ValueType &GetValue() { assert(!IsEnd()); return node_p->ValueAt(index); }
-  inline void Next() { index++; }
+  inline void Next() { assert(index <= node_p->GetSize()); index++; }
   NodeSizeType index;
   BaseNodeType *node_p;
 };
@@ -1192,30 +1192,19 @@ class DefaultConsolidator :
     assert(IsInsertListEmpty() == false); 
     return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
   }
-  // * Append() - Append a key/value or key/node id pair to the new node
-  template <typename BaseNodeType>
-  inline void Append(const KeyType &key, const typename BaseNodeType::ValueType &value) {
-    assert(current_index < old_node_p->GetSize());
-    static_cast<BaseNodeType *>(new_node_p)->KeyAt(current_index) = key;
-    static_cast<BaseNodeType *>(new_node_p)->ValueAt(current_index) = value;
-    current_index++;
-  }
 
   // * InsertPop() - Pop an element from the insert list
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
-  // * IsTopInBound() - Whether the key on the top is still less than the current high key
+
+  // * IsTopInBound() * IsBaseInBound() - Whether the key on the top or the base node is still less than the current high key
   inline bool IsTopInBound() { return current_high_key_p == nullptr || (TopKey() < *current_high_key_p); }
-  inline bool IsBaseInBound(LeafBaseType *node_p, NodeSizeType index) {
-    assert(index < node_p->GetSize()); 
-    return current_high_key_p == nullptr || (node_p->KeyAt(index) < *current_high_key_p);
-  }
+  template <typename IteratorType>
+  inline bool IsBaseInBound(IteratorType it) { return current_high_key_p == nullptr || (it.GetKey() < *current_high_key_p); }
 
   // * IsTopStopped() * IsBaseStopped() - Whether the insert list or the base node has been exhausted
   inline bool IsTopStopped() { return IsInsertListEmpty() || !IsTopInBound(); }
-  inline bool IsBaseStopped(LeafBaseType *node_p, NodeSizeType index) {  
-    assert(index <= node_p->GetSize());
-    return index == node_p->GetSize(); || !IsBaseInBound(node_p, index);
-  }
+  template <typename IteratorType>
+  inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(node_p, index); }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
     SortInsertedList();
@@ -1225,26 +1214,28 @@ class DefaultConsolidator :
         NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey());
     }
 
-    NodeSizeType old_base_index = 0;
+    // The iterator wrappes an index with the node pointer
+    LeafNodeIteratorType it{node_p};
+    LwafNodeIteratorType it_target{static_cast<LeafBaseType *>(new_node_p)};
     while(1) {
-      // Stop if the insert list is empty, or if the top element is not in the current node's bound
       bool insert_list_stop = IsTopStopped();
-      bool old_base_stop = IsBaseStopped(node_p, old_base_index);
+      bool old_base_stop = IsBaseStopped(it);
       if(insert_list_stop && old_base_stop) {
+        // Both are finished
         break;
       } else if(insert_list_stop) {
         // Copy old base
-        while(!IsBaseStopped(node_p, old_base_index)) {
-          Append<LeafBaseType>(TopKey(), TopValue());
-          InsertPop();
+        while(!IsBaseStopped(it)) {
+          Append<LeafBaseType>(it.GetKey(), it.GetValue());
+          it.Next();
         }
       } else if(old_base_stop) {
         // Copy insert list
         while(!IsTopStopped()) {
-          Append<LeafBaseType>(node_p->KeyAt(old_base_index), node_p->ValueAt(old_base_index));
+          Append<LeafBaseType>(TopKey(), TopValue());
         }
       } else {
-        assert(node_p->KeyAt())
+        //assert(node_p->KeyAt());
         // Two-way merge
       }
     }

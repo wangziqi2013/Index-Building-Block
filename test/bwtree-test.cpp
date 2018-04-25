@@ -412,8 +412,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
   remove_id = table_p->AllocateNodeID(inner_node_p);
   AppendHelperType ah2{inner_node_id, inner_node_p, table_p};
   always_assert(ah2.GetBase()->GetType() == NodeType::InnerBase);
-  always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, 200, NodeIDType{201}) == nullptr);
-  always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, 200, NodeIDType{201}, 300, NodeIDType{301}) == nullptr);
+  always_assert(ah2.AppendInnerInsert(100, NodeIDType{101}, BoundKeyType::GetInf()) == nullptr);
+  always_assert(ah2.AppendInnerDelete(100, NodeIDType{101}, BoundKeyType::GetInf(), BoundKeyType{888}, NodeIDType{999}) == nullptr);
   always_assert(ah2.AppendInnerSplit(600, table_p->AllocateNodeID(nullptr), NodeSizeType{400}) == nullptr);
   always_assert(ah2.AppendInnerMerge(700, table_p->AllocateNodeID(nullptr), 
     InnerBaseType::Get(NodeType::InnerBase, size_merge_sibling, BoundKeyType::GetInf(), BoundKeyType::GetInf())) == nullptr);

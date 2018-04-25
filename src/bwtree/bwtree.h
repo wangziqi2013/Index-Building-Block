@@ -1267,12 +1267,21 @@ class DefaultConsolidator :
    * 1. IteratorType is the type of the iterator. This argument can be deduced
    * 2. DeltaInsertType is either leaf insert delta type or inner insert delta type
    *    It is used to fetch the payload (either node ID or value type) from the key's pointer
+   * 3. For base nodes, since the low key could be -Inf, we ignore the first key-NodeID item.
    */
   template <typename DeltaInsertType, typename IteratorType>
   void MergeLoop(typename IteratorType::BaseNodeType *node_p, IteratorType *target_it_p) {
     using BaseNodeType = typename IteratorType::BaseNodeType;
+    assert(node_p->GetType() == NodeType::InnerBase || node_p->GetType() == NodeType::LeafBase);
     // The iterator wrappes an index with the node pointer
     IteratorType it{node_p};
+    // If the low key is -Inf, and we know it is inner node, then ignore the first item
+    if(node_p->GetType() == NodeType::InnerBase && node_p->GetLowKey()->IsInf() == true) {
+      assert(it.IsEnd() == false);
+      target_it_p->Append(node_p->KeyAt(0), node_p->ValueAt(0));
+      it.Next();
+    }
+
     while(1) {
       bool insert_list_stop = IsTopStopped();
       bool old_base_stop = IsBaseStopped(it);

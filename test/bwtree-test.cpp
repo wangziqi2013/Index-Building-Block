@@ -195,36 +195,41 @@ public:
   bool &Finished() { return BaseClassType::finished; }
 
   void HandleLeafBase(LeafBaseType *node_p) { 
-    test_printf("LeafBase"); test_out << node_p->GetSize() << "\n";
+    test_printf("LeafBase"); test_out << "size:" << node_p->GetSize() << "\n";
     Finished() = true; 
   }
   void HandleInnerBase(InnerBaseType *node_p) { 
-    test_printf("InnerBase"); test_out << node_p->GetSize() << "\n";
+    test_printf("InnerBase"); test_out << "size:" << node_p->GetSize() << "\n";
     Finished() = true; 
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { 
-    test_printf("LeafInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() << "\n"; 
+    test_printf("LeafInsert"); test_out << "size:" << node_p->GetSize() << \
+      "key:" << node_p->GetInsertKey() << "val: " << node_p->GetInsertValue() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
-    test_printf("InnerInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() \
-      << node_p->GetNextKey().ToString().c_str() << "\n"; 
+    test_printf("InnerInsert"); test_out << "size:" << node_p->GetSize() << \
+      "key:" << node_p->GetInsertKey() << "val:" << node_p->GetInsertValue() << \
+      "next_key:" << node_p->GetNextKey().ToString().c_str() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { 
-    test_printf("LeafDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() << "\n"; 
+    test_printf("LeafDelete"); test_out << "size:" << node_p->GetSize() << \
+      node_p->GetDeleteKey() << node_p->GetDeleteValue() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
-    test_printf("InnerDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() \
-      << node_p->GetNextKey().ToString().c_str() << node_p->GetPrevKey().ToString().c_str() << node_p->GetPrevNodeID() << "\n"; 
+    test_printf("InnerDelete"); test_out << "size:" << node_p->GetSize() << "key:" << \
+      node_p->GetDeleteKey() << "val:" << node_p->GetDeleteValue() << \
+      "next_key:" << node_p->GetNextKey().ToString().c_str() << \
+      "prev_key:" << node_p->GetPrevKey().ToString().c_str() << "prev_id:" << node_p->GetPrevNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-    test_printf("LeafSplit"); test_out << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
+    test_printf("LeafSplit"); test_out << "size:" << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
@@ -518,7 +523,7 @@ int main() {
   //MappingTableTest();
   //BoundKeyTest();
   //BaseNodeTest();
-  //DeltaNodeTest();
+  DeltaNodeTest();
   AppendTest();
   LeafConsolidationTest();
 

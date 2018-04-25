@@ -1266,7 +1266,7 @@ class DefaultConsolidator :
     // The iterator wrappes an index with the node pointer
     IteratorType it{node_p};
     // If the low key is -Inf, and we know it is inner node, then ignore the first item
-    if(node_p->GetType() == NodeType::InnerBase && node_p->GetLowKey()->IsInf() == true) {
+    if(node_p->GetType() == NodeType::InnerBase) {
       assert(it.IsEnd() == false);
       target_it_p->Append(node_p->KeyAt(0), node_p->ValueAt(0));
       it.Next();

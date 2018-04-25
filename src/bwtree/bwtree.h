@@ -1261,9 +1261,15 @@ class DefaultConsolidator :
   template <typename IteratorType>
   inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(it); }
 
-  // MergeLoop templatized merge loop
-  template <typename IteratorType, typename DeltaInsertType>
-  void MergeLoop(typename IteratorType::BaseNodeType *node_p, IteratorType target_it) {
+  /* 
+   * MergeLoop() - Merges an insert list and a base node
+   * 
+   * 1. IteratorType is the type of the iterator. This argument can be deduced
+   * 2. DeltaInsertType is either leaf insert delta type or inner insert delta type
+   *    It is used to fetch the payload (either node ID or value type) from the key's pointer
+   */
+  template <typename DeltaInsertType, typename IteratorType>
+  void MergeLoop(typename IteratorType::BaseNodeType *node_p, IteratorType *target_it_p) {
     using BaseNodeType = typename IteratorType::BaseNodeType;
     // The iterator wrappes an index with the node pointer
     IteratorType it{node_p};
@@ -1279,7 +1285,7 @@ class DefaultConsolidator :
         // Copy old base items, only if they are not deleted by deltas
         while(!IsBaseStopped(it)) {
           if(!IsDeleted(it.GetKey())) {
-            target_it.Append(it.GetKey(), it.GetValue());
+            target_it_p->Append(it.GetKey(), it.GetValue());
           }
 
           it.Next();
@@ -1289,7 +1295,7 @@ class DefaultConsolidator :
         // Copy insert list
         while(!IsTopStopped()) {
           dbg_printf("  key = %d\n", TopKey());
-          target_it.Append(TopKey(), TopPayload<BaseNodeType, DeltaType::LeafInsertType>());
+          target_it_p->Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
           InsertPop();
         }
       } else {
@@ -1302,7 +1308,7 @@ class DefaultConsolidator :
         assert(it.GetKey() != TopKey());
         // Two-way merge
         if(it.GetKey() > TopKey()) {
-          new_leaf_node_it.Append(TopKey(), TopPayload<BaseNodeType>());
+          new_leaf_node_it.Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
           InsertPop();
         } else {
           new_leaf_node_it.Append(it.GetKey(), it.GetValue());
@@ -1323,7 +1329,7 @@ class DefaultConsolidator :
       dbg_printf("Creating new node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
     }
 
-    MergeLoop(node_p, new_leaf_node_it);
+    MergeLoop<typename DeltaType::LeafInsertType>(node_p, &new_leaf_node_it);
     Finished() = true; 
   }
 

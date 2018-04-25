@@ -1308,10 +1308,10 @@ class DefaultConsolidator :
         assert(it.GetKey() != TopKey());
         // Two-way merge
         if(it.GetKey() > TopKey()) {
-          new_leaf_node_it.Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
+          target_it_p->Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
           InsertPop();
         } else {
-          new_leaf_node_it.Append(it.GetKey(), it.GetValue());
+          target_it_p->Append(it.GetKey(), it.GetValue());
           it.Next();
         }
       }

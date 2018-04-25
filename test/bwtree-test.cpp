@@ -229,11 +229,13 @@ public:
   }
 
   void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { 
-    test_printf("LeafSplit"); test_out << "size:" << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
+    test_printf("LeafSplit"); test_out << "size:" << node_p->GetSize() << "split_key:" << \
+      node_p->GetSplitKey() << "split_id" << node_p->GetSplitNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
   void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { 
-    test_printf("InnerSplit"); test_out << node_p->GetSize() << node_p->GetSplitKey() << node_p->GetSplitNodeID() << "\n"; 
+    test_printf("InnerSplit"); test_out << "size:" << node_p->GetSize() << "split_key:" << \
+      node_p->GetSplitKey() << "split_id" << node_p->GetSplitNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 

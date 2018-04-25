@@ -35,9 +35,8 @@ class BoundKey {
   KeyType key;
   bool inf;
   // * BoundKey() - Constructor
-  BoundKey(const KeyType &pkey) : key{pkey} {} 
+  BoundKey(const KeyType &pkey) : key{pkey}, inf{false} {} 
   BoundKey(const KeyType &pkey, bool pinf) : key{pkey}, inf{pinf} {}
-  BoundKey(bool pinf) : inf{pinf} {}
   // * IsInf() - Whether the key is infinite
   inline bool IsInf() const { return inf; }
   // Operators for checking magnitude with a key

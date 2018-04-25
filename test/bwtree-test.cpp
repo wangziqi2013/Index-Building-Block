@@ -481,7 +481,7 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   always_assert(ah3.AppendLeafInsert(800, "this is 800") == nullptr); // 300 400 600 700 800
   always_assert(ah3.AppendLeafSplit(700, NodeIDType{999}, 2) == nullptr); // 300 400 600 [300, 700)
   always_assert(ah3.AppendLeafDelete(400, "this is 400") == nullptr); // 300 600
-  always_assert(ah3.AppendLeafDelete(300, "this is 300") == nullptr); // 600
+  always_assert(ah3.AppendLeafDelete(300, "this is 300") == nullptr); // 600 [300, 700)
 
   merge_sibling_p = static_cast<LeafBaseType *>(table_p->At(merge_sibling_id));
 
@@ -497,7 +497,7 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   // This tests whether delta nodes below a split can be processed
   always_assert(ah2.AppendLeafInsert(250, "this is 250") == nullptr); // -50 -40 -30 100 200 250 300 400 600
   always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 5) == nullptr); // -50 -40 -30 100 [-Inf, 200)
-  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600
+  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600 [-Inf, 700)
 
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);

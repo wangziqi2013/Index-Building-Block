@@ -316,10 +316,10 @@ class NodeBase {
 #define INNER_REMOVE_TYPE(KeyType, NodeIDType) \
   DeltaNode<KeyType, NodeIDType, char[0], char[0], char[0], char[0], char[0]>
 #define INNER_INSERT_TYPE(KeyType, NodeIDType) \
-  DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, NodeIDType, char[0], char[0]>
+  DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, char[0], char[0], char[0]>
 #define INNER_DELETE_TYPE(KeyType, NodeIDType) \
-  DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, NodeIDType, BoundKey<KeyType>, char[0]>
-                                          // ^ prev key      ^ prev node ID    ^ next key
+  DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, BoundKey<KeyType>, NodeIDType, char[0]>
+                                     //   ^ next key         ^ prev key         ^ prev ID
 
 /*
  * class DeltaNode - Stores the next node pointer
@@ -336,9 +336,9 @@ class NodeBase {
  * LeafRemoveType/InnerRemoveType = 
  *   DeltaNode<KeyType, NodeIDType, char[0], char[0], char[0], char[0], char[0]>
  * InnerInsertType = 
- *   DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, NodeIDType, char[0], char[0]>
+ *   DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, char[0], char[0], char[0]>
  * InnerDeleteType = 
- *   DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, NodeIDType, BoundKey<KeyType>, char[0]>
+ *   DeltaNode<KeyType, KeyType, NodeIDType, BoundKey<KeyType>, BoundKey<KeyType>, NodeIDType, char[0]>
  */
 template <typename KeyType, 
           typename T1, typename T2, typename T3, 
@@ -381,15 +381,6 @@ class DeltaNode : public NodeBase<KeyType> {
             BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
             BaseClassType *pnext_node_p, 
             const T1 &pt1, const T2 &pt2, const T3 &pt3,
-            const T4 &pt4) :
-    BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
-    next_node_p{pnext_node_p}, 
-    t1{pt1}, t2{pt2}, t3{pt3}, t4{pt4} {}
-
-  DeltaNode(NodeType ptype, NodeHeightType pheight, NodeSizeType psize,
-            BoundKeyType *plow_key_p, BoundKeyType *phigh_key_p,
-            BaseClassType *pnext_node_p, 
-            const T1 &pt1, const T2 &pt2, const T3 &pt3,
             const T4 &pt4, const T5 &pt5) :
     BaseClassType{ptype, pheight, psize, plow_key_p, phigh_key_p},
     next_node_p{pnext_node_p}, 
@@ -414,11 +405,10 @@ class DeltaNode : public NodeBase<KeyType> {
   inline T2 &GetMergeNodeID() { return t2; }
 
   inline T3 &GetMergeSibling() { return t3; }
-  inline T3 &GetPrevKey() { return t3; }
+  inline T3 &GetNextKey() { return t3; }
 
-  inline T4 &GetPrevNodeID() { return t4; }
-  inline T5 &GetNextKey() { return t5; }
-  //inline T6 &GetPrevNodeID() { return t6; }
+  inline T4 &GetPrevKey() { return t4; }
+  inline T5 &GetPrevNodeID() { return t5; }
   
   static constexpr size_t T1_OFFSET = offsetof(DeltaNode, t1);
   static constexpr size_t T2_OFFSET = offsetof(DeltaNode, t2);

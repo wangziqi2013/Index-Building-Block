@@ -1326,17 +1326,25 @@ class DefaultConsolidator :
     if(!new_leaf_node_it.Inited()) {
       new_leaf_node_it = LeafNodeIteratorType{static_cast<LeafBaseType *>(
         LeafBaseType::Get(NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey()))};
-      dbg_printf("Creating new node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
+      dbg_printf("Creating new leaf node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
     }
 
     MergeLoop<typename DeltaType::LeafInsertType>(node_p, &new_leaf_node_it);
     Finished() = true; 
+    return;
   }
 
   void HandleInnerBase(InnerBaseType *node_p) { 
     SortInsertedList();
+    if(!new_inner_node_it.Inited()) {
+      new_inner_node_it = InnerNodeIteratorType{static_cast<InnerBaseType *>(
+        InnerBaseType::Get(NodeType::InnerBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey()))};
+      dbg_printf("Creating new inner node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
+    }
 
+    MergeLoop<typename DeltaType::InnerInsertType>(node_p, &new_inner_node_it);
     Finished() = true; 
+    return;
   }
 
   void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { GetNext() = node_p->GetNext(); Insert(&node_p->GetInsertKey()); }

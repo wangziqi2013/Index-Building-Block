@@ -439,7 +439,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
 } END_TEST
 
 // * PrintBaseNode() - Prints out the base node
-void PrintBaseNode(LeafBaseType *node_p) {
+template <typename BaseNodeType>
+void PrintBaseNode(BaseNodeType *node_p) {
   test_printf("Range: [%s, %s)\n", node_p->GetLowKey()->ToString().c_str(), node_p->GetHighKey()->ToString().c_str());
   for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
 }
@@ -524,9 +525,9 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
 } END_TEST
 
 BEGIN_DEBUG_TEST(InnerConsolidationTest) {
-  InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, 2, BoundKeyType::GetInf(), BoundKeyType::GetInf());
+  InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, 2, BoundKeyType::Get(-10), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
-  NodeIDType inner_node_id = table_p->AllocateNodeID(leaf_node_p);
+  NodeIDType inner_node_id = table_p->AllocateNodeID(inner_node_p);
 
   // Inner nodes must have at least 1 separators, i.e. 2 items
   // This will be ignored because it is the -Inf key
@@ -543,9 +544,9 @@ BEGIN_DEBUG_TEST(InnerConsolidationTest) {
   always_assert(ah.AppendInnerInsert(60, NodeIDType{600}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20 30 40 50 60
   always_assert(ah.AppendInnerInsert(10, NodeIDType{100}, BoundKeyType::Get(20)) == nullptr); // -Inf 5 10 20 30 40 50 60 [Inf, Inf)
 
-  ConsolidatorType ct{table_p->At(leaf_node_id)};
-  ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
-  LeafBaseType *new_node_p = ct.GetNewLeafBase();
+  ConsolidatorType ct{table_p->At(inner_node_id)};
+  ConsolidationTraverserType::Traverse(table_p->At(inner_node_id), &ct);
+  InnerBaseType *new_node_p = ct.GetNewInnerBase();
   PrintBaseNode(new_node_p);
 
   MappingTableType::Destroy(table_p);

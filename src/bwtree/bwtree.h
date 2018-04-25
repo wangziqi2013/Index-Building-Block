@@ -1103,13 +1103,15 @@ class DeltaChainFreeHelper :
 };
 
 // * class BaseNodeIterator - Provides a set of interfaces for iterating on base nodes
-template <typename BaseNodeType>
+template <typename _BaseNodeType>
 class BaseNodeIterator {
  public:
+  // Referred to by external classes
+  using BaseNodeType = _BaseNodeType;
   using NodeSizeType = typename BaseNodeType::NodeSizeType;
   using KeyType = typename BaseNodeType::KeyType;
   using ValueType = typename BaseNodeType::ValueType;
-  // * BaseNodeIterator() - Constructor
+  // * BaseNodeIterator() - Constructors
   BaseNodeIterator(BaseNodeType *pnode_p) : node_p{pnode_p}, index{0} {}
   BaseNodeIterator() : node_p{nullptr}, index{0} {}
 
@@ -1183,7 +1185,7 @@ class DefaultConsolidator :
     deleted_num{NodeHeightType{0}},
     current_high_key_p{nullptr},
     old_node_p{pold_node_p},
-    new_leaf_node_it{} {}
+    new_leaf_node_it{} { assert(new_inner_node_it.GetNode() == nullptr); }
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
@@ -1238,6 +1240,13 @@ class DefaultConsolidator :
     assert(IsInsertListEmpty() == false); 
     return *DeltaType::InnerInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
   }
+  
+  // * TopPayload() - Returns the payload (node ID for value) based on the key pointer
+  template <typename BaseNodeType, typename DeltaInsertType>
+  inline typename BaseNodeType::ValueType &TopPayload() { 
+    assert(IsInsertListEmpty() == false); 
+    return *DeltaInsertType::GetT2FromT1(inserted_list[inserted_num - 1]);   
+  }
 
   // * InsertPop() - Pop an element from the insert list
   inline void InsertPop() { assert(IsInsertListEmpty() == false); inserted_num--; }
@@ -1252,17 +1261,12 @@ class DefaultConsolidator :
   template <typename IteratorType>
   inline bool IsBaseStopped(IteratorType it) { return it.IsEnd() || !IsBaseInBound(it); }
 
-  void HandleLeafBase(LeafBaseType *node_p) { 
-    dbg_printf("Handle leaf base\n");
-    SortInsertedList();
-    if(!new_leaf_node_it.Inited()) {
-      new_leaf_node_it = LeafNodeIteratorType{static_cast<LeafBaseType *>(
-        LeafBaseType::Get(NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey()))};
-      dbg_printf("Creating new node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
-    }
-
+  // MergeLoop templatized merge loop
+  template <typename IteratorType, typename DeltaInsertType>
+  void MergeLoop(typename IteratorType::BaseNodeType *node_p, IteratorType target_it) {
+    using BaseNodeType = typename IteratorType::BaseNodeType;
     // The iterator wrappes an index with the node pointer
-    LeafNodeIteratorType it{node_p};
+    IteratorType it{node_p};
     while(1) {
       bool insert_list_stop = IsTopStopped();
       bool old_base_stop = IsBaseStopped(it);
@@ -1275,7 +1279,7 @@ class DefaultConsolidator :
         // Copy old base items, only if they are not deleted by deltas
         while(!IsBaseStopped(it)) {
           if(!IsDeleted(it.GetKey())) {
-            new_leaf_node_it.Append(it.GetKey(), it.GetValue());
+            target_it.Append(it.GetKey(), it.GetValue());
           }
 
           it.Next();
@@ -1285,7 +1289,7 @@ class DefaultConsolidator :
         // Copy insert list
         while(!IsTopStopped()) {
           dbg_printf("  key = %d\n", TopKey());
-          new_leaf_node_it.Append(TopKey(), TopValue());
+          target_it.Append(TopKey(), TopPayload<BaseNodeType, DeltaType::LeafInsertType>());
           InsertPop();
         }
       } else {
@@ -1298,7 +1302,7 @@ class DefaultConsolidator :
         assert(it.GetKey() != TopKey());
         // Two-way merge
         if(it.GetKey() > TopKey()) {
-          new_leaf_node_it.Append(TopKey(), TopValue());
+          new_leaf_node_it.Append(TopKey(), TopPayload<BaseNodeType>());
           InsertPop();
         } else {
           new_leaf_node_it.Append(it.GetKey(), it.GetValue());
@@ -1307,8 +1311,22 @@ class DefaultConsolidator :
       }
     }
 
+    return;
+  }
+
+  void HandleLeafBase(LeafBaseType *node_p) { 
+    dbg_printf("Handle leaf base\n");
+    SortInsertedList();
+    if(!new_leaf_node_it.Inited()) {
+      new_leaf_node_it = LeafNodeIteratorType{static_cast<LeafBaseType *>(
+        LeafBaseType::Get(NodeType::LeafBase, old_node_p->GetSize(), *old_node_p->GetLowKey(), *old_node_p->GetHighKey()))};
+      dbg_printf("Creating new node. Size = %lu\n", (uint64_t)old_node_p->GetSize());
+    }
+
+    MergeLoop(node_p, new_leaf_node_it);
     Finished() = true; 
   }
+
   void HandleInnerBase(InnerBaseType *node_p) { 
     SortInsertedList();
 

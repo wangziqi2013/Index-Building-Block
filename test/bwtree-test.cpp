@@ -431,8 +431,8 @@ BEGIN_DEBUG_TEST(AppendTest) {
   return;
 } END_TEST
 
-// * PrintLeafNode() - Prints out the leaf node
-void PrintLeafNode(LeafBaseType *node_p) {
+// * PrintBaseNode() - Prints out the base node
+void PrintBaseNode(LeafBaseType *node_p) {
   test_printf("Range: [%s, %s)\n", node_p->GetLowKey()->ToString().c_str(), node_p->GetHighKey()->ToString().c_str());
   for(NodeSizeType i = 0;i < node_p->GetSize();i++) { test_out << "Index" << i << node_p->KeyAt(i) << node_p->ValueAt(i) << "\n"; }
 }
@@ -446,7 +446,7 @@ void FreeDeltaChain(MappingTableType *table_p, NodeBaseType *node_p) {
   return;
 }
 
-BEGIN_DEBUG_TEST(ConsolidationTest) {
+BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   size_t size = 0;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
   MappingTableType *table_p = MappingTableType::Get();
@@ -471,7 +471,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   ConsolidatorType ct{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
   LeafBaseType *new_node_p = ct.GetNewLeafBase();
-  PrintLeafNode(new_node_p);
+  PrintBaseNode(new_node_p);
 
   // Split it for later use
   LeafBaseType *merge_sibling_p = new_node_p->Split(); // Base Node: 300 400 600 [300, +Inf)
@@ -502,7 +502,7 @@ BEGIN_DEBUG_TEST(ConsolidationTest) {
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);
   new_node_p = ct2.GetNewLeafBase();
-  PrintLeafNode(new_node_p);
+  PrintBaseNode(new_node_p);
 
   // Free the delta chain with merge and split
   FreeDeltaChain(table_p, table_p->At(leaf_node_id));
@@ -520,7 +520,7 @@ int main() {
   //BaseNodeTest();
   //DeltaNodeTest();
   AppendTest();
-  ConsolidationTest();
+  LeafConsolidationTest();
 
   return 0;
 }

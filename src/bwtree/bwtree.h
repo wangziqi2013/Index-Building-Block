@@ -938,24 +938,24 @@ class AppendHelper {
 
   // * AppendInnerInsert() - Appends inner insert delta
   inline InnerInsertType *AppendInnerInsert(const KeyType &key, const NodeIDType &value, 
-                                            const KeyType &next_key, const NodeIDType &next_value) {
+                                            const BoundKeyType &next_key) {
     assert(node_p->KeyInNode(key));
     InnerInsertType *delta_p = GetBase()->template AllocateDelta<InnerInsertType, NodeType, NodeHeightType>(
       NodeType::InnerInsert, node_p->GetHeight() + 1, node_p->GetSize() + 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
-      key, value, next_key, next_value);
+      key, value, next_key);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 
   // * AppendInnerDelete() - Appends inner delete delta
   inline InnerDeleteType *AppendInnerDelete(const KeyType &key, const NodeIDType &value, 
-                                            const KeyType &next_key, const NodeIDType &next_id,
-                                            const KeyType &prev_key, const NodeIDType &prev_id) {
+                                            const BoundKeyType &next_key, 
+                                            const BoundKeyType &prev_key, const NodeIDType &prev_id) {
     assert(node_p->KeyInNode(key));
     InnerDeleteType *delta_p = GetBase()->template AllocateDelta<InnerDeleteType, NodeType, NodeHeightType>(
       NodeType::InnerDelete, node_p->GetHeight() + 1, node_p->GetSize() - 1,
       node_p->GetLowKey(), node_p->GetHighKey(), node_p,
-      key, value, next_key, next_id, prev_key, prev_id);
+      key, value, next_key, prev_key, prev_id);
     return table_p->CAS(node_id, node_p, delta_p) ? (node_p = delta_p, nullptr) : delta_p;
   }
 

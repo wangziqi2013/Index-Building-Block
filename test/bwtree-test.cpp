@@ -453,6 +453,10 @@ void FreeDeltaChain(MappingTableType *table_p, NodeBaseType *node_p) {
   return;
 }
 
+using ConsolidatorType = typename BwTreeType::ConsolidatorType;
+using ConsolidationTraverserType = \
+  DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
+
 BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   size_t size = 0;
   LeafBaseType *leaf_node_p = LeafBaseType::Get(NodeType::LeafBase, size, BoundKeyType::GetInf(), BoundKeyType::GetInf());
@@ -473,8 +477,6 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   always_assert(ah.AppendLeafInsert(100, "this is 100") == nullptr); // 100 200 300 400
   always_assert(ah.AppendLeafInsert(600, "this is 600") == nullptr); // 100 200 300 400 600
   
-  using ConsolidatorType = typename BwTreeType::ConsolidatorType;
-  using ConsolidationTraverserType = DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, DefaultBaseNode, ConsolidatorType>;
   ConsolidatorType ct{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
   LeafBaseType *new_node_p = ct.GetNewLeafBase();
@@ -521,6 +523,34 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   return;
 } END_TEST
 
+BEGIN_DEBUG_TEST(InnerConsolidationTest) {
+  InnerBaseType *inner_node_p = InnerBaseType::Get(NodeType::InnerBase, 2, BoundKeyType::GetInf(), BoundKeyType::GetInf());
+  MappingTableType *table_p = MappingTableType::Get();
+  NodeIDType inner_node_id = table_p->AllocateNodeID(leaf_node_p);
+
+  // Inner nodes must have at least 1 separators, i.e. 2 items
+  // This will be ignored because it is the -Inf key
+  inner_node_p->KeyAt(0) = 8848;
+  inner_node_p->ValueAt(0) = 9959;
+  inner_node_p->KeyAt(1) = 5;
+  inner_node_p->ValueAt(1) = 2000;
+
+  AppendHelperType ah{inner_node_id, inner_node_p, table_p};
+  always_assert(ah.AppendInnerInsert(20, NodeIDType{200}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20
+  always_assert(ah.AppendInnerInsert(30, NodeIDType{300}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20 30
+  always_assert(ah.AppendInnerInsert(40, NodeIDType{400}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20 30 40
+  always_assert(ah.AppendInnerInsert(50, NodeIDType{500}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20 30 40 50
+  always_assert(ah.AppendInnerInsert(60, NodeIDType{600}, BoundKeyType::GetInf()) == nullptr); // -Inf 5 20 30 40 50 60
+  always_assert(ah.AppendInnerInsert(10, NodeIDType{100}, BoundKeyType::Get(20)) == nullptr); // -Inf 5 10 20 30 40 50 60 [Inf, Inf)
+
+  ConsolidatorType ct{table_p->At(leaf_node_id)};
+  ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct);
+  LeafBaseType *new_node_p = ct.GetNewLeafBase();
+  PrintBaseNode(new_node_p);
+
+  MappingTableType::Destroy(table_p);
+} END_TEST
+
 int main() {
   //MappingTableTest();
   //BoundKeyTest();
@@ -528,6 +558,7 @@ int main() {
   DeltaNodeTest();
   AppendTest();
   LeafConsolidationTest();
+  InnerConsolidationTest();
 
   return 0;
 }

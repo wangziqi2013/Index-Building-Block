@@ -209,7 +209,7 @@ public:
   }
   void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { 
     test_printf("InnerInsert"); test_out << node_p->GetSize() << node_p->GetInsertKey() << node_p->GetInsertValue() \
-      << node_p->GetNextKey() << node_p->GetNextNodeID() << "\n"; 
+      << node_p->GetNextKey().ToString().c_str() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
@@ -219,7 +219,7 @@ public:
   }
   void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { 
     test_printf("InnerDelete"); test_out << node_p->GetSize() << node_p->GetDeleteKey() << node_p->GetDeleteValue() \
-      << node_p->GetNextKey() << node_p->GetNextNodeID() << node_p->GetPrevKey() << node_p->GetPrevNodeID() << "\n"; 
+      << node_p->GetNextKey().ToString().c_str() << node_p->GetPrevKey().ToString().c_str() << node_p->GetPrevNodeID() << "\n"; 
     GetNext() = node_p->GetNext(); 
   }
 
@@ -497,7 +497,7 @@ BEGIN_DEBUG_TEST(LeafConsolidationTest) {
   // This tests whether delta nodes below a split can be processed
   always_assert(ah2.AppendLeafInsert(250, "this is 250") == nullptr); // -50 -40 -30 100 200 250 300 400 600
   always_assert(ah2.AppendLeafSplit(200, NodeIDType{999}, 5) == nullptr); // -50 -40 -30 100 [-Inf, 200)
-  always_assert(ah2.AppendInnerMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600 [-Inf, 700)
+  always_assert(ah2.AppendLeafMerge(-999, NodeIDType{999}, merge_sibling_p) == nullptr); // -50 -40 -30 100 + 600 [-Inf, 700)
 
   ConsolidatorType ct2{table_p->At(leaf_node_id)};
   ConsolidationTraverserType::Traverse(table_p->At(leaf_node_id), &ct2);

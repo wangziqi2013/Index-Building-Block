@@ -1156,7 +1156,8 @@ template <typename KeyType, typename ValueType,
           template <typename, typename, typename> typename BaseNode,
           size_t HEIGHT_THRESHOLD>
 class DefaultConsolidator : 
-  public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+  public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>,
+  public UniqueKeyBase {
  public:
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using NodeBaseType = typename BaseClassType::NodeBaseType;
@@ -1405,10 +1406,10 @@ class DefaultConsolidator :
 // * class ValueSearcher - Searches using a key and returns the value or node ID
 template <typename KeyType, typename ValueType,
           typename MappingTableType, typename DeltaChainType, 
-          template <typename, typename, typename> typename BaseNode,
-          size_t HEIGHT_THRESHOLD>
+          template <typename, typename, typename> typename BaseNode>
 class ValueSearcher : 
-  public TraverseHandlerBase<KeyType, ValueType, typename MappingTableType::NodeIDType, DeltaChainType> {
+  public TraverseHandlerBase<KeyType, ValueType, typename MappingTableType::NodeIDType, DeltaChainType>,
+  public UniqueKeyBase {
  public:
   using NodeIDType = typename MappingTableType::NodeIDType;
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
@@ -1504,6 +1505,9 @@ class BwTree {
   using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
   using ConsolidatorType = Consolidator<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, HEIGHT_THREADHOLD>;
   using ValueSearcherType = ValueSearcher<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
+  static_assert(ConsolidatorType::support_non_unique_key == LeafBaseType::support_non_unique_key, "Inconsistent non-unique key support");
+  static_assert(ValueSearcherType::support_non_unique_key == LeafBaseType::support_non_unique_key, "Inconsistent non-unique key support");
+
 };
 
 } // namespace bwtree

@@ -1496,6 +1496,7 @@ class BwTree {
   using AppendHelperType = AppendHelper<KeyType, ValueType, MappingTableType, DeltaChainType>;
   using DeltaChainFreeHelperType = DeltaChainFreeHelper<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
   using ConsolidatorType = Consolidator<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, HEIGHT_THREADHOLD>;
+  using ValueSearcherType = ValueSearcher<KeyType, ValueType, MappingTableType, DeltaChainType, BaseNode>;
 };
 
 } // namespace bwtree

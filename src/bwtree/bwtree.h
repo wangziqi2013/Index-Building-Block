@@ -26,6 +26,12 @@ namespace bwtree {
  *    template instances rather than raw templates. This, however, is not strict.
  */
 
+// * UniqueKeyBase - If a class inherits from this class, then it only supports unique key
+class UniqueKeyBase {
+ public:
+  static constexpr bool support_non_unique_key = false;
+};
+
 /*
  * BoundKey() - Represents low key and high key which can be infinities
  */
@@ -509,7 +515,7 @@ class ExtendedNodeBase : public NodeBase<KeyType> {
 template <typename _KeyType, 
           typename _ValueType, 
           typename _DeltaChainType>
-class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType> {
+class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType>, public UniqueKeyBase {
  public:
   using KeyType = _KeyType;
   using ValueType = _ValueType;
@@ -519,8 +525,6 @@ class DefaultBaseNode : public ExtendedNodeBase<_KeyType, _DeltaChainType> {
   using NodeSizeType = typename BaseBaseClassType::NodeSizeType;
   using NodeHeightType = typename BaseBaseClassType::NodeHeightType;
   using BoundKeyType = typename BaseBaseClassType::BoundKeyType;
-  // Whether only support unique keys
-  static constexpr bool support_non_unique_key = false;
  private:
   // * DefaultBaseNode() - Private Constructor
   DefaultBaseNode(NodeType ptype, 
@@ -1449,7 +1453,10 @@ class ValueSearcher :
   }
  private:
   NodeBaseType *node_p;
+  // Node id to the next level
   NodeIDType next_id;
+  // Value that matches the key
+  ValueType *value_p;
   bool abort;
 };
 

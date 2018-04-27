@@ -1400,12 +1400,13 @@ class DefaultConsolidator :
 
 // * class ValueSearcher - Searches using a key and returns the value or node ID
 template <typename KeyType, typename ValueType,
-          typename NodeIDType, typename DeltaChainType, 
+          typename MappingTableType, typename DeltaChainType, 
           template <typename, typename, typename> typename BaseNode,
           size_t HEIGHT_THRESHOLD>
 class ValueSearcher : 
   public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
  public:
+  using NodeIDType = typename MappingTableType::NodeIDType;
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
   using NodeBaseType = typename BaseClassType::NodeBaseType;
   using DeltaType = typename BaseClassType::DeltaType;
@@ -1413,11 +1414,12 @@ class ValueSearcher :
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;
+  static constexpr INVALID_NODE_ID = MappingTableType::INVALID_NODE_ID;
 
   // * ValueSearcher() - Constructor
   ValueSearcher(NodeBaseType *pnode_p) : 
     TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
-    node_p{pnode_p} {}
+    node_p{pnode_p}, next_id{INVALID_NODE_ID}, abort{false} {}
 
   NodeBaseType *&GetNext() { return BaseClassType::next_p; }
   bool &Finished() { return BaseClassType::finished; }
@@ -1446,7 +1448,9 @@ class ValueSearcher :
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
   }
  private:
-  NodeBaseType *node_p
+  NodeBaseType *node_p;
+  NodeIDType next_id;
+  bool abort;
 };
 
 template <typename _KeyType, typename _ValueType, 

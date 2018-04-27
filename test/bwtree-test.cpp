@@ -15,7 +15,7 @@ using namespace bwtree;
  * 4. Overflow under debug mode
  */
 BEGIN_DEBUG_TEST(MappingTableTest) {
-  constexpr size_t size = 1024 * 1024;
+  constexpr size_t size = 1024 * 1024; 
   constexpr size_t thread_num = 16;
   using MappingTableType = DefaultMappingTable<char, size>;
   using NodeIDType = typename MappingTableType::NodeIDType;

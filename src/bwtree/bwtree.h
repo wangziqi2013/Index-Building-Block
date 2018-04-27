@@ -879,7 +879,7 @@ class AppendHelper {
   // * GetBase() - Returns a pointer to the base node of the delta chain
   inline ExtendedBaseType *GetBase() { return node_p->template GetBase<DeltaChainType>(); }
   
-  // * DestroyDelta() - Calls the base delta chain to destroy delta record
+  // * DestroyDelta() - Calls the base delta chain to destroy delta record (only applicable to deltas allocated by this class)
   template <typename DeltaNodeType>
   inline void DestroyDelta(DeltaNodeType *delta_p) { GetBase()->delta_chain.DestroyDelta(delta_p); }
   
@@ -1301,17 +1301,16 @@ class DefaultConsolidator :
         // Only test and try to insert non-deleted keys
         if(IsDeleted(it.GetKey())) {
           it.Next();
-          continue;
-        }
-
-        assert(it.GetKey() != TopKey());
-        // Two-way merge
-        if(it.GetKey() > TopKey()) {
-          target_it_p->Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
-          InsertPop();
         } else {
-          target_it_p->Append(it.GetKey(), it.GetValue());
-          it.Next();
+          assert(it.GetKey() != TopKey());
+          // Two-way merge
+          if(it.GetKey() > TopKey()) {
+            target_it_p->Append(TopKey(), TopPayload<BaseNodeType, DeltaInsertType>());
+            InsertPop();
+          } else {
+            target_it_p->Append(it.GetKey(), it.GetValue());
+            it.Next();
+          }
         }
       }
     }
@@ -1365,7 +1364,6 @@ class DefaultConsolidator :
     current_high_key_p = saved_high_key_p;
     Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
-
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
     NodeHeightType saved_deleted_num = deleted_num;
@@ -1375,7 +1373,6 @@ class DefaultConsolidator :
     current_high_key_p = saved_high_key_p;
     Finished() = false;
     DeltaChainTraverserType::Traverse(node_p->GetMergeSibling(), this);
-
   }
 
   // * GetNewLeafBase() * GetNewInnerBase() - Returns the node after consolidation
@@ -1400,6 +1397,7 @@ class DefaultConsolidator :
     InnerNodeIteratorType new_inner_node_it;
   };
 };
+
 
 template <typename _KeyType, typename _ValueType, 
           template <typename, size_t> typename MappingTable, 

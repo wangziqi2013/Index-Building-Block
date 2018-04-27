@@ -1398,6 +1398,51 @@ class DefaultConsolidator :
   };
 };
 
+// * class ValueSearcher - Searches using a key and returns the value or node ID
+template <typename KeyType, typename ValueType,
+          typename NodeIDType, typename DeltaChainType, 
+          template <typename, typename, typename> typename BaseNode,
+          size_t HEIGHT_THRESHOLD>
+class ValueSearcher : 
+  public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+ public:
+  using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
+  using NodeBaseType = typename BaseClassType::NodeBaseType;
+  using DeltaType = typename BaseClassType::DeltaType;
+  using LeafBaseType = typename BaseClassType::LeafBaseType;
+  using InnerBaseType = typename BaseClassType::InnerBaseType;
+  using NodeHeightType = typename NodeBaseType::NodeHeightType;
+  using NodeSizeType = typename NodeBaseType::NodeSizeType;
+  using DeltaChainTraverserType = \
+    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
+  using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
+
+  using LeafNodeIteratorType = BaseNodeIterator<LeafBaseType>;
+  using InnerNodeIteratorType = BaseNodeIterator<InnerBaseType>;
+  void HandleLeafBase(LeafBaseType *node_p) { 
+    Finished() = true; 
+    return;
+  }
+
+  void HandleInnerBase(InnerBaseType *node_p) { 
+    Finished() = true; 
+    return;
+  }
+
+  void HandleLeafInsert(typename DeltaType::LeafInsertType *node_p) { GetNext() = node_p->GetNext();  }
+  void HandleInnerInsert(typename DeltaType::InnerInsertType *node_p) { GetNext() = node_p->GetNext();  }
+
+  void HandleLeafDelete(typename DeltaType::LeafDeleteType *node_p) { GetNext() = node_p->GetNext();  }
+  void HandleInnerDelete(typename DeltaType::InnerDeleteType *node_p) { GetNext() = node_p->GetNext();  }
+
+  void HandleLeafSplit(typename DeltaType::LeafSplitType *node_p) { GetNext() = node_p->GetNext(); }
+  void HandleInnerSplit(typename DeltaType::InnerSplitType *node_p) { GetNext() = node_p->GetNext(); }
+
+  void HandleLeafMerge(typename DeltaType::LeafMergeType *node_p) { 
+  }
+  void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
+  }
+};
 
 template <typename _KeyType, typename _ValueType, 
           template <typename, size_t> typename MappingTable, 

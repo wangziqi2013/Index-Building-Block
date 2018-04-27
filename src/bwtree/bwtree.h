@@ -1404,7 +1404,7 @@ template <typename KeyType, typename ValueType,
           template <typename, typename, typename> typename BaseNode,
           size_t HEIGHT_THRESHOLD>
 class ValueSearcher : 
-  public TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType> {
+  public TraverseHandlerBase<KeyType, ValueType, typename MappingTableType::NodeIDType, DeltaChainType> {
  public:
   using NodeIDType = typename MappingTableType::NodeIDType;
   using BaseClassType = TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>;
@@ -1414,7 +1414,7 @@ class ValueSearcher :
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;
-  static constexpr INVALID_NODE_ID = MappingTableType::INVALID_NODE_ID;
+  static constexpr NodeIDType INVALID_NODE_ID = MappingTableType::INVALID_NODE_ID;
 
   // * ValueSearcher() - Constructor
   ValueSearcher(NodeBaseType *pnode_p) : 

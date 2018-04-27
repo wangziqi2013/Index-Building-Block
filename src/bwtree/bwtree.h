@@ -1413,12 +1413,15 @@ class ValueSearcher :
   using InnerBaseType = typename BaseClassType::InnerBaseType;
   using NodeHeightType = typename NodeBaseType::NodeHeightType;
   using NodeSizeType = typename NodeBaseType::NodeSizeType;
-  using DeltaChainTraverserType = \
-    DeltaChainTraverser<KeyType, ValueType, NodeIDType, DeltaChainType, BaseNode, DefaultConsolidator>;
-  using KeyPtrGreaterType = KeyPtrGreater<KeyType>;
 
-  using LeafNodeIteratorType = BaseNodeIterator<LeafBaseType>;
-  using InnerNodeIteratorType = BaseNodeIterator<InnerBaseType>;
+  // * ValueSearcher() - Constructor
+  ValueSearcher(NodeBaseType *pnode_p) : 
+    TraverseHandlerBase<KeyType, ValueType, NodeIDType, DeltaChainType>{},
+    node_p{pnode_p} {}
+
+  NodeBaseType *&GetNext() { return BaseClassType::next_p; }
+  bool &Finished() { return BaseClassType::finished; }
+
   void HandleLeafBase(LeafBaseType *node_p) { 
     Finished() = true; 
     return;
@@ -1442,6 +1445,8 @@ class ValueSearcher :
   }
   void HandleInnerMerge(typename DeltaType::InnerMergeType *node_p) { 
   }
+ private:
+  NodeBaseType *node_p
 };
 
 template <typename _KeyType, typename _ValueType, 

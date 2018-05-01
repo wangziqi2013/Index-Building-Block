@@ -37,7 +37,7 @@ common:
 	@$(MAKE) -C ./src/common
 
 TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))
-test:  
+test:   
 	@$(MAKE) -C ./src/test
 
 BWTREE_OBJ = $(patsubst ./src/bwtree/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/bwtree/*.cpp))

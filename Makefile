@@ -33,7 +33,7 @@ test-all: common test
 # the shell to the subprocess of make
 
 COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
-common: 
+common:  
 	@$(MAKE) -C ./src/common
 
 TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))

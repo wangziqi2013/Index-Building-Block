@@ -34,7 +34,7 @@ test-all: common test
 
 COMMON_OBJ = $(patsubst ./src/common/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/common/*.cpp))
 common:  
-	@$(MAKE) -C ./src/common
+	@$(MAKE) -C ./src/common 
 
 TEST_OBJ = $(patsubst ./src/test/%.cpp, $(BUILD_DIR)/%.o, $(wildcard ./src/test/*.cpp))
 test:   

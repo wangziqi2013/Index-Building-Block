@@ -65,6 +65,6 @@ clean:
 	$(RM) -f ./bin/*
 	$(RM) -f *-bin
 
-prepare:
+prepare: 
 	$(MKDIR) -p build
 	$(MKDIR) -p bin
